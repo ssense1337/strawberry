@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: strawberrymusicplayer\n"
 "Language-Team: Spanish, Mexico\n"
 "Language: es_MX\n"
-"PO-Revision-Date: 2024-08-11 18:38\n"
+"PO-Revision-Date: 2024-08-15 17:09\n"
 
 #: playlist/playlistlistview.cpp:51
 msgid "\n\n"
@@ -5556,7 +5556,7 @@ msgstr "Utilizar atajos de Gnome (GSD) cuando sea posible"
 
 #: ../../build-qt6dev/src/ui_subsonicsettingspage.h:253
 msgid "Use HTTP/2 when possible"
-msgstr ""
+msgstr "Usar HTTP/2 cuando sea posible"
 
 #: ../../build-qt6dev/src/ui_globalshortcutssettingspage.h:273
 msgid "Use KDE (KGlobalAccel) shortcuts when available"
