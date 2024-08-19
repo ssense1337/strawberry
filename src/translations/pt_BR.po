@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: strawberrymusicplayer\n"
 "Language-Team: Portuguese, Brazilian\n"
 "Language: pt_BR\n"
-"PO-Revision-Date: 2024-08-18 14:51\n"
+"PO-Revision-Date: 2024-08-19 17:12\n"
 
 #: playlist/playlistlistview.cpp:51
 msgid "\n\n"
@@ -219,11 +219,11 @@ msgstr ""
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:653
 msgid "&About Strawberry"
-msgstr ""
+msgstr "&Sobre o Strawberry"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:661
 msgid "&Add file..."
-msgstr ""
+msgstr "&Adicionar arquivo..."
 
 #: playlist/playlistheader.cpp:64
 msgid "&Align text"
@@ -235,11 +235,11 @@ msgstr "&Centro"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:635
 msgid "&Clear playlist"
-msgstr ""
+msgstr "&Limpar lista de reprodução"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:667
 msgid "&Cover Manager"
-msgstr ""
+msgstr "&Gerenciador de capas"
 
 #: ../../build-qt6dev/src/ui_globalshortcutssettingspage.h:286
 msgid "&Custom"
