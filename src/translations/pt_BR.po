@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: strawberrymusicplayer\n"
 "Language-Team: Portuguese, Brazilian\n"
 "Language: pt_BR\n"
-"PO-Revision-Date: 2024-08-19 17:12\n"
+"PO-Revision-Date: 2024-08-19 19:10\n"
 
 #: playlist/playlistlistview.cpp:51
 msgid "\n\n"
@@ -106,7 +106,7 @@ msgstr ""
 #: equalizer/equalizerslider.cpp:59
 #, qt-format
 msgid "%1 dB"
-msgstr ""
+msgstr "%1 dB"
 
 #: utilities/timeutils.cpp:67
 #, qt-format
@@ -146,7 +146,7 @@ msgstr ""
 #: device/deviceview.cpp:146
 #, qt-format
 msgid "%1 song%2"
-msgstr ""
+msgstr "%1 música%2"
 
 #: context/contextview.cpp:412
 #, qt-format
@@ -251,11 +251,11 @@ msgstr ""
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:700
 msgid "&Do a full collection rescan"
-msgstr ""
+msgstr "&Fazer uma varredura completa da coleção"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:672
 msgid "&Equalizer"
-msgstr ""
+msgstr "&Equalizador"
 
 #: playlist/playlistheader.cpp:103
 #, qt-format
@@ -276,7 +276,7 @@ msgstr "&Esquerda"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:687
 msgid "&Load playlist..."
-msgstr ""
+msgstr "&Carregar lista de reprodução..."
 
 #: playlist/playlistheader.cpp:60
 msgid "&Lock rating"
@@ -292,15 +292,15 @@ msgstr "Música"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:696
 msgid "&Mute"
-msgstr ""
+msgstr "&Mudo"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:679
 msgid "&New playlist"
-msgstr ""
+msgstr "&Nova lista de reprodução"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:622
 msgid "&Next track"
-msgstr ""
+msgstr "&Próxima faixa"
 
 #: ../../build-qt6dev/src/ui_appearancesettingspage.h:529
 msgid "&No background image"
@@ -312,11 +312,11 @@ msgstr "&Nenhum"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:665
 msgid "&Open file..."
-msgstr ""
+msgstr "&Abrir arquivo..."
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:614
 msgid "&Play"
-msgstr ""
+msgstr "&Reproduzir"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:626
 msgid "&Quit"
@@ -340,7 +340,7 @@ msgstr ""
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:649
 msgid "&Settings..."
-msgstr ""
+msgstr "&Configurações..."
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:669
 msgid "&Shuffle mode"
