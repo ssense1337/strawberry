@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: strawberrymusicplayer\n"
 "Language-Team: Spanish\n"
 "Language: es_ES\n"
-"PO-Revision-Date: 2024-08-20 11:21\n"
+"PO-Revision-Date: 2024-08-20 18:51\n"
 
 #: playlist/playlistlistview.cpp:51
 msgid "\n\n"
@@ -1956,23 +1956,23 @@ msgstr "Mezcla aleatoria dinámica"
 
 #: context/contextview.cpp:168
 msgid "EBU R 128 Integrated Loudness"
-msgstr ""
+msgstr "Volumen integrado EBU R 128"
 
 #: ../../build-qt6dev/src/ui_backendsettingspage.h:705
 msgid "EBU R 128 Loudness Normalization"
-msgstr ""
+msgstr "Normalización de volumen EBU R 128"
 
 #: context/contextview.cpp:169
 msgid "EBU R 128 Loudness Range"
-msgstr ""
+msgstr "Rango de volumen EBU R 128"
 
 #: ../../build-qt6dev/src/ui_edittagdialog.h:898
 msgid "EBU R 128 integrated loudness"
-msgstr ""
+msgstr "volumen integrado EBU R 128"
 
 #: ../../build-qt6dev/src/ui_edittagdialog.h:907
 msgid "EBU R 128 loudness range"
-msgstr ""
+msgstr "rango de volumen EBU R 128"
 
 #: ../../build-qt6dev/src/ui_smartplaylistsviewcontainer.h:104
 msgid "Edit smart playlist"
@@ -2007,7 +2007,7 @@ msgstr "Editar información de las pistas…"
 #: settings/coverssettingspage.cpp:442
 #, qt-format
 msgid "Embedded album cover art (%1)"
-msgstr ""
+msgstr "Portada de álbum incrustada (%1)"
 
 #: ../../build-qt6dev/src/ui_edittagdialog.h:917
 msgid "Embedded cover"
@@ -2165,7 +2165,7 @@ msgstr "Error al conectar al dispositivo MTP %1"
 #: device/mtploader.cpp:77
 #, qt-format
 msgid "Error connecting MTP device %1: %2"
-msgstr ""
+msgstr "Error al conectar con el dispositivo MTP %1: %2"
 
 #: organize/organizeerrordialog.cpp:71
 msgid "Error copying songs"
@@ -2202,7 +2202,7 @@ msgstr "Ya reproducido"
 
 #: widgets/freespacebar.cpp:69
 msgid "Exceeded by"
-msgstr ""
+msgstr "Superado en"
 
 #: ../../build-qt6dev/src/ui_backendsettingspage.h:712
 msgid "Except between tracks on the same album or in the same CUE sheet"
@@ -2210,7 +2210,7 @@ msgstr "Excepto entre pistas del mismo álbum o en la misma hoja CUE"
 
 #: ../../build-qt6dev/src/ui_backendsettingspage.h:680
 msgid "Exclusive mode (Experimental)"
-msgstr ""
+msgstr "Modo exclusivo (experimental)"
 
 #: ../../build-qt6dev/src/ui_albumcoverexport.h:205
 msgid "Existing covers"
@@ -2299,12 +2299,12 @@ msgstr "Duración del fundido"
 #: core/database.cpp:485 collection/collectionbackend.cpp:118
 #, qt-format
 msgid "Failed SQL query: %1"
-msgstr ""
+msgstr "Falló la consulta SQL: %1"
 
 #: core/filesystemmusicstorage.cpp:57
 #, qt-format
 msgid "Failed to create directory %1."
-msgstr ""
+msgstr "No se pudo crear el directorio %1."
 
 #: covermanager/albumcoverchoicecontroller.cpp:380
 #: covermanager/albumcoverchoicecontroller.cpp:397
@@ -2315,7 +2315,7 @@ msgstr "No se ha podido eliminar el archivo de portada %1: %2"
 #: core/tagreaderclient.cpp:302
 #, qt-format
 msgid "Failed to load image from data for %1"
-msgstr ""
+msgstr "Falló la carga de la imagen desde datos para %1"
 
 #: playlistparsers/playlistparser.cpp:245
 #, qt-format
