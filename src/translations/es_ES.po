@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: strawberrymusicplayer\n"
 "Language-Team: Spanish\n"
 "Language: es_ES\n"
-"PO-Revision-Date: 2024-08-20 07:57\n"
+"PO-Revision-Date: 2024-08-20 09:54\n"
 
 #: playlist/playlistlistview.cpp:51
 msgid "\n\n"
@@ -976,7 +976,7 @@ msgstr "Expandir automáticamente categorías únicas en la colección"
 #: settings/coverssettingspage.cpp:439
 #, qt-format
 msgid "Automatically picked up from album directory (%1)"
-msgstr ""
+msgstr "Tomado automáticamente del directorio del álbum (%1)"
 
 #: ../../build-qt6dev/src/ui_contextsettingspage.h:436
 msgid "Automatically search for album cover"
@@ -1045,7 +1045,7 @@ msgstr "Azul básico"
 
 #: ../../build-qt6dev/src/ui_spotifysettingspage.h:266
 msgid "Basic authentication"
-msgstr ""
+msgstr "Autenticación básica"
 
 #: ../../build-qt6dev/src/ui_behavioursettingspage.h:314
 msgid "Behavior"
@@ -1057,11 +1057,11 @@ msgstr "Mejor"
 
 #: playlist/playlistview.cpp:224
 msgid "Bit"
-msgstr ""
+msgstr "Bit"
 
 #: playlist/playlist.cpp:1406
 msgid "Bit Depth"
-msgstr ""
+msgstr "Profundidad de bit"
 
 #: context/contextview.cpp:166 collection/savedgroupingmanager.cpp:148
 #: organize/organizedialog.cpp:123
@@ -1147,11 +1147,11 @@ msgstr "La reproducción de CD solo es posible con el motor GStreamer."
 
 #: ../../build-qt6dev/src/ui_scrobblersettingspage.h:424
 msgid "CDDA"
-msgstr ""
+msgstr "CDDA"
 
 #: playlist/playlist.cpp:1420
 msgid "CUE"
-msgstr ""
+msgstr "CUE"
 
 #: ../../build-qt6dev/src/ui_lastfmimportdialog.h:157
 msgid "Cancel"
@@ -1277,7 +1277,7 @@ msgstr "Si cierra esta ventana se detendrá la búsqueda de portadas para los á
 
 #: equalizer/equalizer.cpp:141
 msgid "Club"
-msgstr ""
+msgstr "Club"
 
 #: core/mainwindow.cpp:386
 #: ../../build-qt6dev/src/ui_collectionsettingspage.h:442
@@ -1317,7 +1317,7 @@ msgstr "Compilación"
 
 #: ../../build-qt6dev/src/ui_edittagdialog.h:935
 msgid "Complete lyrics automatically"
-msgstr ""
+msgstr "Completa letra automáticamente"
 
 #: ../../build-qt6dev/src/ui_edittagdialog.h:926
 msgid "Complete tags automatically"
@@ -1422,12 +1422,12 @@ msgstr "Copia los archivos strawberry.conf y strawberry.db de tu directorio ~/sn
 #: device/gpoddevice.cpp:241
 #, qt-format
 msgid "Could not copy %1 to %2: %3"
-msgstr ""
+msgstr "No se pudo copiar %1 a %2: %3"
 
 #: core/filesystemmusicstorage.cpp:98
 #, qt-format
 msgid "Could not copy file %1 to %2."
-msgstr ""
+msgstr "No se pudo copiar el fichero %1 a %2."
 
 #: transcoder/transcoder.cpp:73
 #, qt-format
@@ -1441,7 +1441,7 @@ msgstr "No se ha podido leer el archivo CUE %1: %2"
 
 #: device/mtpconnection.cpp:75 device/mtpconnection.cpp:109
 msgid "Could not open MTP device."
-msgstr ""
+msgstr "No se pudo abrir el dispositivo MTP."
 
 #: scrobbler/scrobblingapi20.cpp:223
 msgid "Could not open URL. Please open this URL in your browser"
@@ -1450,7 +1450,7 @@ msgstr "No se ha podido abrir URL. Por favor, ábrala en su navegador"
 #: playlistparsers/playlistparser.cpp:192
 #, qt-format
 msgid "Could not open file %1"
-msgstr ""
+msgstr "No se pudo abrir el fichero %1"
 
 #: core/songloader.cpp:281
 #, qt-format
@@ -1466,22 +1466,22 @@ msgstr "No se ha podido leer el archivo de lista de reproducción %1: %2"
 #: covermanager/albumcoverchoicecontroller.cpp:827
 #, qt-format
 msgid "Could not save cover to file %1."
-msgstr ""
+msgstr "No se pudo guardar la portada en el fichero %1."
 
 #: playlist/playlist.cpp:442 dialogs/edittagdialog.cpp:1491
 #, qt-format
 msgid "Could not write metadata to %1"
-msgstr ""
+msgstr "No se pudieron escribir los metadatos en %1"
 
 #: playlist/playlist.cpp:439 dialogs/edittagdialog.cpp:1494
 #, qt-format
 msgid "Could not write metadata to %1: %2"
-msgstr ""
+msgstr "No se pudieron escribir los metadatos en %1: %2"
 
 #: core/songloader.cpp:499
 #, qt-format
 msgid "Couldn't create GStreamer fakesink element for %1"
-msgstr ""
+msgstr "No se pudo crear el elemento fakesink de GStreamer para %1"
 
 #: core/songloader.cpp:482
 #, qt-format
@@ -1491,7 +1491,7 @@ msgstr "No se ha podido crear una fuente GStreamer para %1"
 #: core/songloader.cpp:492
 #, qt-format
 msgid "Couldn't create GStreamer typefind element for %1"
-msgstr ""
+msgstr "No se pudo crear el elemento typefind de GStreamer para %1"
 
 #: playlist/playlistmanager.cpp:207
 msgid "Couldn't create playlist"
@@ -1510,7 +1510,7 @@ msgstr "No se pudo encontrar un codificador para %1; compruebe que tiene instala
 #: core/songloader.cpp:505
 #, qt-format
 msgid "Couldn't link GStreamer source, typefind and fakesink elements for %1"
-msgstr ""
+msgstr "No se pudieron vincular los elementos fuente, typefind y fakesink de GStreamer para %1"
 
 #: ../../build-qt6dev/src/ui_albumcovermanager.h:212
 #: ../../build-qt6dev/src/ui_albumcoversearcher.h:102
@@ -1545,15 +1545,15 @@ msgstr "El archivo de portada %1 está vacío."
 #: dialogs/edittagdialog.cpp:854 dialogs/edittagdialog.cpp:857
 #, qt-format
 msgid "Cover from %1"
-msgstr ""
+msgstr "Portada de %1"
 
 #: dialogs/edittagdialog.cpp:851
 msgid "Cover from embedded image."
-msgstr ""
+msgstr "Portada de la imagen incrustada."
 
 #: dialogs/edittagdialog.cpp:848
 msgid "Cover is unset."
-msgstr ""
+msgstr "La portada no está definida."
 
 #: ../../build-qt6dev/src/ui_coverssettingspage.h:307
 msgid "Cover providers"
@@ -1583,60 +1583,60 @@ msgstr "Fundido encadenado al cambiar pistas manualmente"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:632
 msgid "Ctrl+Alt+V"
-msgstr ""
+msgstr "Ctrl+Alt+V"
 
 #: ../../build-qt6dev/src/ui_queueview.h:134
 msgid "Ctrl+Down"
-msgstr ""
+msgstr "Ctrl+Down"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:644
 msgid "Ctrl+E"
-msgstr ""
+msgstr "Ctrl+E"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:659
 msgid "Ctrl+H"
-msgstr ""
+msgstr "Ctrl+H"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:677
 msgid "Ctrl+J"
-msgstr ""
+msgstr "Ctrl+J"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:640
 #: ../../build-qt6dev/src/ui_queueview.h:144
 msgid "Ctrl+K"
-msgstr ""
+msgstr "Ctrl+K"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:698
 msgid "Ctrl+M"
-msgstr ""
+msgstr "Ctrl+M"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:681
 msgid "Ctrl+N"
-msgstr ""
+msgstr "Ctrl+N"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:651
 msgid "Ctrl+P"
-msgstr ""
+msgstr "Ctrl+P"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:628
 msgid "Ctrl+Q"
-msgstr ""
+msgstr "Ctrl+Q"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:685
 msgid "Ctrl+S"
-msgstr ""
+msgstr "Ctrl+S"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:663
 msgid "Ctrl+Shift+A"
-msgstr ""
+msgstr "Ctrl+Shift+A"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:689
 msgid "Ctrl+Shift+O"
-msgstr ""
+msgstr "Ctrl+Shift+O"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:704
 msgid "Ctrl+T"
-msgstr ""
+msgstr "Ctrl+T"
 
 #: ../../build-qt6dev/src/ui_savedgroupingmanager.h:106
 #: ../../build-qt6dev/src/ui_queueview.h:128
@@ -1677,11 +1677,11 @@ msgstr "Ruta de D-Bus"
 
 #: equalizer/equalizer.cpp:142
 msgid "Dance"
-msgstr ""
+msgstr "Música de baile"
 
 #: spotify/spotifyrequest.cpp:1371
 msgid "Data missing error"
-msgstr ""
+msgstr "Error de datos inexistentes"
 
 #: core/database.cpp:510
 msgid "Database corruption detected."
@@ -1689,11 +1689,11 @@ msgstr "Se han detectado errores en la base de datos."
 
 #: playlist/playlist.cpp:1414
 msgid "Date Created"
-msgstr ""
+msgstr "Fecha de creación"
 
 #: playlist/playlist.cpp:1413
 msgid "Date Modified"
-msgstr ""
+msgstr "Fecha de modificación"
 
 #: ../../build-qt6dev/src/ui_edittagdialog.h:888
 msgid "Date created"
@@ -1786,12 +1786,12 @@ msgstr "Destino"
 #: core/filesystemmusicstorage.cpp:92
 #, qt-format
 msgid "Destination file %1 exists, but not allowed to overwrite"
-msgstr ""
+msgstr "El fichero de destino %1 existe, pero no está permitida la sobreescritura"
 
 #: core/filesystemmusicstorage.cpp:73
 #, qt-format
 msgid "Destination file %1 exists, but not allowed to overwrite."
-msgstr ""
+msgstr "El fichero de destino %1 existe, pero no está permitida la sobreescritura."
 
 #: ../../build-qt6dev/src/ui_transcodedialog.h:235
 msgid "Details..."
@@ -1808,7 +1808,7 @@ msgstr "Propiedades del dispositivo"
 
 #: ../../build-qt6dev/src/ui_spotifysettingspage.h:268
 msgid "Device credentials"
-msgstr ""
+msgstr "Credenciales del dispositivo"
 
 #: device/deviceview.cpp:241
 msgid "Device properties..."
@@ -1833,7 +1833,7 @@ msgstr "Carpeta"
 #: playlistparsers/playlistparser.cpp:222
 #, qt-format
 msgid "Directory %1 does not exist."
-msgstr ""
+msgstr "El directorio %1 no existe."
 
 #: dialogs/saveplaylistsdialog.cpp:79
 msgid "Directory does not exist."
@@ -1893,7 +1893,7 @@ msgstr "No volver a mostrar este mensaje."
 #: playlistparsers/parserbase.cpp:62
 #, qt-format
 msgid "Don't know how to handle %1"
-msgstr ""
+msgstr "No sé cómo manejar %1"
 
 #: osd/osdbase.cpp:363 ../../build-qt6dev/src/ui_playlistsequence.h:108
 msgid "Don't repeat"
@@ -1940,7 +1940,7 @@ msgstr "Descargar las portadas de los álbumes"
 
 #: musicbrainz/tagfetcher.cpp:132
 msgid "Downloading metadata"
-msgstr ""
+msgstr "Descargando metadatos"
 
 #: settings/notificationssettingspage.cpp:68
 msgid "Drag to reposition"
@@ -3427,7 +3427,7 @@ msgstr "Sin analizador"
 
 #: ../../build-qt6dev/src/ui_backendsettingspage.h:695
 msgid "No audio normalization"
-msgstr ""
+msgstr "Sin normalización de audio"
 
 #: covermanager/albumcovermanager.cpp:1022
 msgid "No covers to export."
@@ -3472,7 +3472,7 @@ msgstr "Ninguna de los temas seleccionados podía copiarse en un dispositivo"
 
 #: moodbar/moodbarrenderer.cpp:166
 msgid "Normal"
-msgstr ""
+msgstr "Normal"
 
 #: ../../build-qt6dev/src/ui_transcoderoptionsaac.h:143
 msgid "Normal block type"
@@ -3486,7 +3486,7 @@ msgstr "No se ha accedido a Qobuz."
 #: spotify/spotifyservice.cpp:516 spotify/spotifyservice.cpp:568
 #: spotify/spotifyservice.cpp:620 spotify/spotifyservice.cpp:680
 msgid "Not authenticated with Spotify."
-msgstr ""
+msgstr "No autenticado con Spotify."
 
 #: tidal/tidalservice.cpp:701
 msgid "Not authenticated with Tidal and reached maximum number of login attempts."
@@ -3504,7 +3504,7 @@ msgstr "No conectado"
 
 #: dialogs/edittagdialog.cpp:1442
 msgid "Not found."
-msgstr ""
+msgstr "No encontrado."
 
 #: device/deviceview.cpp:135
 msgid "Not mounted - double click to mount"
@@ -3604,7 +3604,7 @@ msgstr "Opciones…"
 
 #: ../../build-qt6dev/src/ui_transcodersettingspage.h:190
 msgid "Opus"
-msgstr ""
+msgstr "Opus"
 
 #: ../../build-qt6dev/src/ui_organizedialog.h:260
 msgid "Organize Files"
@@ -3620,7 +3620,7 @@ msgstr "Organizando archivos"
 
 #: playlist/playlist.cpp:1394
 msgid "Original Year"
-msgstr ""
+msgstr "Año original"
 
 #: dialogs/trackselectiondialog.cpp:194
 msgid "Original tags"
@@ -3721,7 +3721,7 @@ msgstr "En pausa"
 
 #: ../../build-qt6dev/src/ui_collectionsettingspage.h:451
 msgid "Perform song EBU R 128 analysis (required for EBU R 128 loudness normalization)"
-msgstr ""
+msgstr "Realizar análisis de canción EBU R 128 (requerido para la normalización de volumen EBU R 128)"
 
 #: ../../build-qt6dev/src/ui_backendsettingspage.h:706
 msgid "Perform track loudness normalization"
