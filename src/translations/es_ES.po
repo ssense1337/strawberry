@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: strawberrymusicplayer\n"
 "Language-Team: Spanish\n"
 "Language: es_ES\n"
-"PO-Revision-Date: 2024-08-20 09:54\n"
+"PO-Revision-Date: 2024-08-20 11:21\n"
 
 #: playlist/playlistlistview.cpp:51
 msgid "\n\n"
@@ -2155,7 +2155,7 @@ msgstr "Equivalente a --log-levels*:3"
 #: core/mainwindow.cpp:2719 core/mainwindow.cpp:2870
 #: collection/collectionview.cpp:716
 msgid "Error"
-msgstr ""
+msgstr "Error"
 
 #: device/mtploader.cpp:72
 #, qt-format
@@ -2257,27 +2257,27 @@ msgstr "Se han exportado %1 portadas de %2 (%3 omitidas)"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:655
 msgid "F1"
-msgstr ""
+msgstr "F1"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:612
 msgid "F5"
-msgstr ""
+msgstr "F5"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:616
 msgid "F6"
-msgstr ""
+msgstr "F6"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:620
 msgid "F7"
-msgstr ""
+msgstr "F7"
 
 #: ../../build-qt6dev/src/ui_mainwindow.h:624
 msgid "F8"
-msgstr ""
+msgstr "F8"
 
 #: ../../build-qt6dev/src/ui_transcodersettingspage.h:187
 msgid "FLAC"
-msgstr ""
+msgstr "FLAC"
 
 #: ../../build-qt6dev/src/ui_backendsettingspage.h:715
 msgid "Fade out on pause / fade in on resume"
@@ -2577,7 +2577,7 @@ msgstr "Agudos completos"
 
 #: settings/settingsdialog.cpp:135
 msgid "General"
-msgstr ""
+msgstr "General"
 
 #: ../../build-qt6dev/src/ui_notificationssettingspage.h:484
 msgid "General settings"
@@ -2736,7 +2736,7 @@ msgstr "Ayuda"
 
 #: ../../build-qt6dev/src/ui_subsonicsettingspage.h:250
 msgid "Hex"
-msgstr ""
+msgstr "Hex"
 
 #: ../../build-qt6dev/src/ui_behavioursettingspage.h:324
 msgid "Hide the main window"
@@ -2761,7 +2761,7 @@ msgstr "Horas"
 
 #: playlist/playlistview.cpp:223
 msgid "Hz"
-msgstr ""
+msgstr "Hz"
 
 #: ../../build-qt6dev/src/ui_deviceproperties.h:372
 msgid "Icon"
@@ -2955,7 +2955,7 @@ msgstr "Última reproducción para %1 temas recibidas."
 
 #: ../../build-qt6dev/src/ui_scrobblersettingspage.h:429
 msgid "Last.fm"
-msgstr ""
+msgstr "Last.fm"
 
 #: smartplaylists/smartplaylistsmodel.cpp:108
 msgid "Least favourite tracks"
@@ -2973,7 +2973,7 @@ msgstr "Duración"
 
 #: ../../build-qt6dev/src/ui_scrobblersettingspage.h:432
 msgid "Libre.fm"
-msgstr ""
+msgstr "Libre.fm"
 
 #: ../../build-qt6dev/src/ui_smartplaylistquerysortpage.h:137
 msgid "Limits"
@@ -2990,7 +2990,7 @@ msgstr ""
 
 #: ../../build-qt6dev/src/ui_scrobblersettingspage.h:435
 msgid "Listenbrainz"
-msgstr ""
+msgstr "ListenBrainz"
 
 #: equalizer/equalizer.cpp:148
 msgid "Live"
@@ -3110,7 +3110,7 @@ msgstr ""
 
 #: ../../build-qt6dev/src/ui_transcodersettingspage.h:194
 msgid "MP3"
-msgstr ""
+msgstr "MP3"
 
 #: device/mtpconnection.cpp:100
 msgid "MTP device not found."
@@ -3419,7 +3419,7 @@ msgstr "Próxima semana"
 
 #: dialogs/edittagdialog.cpp:820 dialogs/edittagdialog.cpp:836
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #: analyzer/analyzercontainer.cpp:98
 msgid "No analyzer"
@@ -4850,7 +4850,7 @@ msgstr "Tamaño:"
 
 #: equalizer/equalizer.cpp:154
 msgid "Ska"
-msgstr ""
+msgstr "Ska"
 
 #: playlist/playlist.cpp:1402
 msgid "Skip Count"
@@ -4906,7 +4906,7 @@ msgstr "Soft rock"
 
 #: ../../build-qt6dev/src/ui_scrobblersettingspage.h:425
 msgid "SomaFM"
-msgstr ""
+msgstr "SomaFM"
 
 #: ../../build-qt6dev/src/ui_contextsettingspage.h:435
 msgid "Song Lyrics"
@@ -4964,7 +4964,7 @@ msgstr ""
 
 #: core/mainwindow.cpp:402 ../../build-qt6dev/src/ui_spotifysettingspage.h:264
 msgid "Spotify"
-msgstr ""
+msgstr "Spotify"
 
 #: spotify/spotifyservice.cpp:295
 msgid "Spotify Authentication"
@@ -5332,7 +5332,7 @@ msgstr "No se admite este tipo de dispositivo: %1"
 #: ../../build-qt6dev/src/ui_scrobblersettingspage.h:421
 #: ../../build-qt6dev/src/ui_tidalsettingspage.h:325
 msgid "Tidal"
-msgstr ""
+msgstr "Tidal"
 
 #: ../../build-qt6dev/src/ui_tidalsettingspage.h:327
 msgid "Tidal support is not official and requires a API token from a registered application to work. We can't help you getting these."
@@ -5434,7 +5434,7 @@ msgstr "Tipo"
 
 #: device/giolister.cpp:194
 msgid "URI"
-msgstr ""
+msgstr "URI"
 
 #: core/commandlineoptions.cpp:219
 msgid "URL(s)"
@@ -5442,7 +5442,7 @@ msgstr "URL"
 
 #: device/udisks2lister.cpp:127
 msgid "UUID"
-msgstr ""
+msgstr "UUID"
 
 #: ../../build-qt6dev/src/ui_transcoderoptionsspeex.h:226
 msgid "Ultra wide band (UWB)"
@@ -5711,7 +5711,7 @@ msgstr ""
 
 #: ../../build-qt6dev/src/ui_transcodersettingspage.h:189
 msgid "Vorbis"
-msgstr ""
+msgstr "Vorbis"
 
 #: playlist/playlisttabbar.cpp:236
 #: ../../build-qt6dev/src/ui_playlistsettingspage.h:181
@@ -5810,7 +5810,7 @@ msgstr "Años"
 
 #: dialogs/edittagdialog.cpp:820 dialogs/edittagdialog.cpp:836
 msgid "Yes"
-msgstr ""
+msgstr "Sí"
 
 #: utilities/timeutils.cpp:86
 msgid "Yesterday"
@@ -5877,7 +5877,7 @@ msgstr "La colección está vacía!"
 
 #: smartplaylists/smartplaylistsearchterm.cpp:430
 msgid "Z-A"
-msgstr ""
+msgstr "Z-A"
 
 #: equalizer/equalizer.cpp:157
 msgid "Zero"
@@ -5973,7 +5973,7 @@ msgstr "mayor que"
 
 #: ../../build-qt6dev/src/ui_backendsettingspage.h:677
 msgid "hw"
-msgstr ""
+msgstr "hw"
 
 #: smartplaylists/smartplaylistsearchterm.cpp:262
 msgid "in the last"
@@ -5990,7 +5990,7 @@ msgstr "menos de"
 
 #: dialogs/edittagdialog.cpp:1430
 msgid "loading..."
-msgstr ""
+msgstr "cargando..."
 
 #: smartplaylists/smartplaylistsearchterm.cpp:434
 msgid "longest first"
@@ -6005,7 +6005,7 @@ msgstr "mover %n temas"
 #: ../../build-qt6dev/src/ui_spotifysettingspage.h:275
 #: ../../build-qt6dev/src/ui_qobuzsettingspage.h:293
 msgid "ms"
-msgstr ""
+msgstr "ms"
 
 #: smartplaylists/smartplaylistsearchterm.cpp:432
 msgid "newest first"
@@ -6045,7 +6045,7 @@ msgstr ""
 
 #: ../../build-qt6dev/src/ui_backendsettingspage.h:679
 msgid "pcm"
-msgstr ""
+msgstr "pcm"
 
 #: filterparser/filterparser.cpp:471
 msgid "rating"
