@@ -479,11 +479,8 @@ jobs:
     if: (success() || failure()) && github.event_name == 'release'
     runs-on: ubuntu-latest
     needs:
-      - build-opensuse
-      - build-fedora
-      - build-mageia
-      - build-debian
-      - build-ubuntu
+      - build-windows-mingw
+      - build-windows-msvc
     steps:
       - name: Install packages
         env:
