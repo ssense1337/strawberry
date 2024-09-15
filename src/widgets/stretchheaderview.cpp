@@ -163,7 +163,7 @@ bool StretchHeaderView::RestoreState(const QByteArray &state) {
     ResizeSections();
   }
 
-  emit StretchEnabledChanged(stretch_enabled_);
+  Q_EMIT StretchEnabledChanged(stretch_enabled_);
 
   return true;
 
@@ -207,7 +207,7 @@ void StretchHeaderView::SetStretchEnabled(const bool enabled) {
     ResizeSections();
   }
 
-  emit StretchEnabledChanged(enabled);
+  Q_EMIT StretchEnabledChanged(enabled);
 
 }
 
@@ -239,7 +239,7 @@ void StretchHeaderView::NormaliseWidths(const QList<int> &sections) {
     selected_sum = 0.0;
     for (int i = 0; i < count(); ++i) {
       if (sections.contains(i)) {
-        selected_sum += column_widths_[i];
+        selected_sum += column_widths_.value(i);
       }
     }
   }
@@ -263,7 +263,7 @@ void StretchHeaderView::ResizeSections(const QList<int> &sections) {
     if (isSectionHidden(i) || (!sections.isEmpty() && !sections.contains(i))) {
       continue;
     }
-    const int pixels = static_cast<int>(column_widths_[i] * width());
+    const int pixels = static_cast<int>(column_widths_.value(i) * width());
     if (pixels != 0) {
       resizeSection(i, pixels);
     }

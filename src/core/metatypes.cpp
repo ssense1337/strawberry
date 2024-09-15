@@ -81,6 +81,8 @@
 #include "smartplaylists/smartplaylistsearchterm.h"
 #include "smartplaylists/smartplaylistsitem.h"
 
+#include "lyrics/lyricssearchresult.h"
+
 void RegisterMetaTypes() {
 
   qRegisterMetaType<const char*>("const char*");
@@ -94,10 +96,6 @@ void RegisterMetaTypes() {
   qRegisterMetaType<QItemSelection>("QItemSelection");
   qRegisterMetaType<QMap<int, Qt::Alignment>>("ColumnAlignmentMap");
   qRegisterMetaType<QMap<int, int>>("ColumnAlignmentIntMap");
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-  qRegisterMetaTypeStreamOperators<QMap<int, Qt::Alignment>>("ColumnAlignmentMap");
-  qRegisterMetaTypeStreamOperators<QMap<int, int>>("ColumnAlignmentIntMap");
-#endif
   qRegisterMetaType<Song>("Song");
   qRegisterMetaType<SongList>("SongList");
   qRegisterMetaType<SongMap>("SongMap");
@@ -131,10 +129,6 @@ void RegisterMetaTypes() {
 
   qRegisterMetaType<Equalizer::Params>("Equalizer::Params");
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-  qRegisterMetaTypeStreamOperators<Equalizer::Params>("Equalizer::Params");
-#endif
-
 #ifdef HAVE_DBUS
   qDBusRegisterMetaType<QByteArrayList>();
   qDBusRegisterMetaType<QImage>();
@@ -166,5 +160,7 @@ void RegisterMetaTypes() {
   qRegisterMetaType<SmartPlaylistSearchTerm::Type>("SmartPlaylistSearchTerm::Type");
   qRegisterMetaType<SmartPlaylistSearchTerm::DateType>("SmartPlaylistSearchTerm::DateType");
   qRegisterMetaType<SmartPlaylistsItem::Type>("SmartPlaylistsItem::Type");
+
+  qRegisterMetaType<LyricsSearchResults>("LyricsSearchResults");
 
 }

@@ -51,16 +51,16 @@
 #include <QFlags>
 #include <QtEvents>
 
-#include "core/settings.h"
-
-#ifdef HAVE_X11EXTRAS
-#  include <QX11Info>
-#elif defined(HAVE_X11) && defined(HAVE_QPA_QPLATFORMNATIVEINTERFACE_H)
+#ifdef HAVE_QPA_QPLATFORMNATIVEINTERFACE_H
 #  include <qpa/qplatformnativeinterface.h>
 #endif
 
+#include "core/settings.h"
+
 #include "osdpretty.h"
 #include "ui_osdpretty.h"
+
+using namespace Qt::StringLiterals;
 
 #ifdef Q_OS_WIN
 #  include <windows.h>
@@ -82,7 +82,6 @@ const int OSDPretty::kSnapProximity = 20;
 
 const QRgb OSDPretty::kPresetBlue = qRgb(102, 150, 227);
 const QRgb OSDPretty::kPresetRed = qRgb(202, 22, 16);
-
 
 OSDPretty::OSDPretty(Mode mode, QWidget *parent)
     : QWidget(parent),
@@ -217,9 +216,7 @@ void OSDPretty::ScreenRemoved(QScreen *screen) {
 
 bool OSDPretty::IsTransparencyAvailable() {
 
-#ifdef HAVE_X11EXTRAS
-  return QX11Info::isCompositingManagerRunning();
-#elif defined(HAVE_X11) && defined(HAVE_QPA_QPLATFORMNATIVEINTERFACE_H)
+#ifdef HAVE_QPA_QPLATFORMNATIVEINTERFACE_H
   if (qApp) {
     QPlatformNativeInterface *native = QGuiApplication::platformNativeInterface();
     QScreen *screen = popup_screen_ == nullptr ? QGuiApplication::primaryScreen() : popup_screen_;
@@ -248,10 +245,10 @@ void OSDPretty::Load() {
   fading_enabled_ = s.value("fading", false).toBool();
 #endif
 
-  if (s.contains(QLatin1String("popup_screen"))) {
+  if (s.contains("popup_screen"_L1)) {
     popup_screen_name_ = s.value("popup_screen").toString();
     if (screens_.contains(popup_screen_name_)) {
-      popup_screen_ = screens_[popup_screen_name_];
+      popup_screen_ = screens_.value(popup_screen_name_);
     }
     else {
       popup_screen_ = current_screen();
@@ -264,7 +261,7 @@ void OSDPretty::Load() {
     if (current_screen()) popup_screen_name_ = current_screen()->name();
   }
 
-  if (s.contains(QLatin1String("popup_pos"))) {
+  if (s.contains("popup_pos"_L1)) {
     popup_pos_ = s.value("popup_pos").toPoint();
   }
   else {
@@ -464,11 +461,8 @@ void OSDPretty::Reposition() {
 
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 void OSDPretty::enterEvent(QEnterEvent*) {
-#else
-void OSDPretty::enterEvent(QEvent*) {
-#endif
+
   if (mode_ == Mode::Popup) {
     setWindowOpacity(0.25);
   }
@@ -486,11 +480,7 @@ void OSDPretty::mousePressEvent(QMouseEvent *e) {
   }
   else {
     original_window_pos_ = pos();
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
     drag_start_pos_ = e->globalPosition().toPoint();
-#else
-    drag_start_pos_ = e->globalPos();
-#endif
   }
 
 }
@@ -498,19 +488,11 @@ void OSDPretty::mousePressEvent(QMouseEvent *e) {
 void OSDPretty::mouseMoveEvent(QMouseEvent *e) {
 
   if (mode_ == Mode::Draggable) {
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
     QPoint delta = e->globalPosition().toPoint() - drag_start_pos_;
-#else
-    QPoint delta = e->globalPos() - drag_start_pos_;
-#endif
     QPoint new_pos = original_window_pos_ + delta;
 
     // Keep it to the bounds of the desktop
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
     QScreen *screen = current_screen(e->globalPosition().toPoint());
-#else
-    QScreen *screen = current_screen(e->globalPos());
-#endif
     if (!screen) return;
 
     QRect geometry = screen->availableGeometry();
@@ -538,7 +520,7 @@ void OSDPretty::mouseReleaseEvent(QMouseEvent *) {
     popup_screen_ = current_screen();
     popup_screen_name_ = current_screen()->name();
     popup_pos_ = current_pos();
-    emit PositionChanged();
+    Q_EMIT PositionChanged();
   }
 
 }

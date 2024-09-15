@@ -27,10 +27,11 @@
 #include <QObject>
 #include <QDir>
 #include <QImage>
-#include <QTemporaryFile>
+#include <QStandardPaths>
 
 #include "core/application.h"
 #include "core/song.h"
+#include "core/temporaryfile.h"
 #include "playlist/playlistmanager.h"
 #include "albumcoverloader.h"
 #include "albumcoverloaderresult.h"
@@ -41,8 +42,10 @@ using std::make_unique;
 CurrentAlbumCoverLoader::CurrentAlbumCoverLoader(Application *app, QObject *parent)
     : QObject(parent),
       app_(app),
-      temp_file_pattern_(QDir::tempPath() + QStringLiteral("/strawberry-cover-XXXXXX.jpg")),
+      temp_file_pattern_(QStandardPaths::writableLocation(QStandardPaths::TempLocation) + QStringLiteral("/strawberry-cover-XXXXXX.jpg")),
       id_(0) {
+
+  setObjectName(QLatin1String(metaObject()->className()));
 
   options_.options = AlbumCoverLoaderOptions::Option::RawImageData | AlbumCoverLoaderOptions::Option::OriginalImage | AlbumCoverLoaderOptions::Option::ScaledImage;
   options_.desired_scaled_size = QSize(120, 120);
@@ -55,12 +58,7 @@ CurrentAlbumCoverLoader::CurrentAlbumCoverLoader(Application *app, QObject *pare
 
 }
 
-CurrentAlbumCoverLoader::~CurrentAlbumCoverLoader() {
-
-  if (temp_cover_) temp_cover_->remove();
-  if (temp_cover_thumbnail_) temp_cover_thumbnail_->remove();
-
-}
+CurrentAlbumCoverLoader::~CurrentAlbumCoverLoader() = default;
 
 void CurrentAlbumCoverLoader::ReloadSettingsAsync() {
 
@@ -87,35 +85,33 @@ void CurrentAlbumCoverLoader::AlbumCoverReady(const quint64 id, AlbumCoverLoader
   id_ = 0;
 
   if (!result.album_cover.image.isNull()) {
-    temp_cover_ = make_unique<QTemporaryFile>(temp_file_pattern_);
-    temp_cover_->setAutoRemove(true);
-    if (temp_cover_->open()) {
-      if (result.album_cover.image.save(temp_cover_->fileName(), "JPEG")) {
-        result.temp_cover_url = QUrl::fromLocalFile(temp_cover_->fileName());
+    temp_cover_ = make_unique<TemporaryFile>(temp_file_pattern_);
+    if (!temp_cover_->filename().isEmpty()) {
+      if (result.album_cover.image.save(temp_cover_->filename(), "JPEG")) {
+        result.temp_cover_url = QUrl::fromLocalFile(temp_cover_->filename());
       }
       else {
-        qLog(Error) << "Failed to save cover image to" << temp_cover_->fileName() << temp_cover_->errorString();
+        qLog(Error) << "Failed to save cover image to" << temp_cover_->filename();
       }
     }
     else {
-      qLog(Error) << "Failed to open" << temp_cover_->fileName() << temp_cover_->errorString();
+      qLog(Error) << "Failed to open" << temp_cover_->filename();
     }
   }
 
   QUrl thumbnail_url;
   if (!result.image_scaled.isNull()) {
-    temp_cover_thumbnail_ = make_unique<QTemporaryFile>(temp_file_pattern_);
-    temp_cover_thumbnail_->setAutoRemove(true);
-    if (temp_cover_thumbnail_->open()) {
-      if (result.image_scaled.save(temp_cover_thumbnail_->fileName(), "JPEG")) {
-        thumbnail_url = QUrl::fromLocalFile(temp_cover_thumbnail_->fileName());
+    temp_cover_thumbnail_ = make_unique<TemporaryFile>(temp_file_pattern_);
+    if (!temp_cover_thumbnail_->filename().isEmpty()) {
+      if (result.image_scaled.save(temp_cover_thumbnail_->filename(), "JPEG")) {
+        thumbnail_url = QUrl::fromLocalFile(temp_cover_thumbnail_->filename());
       }
       else {
-        qLog(Error) << "Unable to save cover thumbnail image to" << temp_cover_thumbnail_->fileName();
+        qLog(Error) << "Unable to save cover thumbnail image to" << temp_cover_thumbnail_->filename();
       }
     }
     else {
-      qLog(Error) << "Unable to open" << temp_cover_thumbnail_->fileName();
+      qLog(Error) << "Unable to open" << temp_cover_thumbnail_->filename();
     }
   }
 
@@ -126,7 +122,7 @@ void CurrentAlbumCoverLoader::AlbumCoverReady(const quint64 id, AlbumCoverLoader
     last_song_.set_art_automatic(result.art_automatic_updated);
   }
 
-  emit AlbumCoverLoaded(last_song_, result);
-  emit ThumbnailLoaded(last_song_, thumbnail_url, result.image_scaled);
+  Q_EMIT AlbumCoverLoaded(last_song_, result);
+  Q_EMIT ThumbnailLoaded(last_song_, thumbnail_url, result.image_scaled);
 
 }

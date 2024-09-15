@@ -99,7 +99,7 @@ void DeleteFiles::ProcessSomeFiles() {
 
     task_manager_->SetTaskFinished(task_id_);
 
-    emit Finished(songs_with_errors_);
+    Q_EMIT Finished(songs_with_errors_);
 
     // Move back to the original thread so deleteLater() can get called in the main thread's event loop
     moveToThread(original_thread_);
@@ -116,7 +116,7 @@ void DeleteFiles::ProcessSomeFiles() {
   for (; progress_ < n; ++progress_) {
     task_manager_->SetTaskProgress(task_id_, progress_, songs_.count());
 
-    const Song &song = songs_[progress_];
+    const Song song = songs_.value(progress_);
 
     MusicStorage::DeleteJob job;
     job.metadata_ = song;

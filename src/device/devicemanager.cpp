@@ -30,7 +30,7 @@
 #include <QObject>
 #include <QMetaObject>
 #include <QThread>
-#include <QtConcurrent>
+#include <QtConcurrentRun>
 #include <QAbstractItemModel>
 #include <QDir>
 #include <QList>
@@ -84,6 +84,7 @@
 #  include "gpoddevice.h"
 #endif
 
+using namespace Qt::StringLiterals;
 using std::make_unique;
 
 const int DeviceManager::kDeviceIconSize = 32;
@@ -93,6 +94,8 @@ DeviceManager::DeviceManager(Application *app, QObject *parent)
     : SimpleTreeModel<DeviceInfo>(new DeviceInfo(this), parent),
       app_(app),
       not_connected_overlay_(IconLoader::Load(QStringLiteral("edit-delete"))) {
+
+  setObjectName(QLatin1String(metaObject()->className()));
 
   thread_pool_.setMaxThreadCount(1);
   QObject::connect(&*app_->task_manager(), &TaskManager::TasksChanged, this, &DeviceManager::TasksChanged);
@@ -105,11 +108,7 @@ DeviceManager::DeviceManager(Application *app, QObject *parent)
   QObject::connect(this, &DeviceManager::DeviceCreatedFromDB, this, &DeviceManager::AddDeviceFromDB);
 
   // This reads from the database and contents on the database mutex, which can be very slow on startup.
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   (void)QtConcurrent::run(&thread_pool_, &DeviceManager::LoadAllDevices, this);
-#else
-  (void)QtConcurrent::run(&thread_pool_, this, &DeviceManager::LoadAllDevices);
-#endif
 
   // This proxy model only shows connected devices
   connected_devices_model_ = new DeviceStateFilterModel(this);
@@ -202,7 +201,7 @@ void DeviceManager::BackendClosed() {
   QObject::disconnect(obj, nullptr, this, nullptr);
   qLog(Debug) << obj << "successfully closed.";
   wait_for_exit_.removeAll(obj);
-  if (wait_for_exit_.isEmpty()) emit ExitFinished();
+  if (wait_for_exit_.isEmpty()) Q_EMIT ExitFinished();
 
 }
 
@@ -236,7 +235,7 @@ void DeviceManager::LoadAllDevices() {
   for (const DeviceDatabaseBackend::Device &device : devices) {
     DeviceInfo *info = new DeviceInfo(DeviceInfo::Type::Device, root_);
     info->InitFromDb(device);
-    emit DeviceCreatedFromDB(info);
+    Q_EMIT DeviceCreatedFromDB(info);
   }
 
   // This is done in a concurrent thread so close the unique DB connection.
@@ -246,7 +245,7 @@ void DeviceManager::LoadAllDevices() {
 
 void DeviceManager::AddDeviceFromDB(DeviceInfo *info) {
 
-  const QStringList icon_names = info->icon_name_.split(QLatin1Char(','));
+  const QStringList icon_names = info->icon_name_.split(u',');
   QVariantList icons;
   icons.reserve(icon_names.count());
   for (const QString &icon_name : icon_names) {
@@ -260,7 +259,7 @@ void DeviceManager::AddDeviceFromDB(DeviceInfo *info) {
     existing->icon_name_ = info->icon_name_;
     existing->icon_ = info->icon_;
     QModelIndex idx = ItemToIndex(existing);
-    if (idx.isValid()) emit dataChanged(idx, idx);
+    if (idx.isValid()) Q_EMIT dataChanged(idx, idx);
     root_->Delete(info->row);
   }
   else {
@@ -460,7 +459,7 @@ void DeviceManager::PhysicalDeviceAdded(const QString &id) {
       }
     }
     QModelIndex idx = ItemToIndex(info);
-    if (idx.isValid()) emit dataChanged(idx, idx);
+    if (idx.isValid()) Q_EMIT dataChanged(idx, idx);
   }
   else {
     // Check if we have another device with the same URL
@@ -476,7 +475,7 @@ void DeviceManager::PhysicalDeviceAdded(const QString &id) {
         info->LoadIcon(lister->DeviceIcons(id), info->friendly_name_);
       }
       QModelIndex idx = ItemToIndex(info);
-      if (idx.isValid()) emit dataChanged(idx, idx);
+      if (idx.isValid()) Q_EMIT dataChanged(idx, idx);
     }
     else {
       // It's a completely new device
@@ -518,9 +517,9 @@ void DeviceManager::PhysicalDeviceRemoved(const QString &id) {
       info->device_->Close();
     }
 
-    if (!info->device_) emit DeviceDisconnected(idx);
+    if (!info->device_) Q_EMIT DeviceDisconnected(idx);
 
-    emit dataChanged(idx, idx);
+    Q_EMIT dataChanged(idx, idx);
   }
   else {
     // If this was the last lister for the device then remove it from the model
@@ -605,7 +604,7 @@ SharedPtr<ConnectedDevice> DeviceManager::Connect(DeviceInfo *info) {
 
     // If we get here it means that this URL scheme wasn't supported.
     // If it was "ipod" or "mtp" then the user compiled out support and the device won't work properly.
-    if (url.scheme() == QLatin1String("mtp") || url.scheme() == QLatin1String("gphoto2")) {
+    if (url.scheme() == "mtp"_L1 || url.scheme() == "gphoto2"_L1) {
       if (QMessageBox::critical(nullptr, tr("This device will not work properly"),
           tr("This is an MTP device, but you compiled Strawberry without libmtp support.") + QStringLiteral("  ") +
           tr("If you continue, this device will work slowly and songs copied to it may not work."),
@@ -613,9 +612,9 @@ SharedPtr<ConnectedDevice> DeviceManager::Connect(DeviceInfo *info) {
         return ret;
     }
 
-    if (url.scheme() == QLatin1String("ipod")) {
+    if (url.scheme() == "ipod"_L1) {
       if (QMessageBox::critical(nullptr, tr("This device will not work properly"),
-          tr("This is an iPod, but you compiled Strawberry without libgpod support.") + QLatin1String("  ") +
+          tr("This is an iPod, but you compiled Strawberry without libgpod support.") + "  "_L1 +
           tr("If you continue, this device will work slowly and songs copied to it may not work."),
               QMessageBox::Abort, QMessageBox::Ignore) == QMessageBox::Abort)
         return ret;
@@ -630,7 +629,7 @@ SharedPtr<ConnectedDevice> DeviceManager::Connect(DeviceInfo *info) {
       url_strings << url.toString();
     }
 
-    app_->AddError(tr("This type of device is not supported: %1").arg(url_strings.join(QLatin1String(", "))));
+    app_->AddError(tr("This type of device is not supported: %1").arg(url_strings.join(", "_L1)));
     return ret;
   }
 
@@ -661,7 +660,7 @@ SharedPtr<ConnectedDevice> DeviceManager::Connect(DeviceInfo *info) {
   QModelIndex idx = ItemToIndex(info);
   if (!idx.isValid()) return ret;
 
-  emit dataChanged(idx, idx);
+  Q_EMIT dataChanged(idx, idx);
 
   QObject::connect(&*info->device_, &ConnectedDevice::TaskStarted, this, &DeviceManager::DeviceTaskStarted);
   QObject::connect(&*info->device_, &ConnectedDevice::SongCountUpdated, this, &DeviceManager::DeviceSongCountUpdated);
@@ -681,7 +680,7 @@ void DeviceManager::DeviceConnectFinished(const QString &id, const bool success)
   if (!idx.isValid()) return;
 
   if (success) {
-    emit DeviceConnected(idx);
+    Q_EMIT DeviceConnected(idx);
   }
   else {
     info->device_->Close();
@@ -699,8 +698,8 @@ void DeviceManager::DeviceCloseFinished(const QString &id) {
   QModelIndex idx = ItemToIndex(info);
   if (!idx.isValid()) return;
 
-  emit DeviceDisconnected(idx);
-  emit dataChanged(idx, idx);
+  Q_EMIT DeviceDisconnected(idx);
+  Q_EMIT dataChanged(idx, idx);
 
   if (info->unmount_ && info->BestBackend() && info->BestBackend()->lister_) {
     info->BestBackend()->lister_->UnmountDeviceAsync(info->BestBackend()->unique_id_);
@@ -799,7 +798,7 @@ void DeviceManager::RemoveFromDB(DeviceInfo *info, const QModelIndex &idx) {
 
     info->friendly_name_ = info->BestBackend()->lister_->MakeFriendlyName(id);
     info->LoadIcon(info->BestBackend()->lister_->DeviceIcons(id), info->friendly_name_);
-    emit dataChanged(idx, idx);
+    Q_EMIT dataChanged(idx, idx);
   }
 
 }
@@ -816,7 +815,7 @@ void DeviceManager::SetDeviceOptions(const QModelIndex &idx, const QString &frie
   info->transcode_mode_ = mode;
   info->transcode_format_ = format;
 
-  emit dataChanged(idx, idx);
+  Q_EMIT dataChanged(idx, idx);
 
   if (info->database_id_ != -1) {
     backend_->SetDeviceOptions(info->database_id_, friendly_name, icon_name, mode, format);
@@ -830,13 +829,13 @@ void DeviceManager::DeviceTaskStarted(const int id) {
   if (!device) return;
 
   for (int i = 0; i < devices_.count(); ++i) {
-    DeviceInfo *info = devices_[i];
+    DeviceInfo *info = devices_.value(i);
     if (info->device_ && &*info->device_ == device) {
       QModelIndex index = ItemToIndex(info);
       if (!index.isValid()) continue;
       active_tasks_[id] = index;
       info->task_percentage_ = 0;
-      emit dataChanged(index, index);
+      Q_EMIT dataChanged(index, index);
       return;
     }
   }
@@ -851,7 +850,7 @@ void DeviceManager::TasksChanged() {
   for (const TaskManager::Task &task : tasks) {
     if (!active_tasks_.contains(task.id)) continue;
 
-    const QPersistentModelIndex idx = active_tasks_[task.id];
+    const QPersistentModelIndex idx = active_tasks_.value(task.id);
     if (!idx.isValid()) continue;
 
     DeviceInfo *info = IndexToItem(idx);
@@ -862,7 +861,7 @@ void DeviceManager::TasksChanged() {
       info->task_percentage_ = 0;
     }
 
-    emit dataChanged(idx, idx);
+    Q_EMIT dataChanged(idx, idx);
     finished_tasks.removeAll(idx);
 
   }
@@ -875,7 +874,7 @@ void DeviceManager::TasksChanged() {
     if (!info) continue;
 
     info->task_percentage_ = -1;
-    emit dataChanged(idx, idx);
+    Q_EMIT dataChanged(idx, idx);
 
     active_tasks_.remove(active_tasks_.key(idx));
   }
@@ -918,7 +917,7 @@ void DeviceManager::DeviceSongCountUpdated(const int count) {
   QModelIndex idx = ItemToIndex(info);
   if (!idx.isValid()) return;
 
-  emit dataChanged(idx, idx);
+  Q_EMIT dataChanged(idx, idx);
 
 }
 

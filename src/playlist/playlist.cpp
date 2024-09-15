@@ -32,7 +32,7 @@
 
 #include <QObject>
 #include <QCoreApplication>
-#include <QtConcurrent>
+#include <QtConcurrentRun>
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QIODevice>
@@ -96,6 +96,7 @@
 
 using std::make_shared;
 using namespace std::chrono_literals;
+using namespace Qt::StringLiterals;
 
 const char *Playlist::kSettingsGroup = "Playlist";
 const char *Playlist::kCddaMimeType = "x-content/audio-cdda";
@@ -398,7 +399,7 @@ QVariant Playlist::data(const QModelIndex &idx, const int role) const {
 
 #ifdef HAVE_MOODBAR
 void Playlist::MoodbarUpdated(const QModelIndex &idx) {
-  emit dataChanged(idx.sibling(idx.row(), static_cast<int>(Column::Mood)), idx.sibling(idx.row(), static_cast<int>(Column::Mood)));
+  Q_EMIT dataChanged(idx.sibling(idx.row(), static_cast<int>(Column::Mood)), idx.sibling(idx.row(), static_cast<int>(Column::Mood)));
 }
 #endif
 
@@ -436,10 +437,10 @@ void Playlist::SongSaveComplete(TagReaderReply *reply, const QPersistentModelInd
     }
     else {
       if (reply->request_message().write_file_response().has_error()) {
-        emit Error(tr("Could not write metadata to %1: %2").arg(QString::fromStdString(reply->request_message().write_file_request().filename()), QString::fromStdString(reply->request_message().write_file_response().error())));
+        Q_EMIT Error(tr("Could not write metadata to %1: %2").arg(QString::fromStdString(reply->request_message().write_file_request().filename()), QString::fromStdString(reply->request_message().write_file_response().error())));
       }
       else {
-        emit Error(tr("Could not write metadata to %1").arg(QString::fromStdString(reply->request_message().write_file_request().filename())));
+        Q_EMIT Error(tr("Could not write metadata to %1").arg(QString::fromStdString(reply->request_message().write_file_request().filename())));
       }
     }
   }
@@ -473,14 +474,14 @@ void Playlist::ItemReloadComplete(const QPersistentModelIndex &idx, const Song &
       ItemChanged(idx.row(), ChangedColumns(old_metadata, item->Metadata()));
       if (idx.row() == current_row()) {
         if (MinorMetadataChange(old_metadata, item->Metadata())) {
-          emit CurrentSongMetadataChanged(item->Metadata());
+          Q_EMIT CurrentSongMetadataChanged(item->Metadata());
         }
         else {
-          emit CurrentSongChanged(item->Metadata());
+          Q_EMIT CurrentSongChanged(item->Metadata());
         }
       }
       if (metadata_edit) {
-        emit EditingFinished(id_, idx);
+        Q_EMIT EditingFinished(id_, idx);
       }
       ScheduleSaveAsync();
     }
@@ -620,7 +621,7 @@ int Playlist::next_row(const bool ignore_repeat_track) {
   // Still off the end?  Then just give up
   if (next_virtual_index < 0 || next_virtual_index >= virtual_items_.count()) return -1;
 
-  return virtual_items_[next_virtual_index];
+  return virtual_items_.value(next_virtual_index);
 
 }
 
@@ -651,7 +652,7 @@ int Playlist::previous_row(const bool ignore_repeat_track) {
   // Still off the beginning?  Then just give up
   if (prev_virtual_index < 0) return -1;
 
-  return virtual_items_[prev_virtual_index];
+  return virtual_items_.value(prev_virtual_index);
 
 }
 
@@ -668,7 +669,7 @@ void Playlist::set_current_row(const int i, const AutoScroll autoscroll, const b
     PlaylistItemPtr next_item = item_at(nextrow);
     if (next_item) {
       next_item->ClearTemporaryMetadata();
-      emit dataChanged(index(nextrow, 0), index(nextrow, ColumnCount - 1));
+      Q_EMIT dataChanged(index(nextrow, 0), index(nextrow, ColumnCount - 1));
     }
   }
 
@@ -685,7 +686,7 @@ void Playlist::set_current_row(const int i, const AutoScroll autoscroll, const b
   }
 
   if (old_current_item_index.isValid()) {
-    emit dataChanged(old_current_item_index, old_current_item_index.sibling(old_current_item_index.row(), ColumnCount - 1));
+    Q_EMIT dataChanged(old_current_item_index, old_current_item_index.sibling(old_current_item_index.row(), ColumnCount - 1));
   }
 
   // Update the virtual index
@@ -710,8 +711,8 @@ void Playlist::set_current_row(const int i, const AutoScroll autoscroll, const b
 
   if (current_item_index_.isValid() && !is_stopping) {
     InformOfCurrentSongChange(false);
-    emit dataChanged(index(current_item_index_.row(), 0), index(current_item_index_.row(), ColumnCount - 1));
-    emit MaybeAutoscroll(autoscroll);
+    Q_EMIT dataChanged(index(current_item_index_.row(), 0), index(current_item_index_.row(), ColumnCount - 1));
+    Q_EMIT MaybeAutoscroll(autoscroll);
   }
 
   // The structure of a dynamic playlist is as follows:
@@ -744,15 +745,9 @@ void Playlist::set_current_row(const int i, const AutoScroll autoscroll, const b
   if (current_item_index_.isValid()) {
     last_played_item_index_ = current_item_index_;
     played_indexes_.append(current_item_index_);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     if (played_indexes_.count() > kMaxPlayedIndexes) {
       played_indexes_.remove(0, played_indexes_.count() - kMaxPlayedIndexes);
     }
-#else
-    while (played_indexes_.count() > kMaxPlayedIndexes) {
-      played_indexes_.removeFirst();
-    }
-#endif
     ScheduleSave();
   }
 
@@ -925,7 +920,7 @@ void Playlist::TurnOnDynamicPlaylist(PlaylistGeneratorPtr gen) {
 
   dynamic_playlist_ = gen;
   ShuffleModeChanged(PlaylistSequence::ShuffleMode::Off);
-  emit DynamicModeChanged(true);
+  Q_EMIT DynamicModeChanged(true);
 
   ScheduleSave();
 
@@ -937,7 +932,7 @@ void Playlist::MoveItemWithoutUndo(const int source, const int dest) {
 
 void Playlist::MoveItemsWithoutUndo(const QList<int> &source_rows, int pos) {
 
-  emit layoutAboutToBeChanged();
+  Q_EMIT layoutAboutToBeChanged();
 
   PlaylistItemPtrList old_items = items_;
   PlaylistItemPtrList moved_items;
@@ -999,7 +994,7 @@ void Playlist::MoveItemsWithoutUndo(const QList<int> &source_rows, int pos) {
     current_virtual_index_ = -1;
   }
 
-  emit layoutChanged();
+  Q_EMIT layoutChanged();
 
   ScheduleSave();
 
@@ -1007,7 +1002,7 @@ void Playlist::MoveItemsWithoutUndo(const QList<int> &source_rows, int pos) {
 
 void Playlist::MoveItemsWithoutUndo(int start, const QList<int> &dest_rows) {
 
-  emit layoutAboutToBeChanged();
+  Q_EMIT layoutAboutToBeChanged();
 
   PlaylistItemPtrList old_items = items_;
   PlaylistItemPtrList moved_items;
@@ -1072,7 +1067,7 @@ void Playlist::MoveItemsWithoutUndo(int start, const QList<int> &dest_rows) {
     current_virtual_index_ = -1;
   }
 
-  emit layoutChanged();
+  Q_EMIT layoutChanged();
 
   ScheduleSave();
 
@@ -1097,7 +1092,7 @@ void Playlist::InsertItems(const PlaylistItemPtrList &itemsIn, const int pos, co
     undo_stack_->push(new PlaylistUndoCommands::InsertItems(this, items, pos, enqueue, enqueue_next));
   }
 
-  if (play_now) emit PlayRequested(index(start, 0), AutoScroll::Maybe);
+  if (play_now) Q_EMIT PlayRequested(index(start, 0), AutoScroll::Maybe);
 
 }
 
@@ -1227,7 +1222,7 @@ void Playlist::UpdateItems(SongList songs) {
     QMutableListIterator<Song> it(songs);
     while (it.hasNext()) {
       const Song &song = it.next();
-      const PlaylistItemPtr &item = items_[i];
+      const PlaylistItemPtr item = items_.value(i);
       if (item->Metadata().url() == song.url() && (item->Metadata().filetype() == Song::FileType::Unknown || item->Metadata().filetype() == Song::FileType::Stream || item->Metadata().filetype() == Song::FileType::CDDA || !item->Metadata().init_from_file())) {
         PlaylistItemPtr new_item;
         if (song.url().isLocalFile()) {
@@ -1249,7 +1244,7 @@ void Playlist::UpdateItems(SongList songs) {
           }
         }
         items_[i] = new_item;
-        emit dataChanged(index(i, 0), index(i, ColumnCount - 1));
+        Q_EMIT dataChanged(index(i, 0), index(i, ColumnCount - 1));
         // Also update undo actions
         for (int y = 0; y < undo_stack_->count(); y++) {
           QUndoCommand *undo_action = const_cast<QUndoCommand*>(undo_stack_->command(i));
@@ -1265,7 +1260,7 @@ void Playlist::UpdateItems(SongList songs) {
     }
   }
 
-  emit PlaylistChanged();
+  Q_EMIT PlaylistChanged();
 
   ScheduleSave();
 
@@ -1342,7 +1337,7 @@ bool Playlist::CompareItems(const Column column, const Qt::SortOrder order, Play
     case Column::Samplerate:   cmp(samplerate);
     case Column::Bitdepth:     cmp(bitdepth);
     case Column::Filename:
-      return (QString::localeAwareCompare(a->Url().path().toLower(), b->Url().path().toLower()) < 0);
+      return QString::localeAwareCompare(a->Url().path(), b->Url().path()) < 0;
     case Column::BaseFilename: cmp(basefilename);
     case Column::Filesize:     cmp(filesize);
     case Column::Filetype:     cmp(filetype);
@@ -1368,18 +1363,6 @@ bool Playlist::CompareItems(const Column column, const Qt::SortOrder order, Play
 #undef strcmp
 
   return false;
-
-}
-
-bool Playlist::ComparePathDepths(const Qt::SortOrder order, PlaylistItemPtr _a, PlaylistItemPtr _b) {
-
-  PlaylistItemPtr a = order == Qt::AscendingOrder ? _a : _b;
-  PlaylistItemPtr b = order == Qt::AscendingOrder ? _b : _a;
-
-  qint64 a_dir_level = a->Url().path().count(QLatin1Char('/'));
-  qint64 b_dir_level = b->Url().path().count(QLatin1Char('/'));
-
-  return a_dir_level < b_dir_level;
 
 }
 
@@ -1428,7 +1411,7 @@ QString Playlist::column_name(const Column column) {
       break;
   }
 
-  return QLatin1String("");
+  return ""_L1;
 
 }
 
@@ -1446,7 +1429,7 @@ QString Playlist::abbreviated_column_name(const Column column) {
       return column_name;
   }
 
-  return QLatin1String("");
+  return ""_L1;
 
 }
 
@@ -1471,11 +1454,6 @@ void Playlist::sort(const int column_number, const Qt::SortOrder order) {
     std::stable_sort(begin, new_items.end(), std::bind(&Playlist::CompareItems, Column::Disc, order, std::placeholders::_1, std::placeholders::_2));
     std::stable_sort(begin, new_items.end(), std::bind(&Playlist::CompareItems, Column::Album, order, std::placeholders::_1, std::placeholders::_2));
   }
-  else if (column == Column::Filename) {
-    // When sorting by full paths we also expect a hierarchical order. This returns a breath-first ordering of paths.
-    std::stable_sort(begin, new_items.end(), std::bind(&Playlist::CompareItems, Column::Filename, order, std::placeholders::_1, std::placeholders::_2));
-    std::stable_sort(begin, new_items.end(), std::bind(&Playlist::ComparePathDepths, order, std::placeholders::_1, std::placeholders::_2));
-  }
   else {
     std::stable_sort(begin, new_items.end(), std::bind(&Playlist::CompareItems, column, order, std::placeholders::_1, std::placeholders::_2));
   }
@@ -1486,7 +1464,7 @@ void Playlist::sort(const int column_number, const Qt::SortOrder order) {
 
 void Playlist::ReOrderWithoutUndo(const PlaylistItemPtrList &new_items) {
 
-  emit layoutAboutToBeChanged();
+  Q_EMIT layoutAboutToBeChanged();
 
   PlaylistItemPtrList old_items = items_;
   items_ = new_items;
@@ -1518,9 +1496,9 @@ void Playlist::ReOrderWithoutUndo(const PlaylistItemPtrList &new_items) {
     current_virtual_index_ = -1;
   }
 
-  emit layoutChanged();
+  Q_EMIT layoutChanged();
 
-  emit PlaylistChanged();
+  Q_EMIT PlaylistChanged();
 
   ScheduleSave();
 
@@ -1539,7 +1517,7 @@ void Playlist::SetCurrentIsPaused(const bool paused) {
   current_is_paused_ = paused;
 
   if (current_item_index_.isValid()) {
-    emit dataChanged(index(current_item_index_.row(), 0), index(current_item_index_.row(), ColumnCount - 1));
+    Q_EMIT dataChanged(index(current_item_index_.row(), 0), index(current_item_index_.row(), ColumnCount - 1));
   }
 
 }
@@ -1580,11 +1558,7 @@ void Playlist::Restore() {
   collection_items_by_id_.clear();
 
   cancel_restore_ = false;
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   QFuture<PlaylistItemPtrList> future = QtConcurrent::run(&PlaylistBackend::GetPlaylistItems, backend_, id_);
-#else
-  QFuture<PlaylistItemPtrList> future = QtConcurrent::run(&*backend_, &PlaylistBackend::GetPlaylistItems, id_);
-#endif
   QFutureWatcher<PlaylistItemPtrList> *watcher = new QFutureWatcher<PlaylistItemPtrList>();
   QObject::connect(watcher, &QFutureWatcher<PlaylistItemPtrList>::finished, this, &Playlist::ItemsLoaded);
   watcher->setFuture(future);
@@ -1634,7 +1608,7 @@ void Playlist::ItemsLoaded() {
     }
   }
 
-  emit RestoreFinished();
+  Q_EMIT RestoreFinished();
 
   Settings s;
   s.beginGroup(kSettingsGroup);
@@ -1643,14 +1617,10 @@ void Playlist::ItemsLoaded() {
 
   // Should we gray out deleted songs asynchronously on startup?
   if (greyout) {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     (void)QtConcurrent::run(&Playlist::InvalidateDeletedSongs, this);
-#else
-    (void)QtConcurrent::run(this, &Playlist::InvalidateDeletedSongs);
-#endif
   }
 
-  emit PlaylistLoaded();
+  Q_EMIT PlaylistLoaded();
 
 }
 
@@ -1795,10 +1765,10 @@ void Playlist::StopAfter(const int row) {
   }
 
   if (old_stop_after.isValid()) {
-    emit dataChanged(old_stop_after, old_stop_after.sibling(old_stop_after.row(), ColumnCount - 1));
+    Q_EMIT dataChanged(old_stop_after, old_stop_after.sibling(old_stop_after.row(), ColumnCount - 1));
   }
   if (stop_after_.isValid()) {
-    emit dataChanged(stop_after_, stop_after_.sibling(stop_after_.row(), ColumnCount - 1));
+    Q_EMIT dataChanged(stop_after_, stop_after_.sibling(stop_after_.row(), ColumnCount - 1));
   }
 
 }
@@ -1897,9 +1867,9 @@ void Playlist::RemoveItemsNotInQueue() {
   }
 
   int start = 0;
-  forever {
+  Q_FOREVER {
     // Find a place to start - first row that isn't in the queue
-    forever {
+    Q_FOREVER {
       if (start >= rowCount()) return;
       if (!queue_->ContainsSourceRow(start) && current_row() != start) break;
       start++;
@@ -1907,7 +1877,7 @@ void Playlist::RemoveItemsNotInQueue() {
 
     // Figure out how many rows to remove - keep going until we find a row that is in the queue
     int count = 1;
-    forever {
+    Q_FOREVER {
       if (start + count >= rowCount()) break;
       if (queue_->ContainsSourceRow(start + count) || current_row() == start + count) break;
       count++;
@@ -2101,10 +2071,10 @@ void Playlist::TracksAboutToBeDequeued(const QModelIndex&, const int begin, cons
 void Playlist::TracksDequeued() {
 
   for (const QModelIndex &idx : std::as_const(temp_dequeue_change_indexes_)) {
-    emit dataChanged(idx, idx);
+    Q_EMIT dataChanged(idx, idx);
   }
   temp_dequeue_change_indexes_.clear();
-  emit QueueChanged();
+  Q_EMIT QueueChanged();
 
 }
 
@@ -2112,7 +2082,7 @@ void Playlist::TracksEnqueued(const QModelIndex&, const int begin, const int end
 
   const QModelIndex &b = queue_->mapToSource(queue_->index(begin, static_cast<int>(Column::Title)));
   const QModelIndex &e = queue_->mapToSource(queue_->index(end, static_cast<int>(Column::Title)));
-  emit dataChanged(b, e);
+  Q_EMIT dataChanged(b, e);
 
 }
 
@@ -2120,7 +2090,7 @@ void Playlist::QueueLayoutChanged() {
 
   for (int i = 0; i < queue_->rowCount(); ++i) {
     const QModelIndex &idx = queue_->mapToSource(queue_->index(i, static_cast<int>(Column::Title)));
-    emit dataChanged(idx, idx);
+    Q_EMIT dataChanged(idx, idx);
   }
 
 }
@@ -2274,20 +2244,20 @@ void Playlist::UpdateItemMetadata(const int row, PlaylistItemPtr item, const Son
 
 }
 
-void Playlist::ItemChanged(const int row, const Columns columns) {
+void Playlist::ItemChanged(const int row, const Columns &columns) {
 
   if (columns.count() > 5) {
     const QModelIndex idx_column_first = index(row, 0);
     const QModelIndex idx_column_last = index(row, ColumnCount - 1);
     if (idx_column_first.isValid() && idx_column_last.isValid()) {
-      emit dataChanged(index(row, 0), index(row, ColumnCount - 1));
+      Q_EMIT dataChanged(index(row, 0), index(row, ColumnCount - 1));
     }
   }
   else {
     for (const Column &column : columns) {
       const QModelIndex idx = index(row, static_cast<int>(column));
       if (idx.isValid()) {
-        emit dataChanged(idx, idx);
+        Q_EMIT dataChanged(idx, idx);
       }
     }
   }
@@ -2302,10 +2272,10 @@ void Playlist::InformOfCurrentSongChange(const bool minor) {
   }
 
   if (minor) {
-    emit CurrentSongMetadataChanged(metadata);
+    Q_EMIT CurrentSongMetadataChanged(metadata);
   }
   else {
-    emit CurrentSongChanged(metadata);
+    Q_EMIT CurrentSongChanged(metadata);
   }
 
 }
@@ -2315,7 +2285,7 @@ void Playlist::InvalidateDeletedSongs() {
   QList<int> invalidated_rows;
 
   for (int row = 0; row < items_.count(); ++row) {
-    PlaylistItemPtr item = items_[row];
+    PlaylistItemPtr item = items_.value(row);
     Song song = item->Metadata();
 
     if (song.url().isLocalFile()) {
@@ -2349,7 +2319,7 @@ void Playlist::RemoveDeletedSongs() {
   QList<int> rows_to_remove;
 
   for (int row = 0; row < items_.count(); ++row) {
-    PlaylistItemPtr item = items_[row];
+    PlaylistItemPtr item = items_.value(row);
     Song song = item->Metadata();
 
     if (song.url().isLocalFile() && !QFile::exists(song.url().toLocalFile())) {
@@ -2383,7 +2353,7 @@ void Playlist::RemoveDuplicateSongs() {
   std::unordered_map<Song, int, SongSimilarHash, SongSimilarEqual> unique_songs;
 
   for (int row = 0; row < items_.count(); ++row) {
-    PlaylistItemPtr item = items_[row];
+    PlaylistItemPtr item = items_.value(row);
     const Song &song = item->Metadata();
 
     bool found_duplicate = false;
@@ -2416,7 +2386,7 @@ void Playlist::RemoveUnavailableSongs() {
 
   QList<int> rows_to_remove;
   for (int row = 0; row < items_.count(); ++row) {
-    PlaylistItemPtr item = items_[row];
+    PlaylistItemPtr item = items_.value(row);
     const Song &song = item->Metadata();
 
     // Check only local files
@@ -2465,7 +2435,7 @@ void Playlist::SkipTracks(const QModelIndexList &source_indexes) {
   for (const QModelIndex &source_index : source_indexes) {
     PlaylistItemPtr track_to_skip = item_at(source_index.row());
     track_to_skip->SetShouldSkip(!((track_to_skip)->GetShouldSkip()));
-    emit dataChanged(source_index, source_index);
+    Q_EMIT dataChanged(source_index, source_index);
   }
 
 }
@@ -2521,7 +2491,7 @@ void Playlist::TurnOffDynamicPlaylist() {
     ShuffleModeChanged(ShuffleMode());
   }
 
-  emit DynamicModeChanged(false);
+  Q_EMIT DynamicModeChanged(false);
 
   ScheduleSave();
 

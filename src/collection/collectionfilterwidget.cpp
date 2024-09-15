@@ -57,9 +57,11 @@
 #include "collectionfilterwidget.h"
 #include "groupbydialog.h"
 #include "ui_collectionfilterwidget.h"
-#include "widgets/qsearchfield.h"
+#include "widgets/searchfield.h"
 #include "settings/collectionsettingspage.h"
 #include "settings/appearancesettingspage.h"
+
+using namespace Qt::StringLiterals;
 
 namespace {
 constexpr int kFilterDelay = 500;  // msec
@@ -84,7 +86,7 @@ CollectionFilterWidget::CollectionFilterWidget(QWidget *parent)
 
   ui_->search_field->setToolTip(FilterParser::ToolTip());
 
-  QObject::connect(ui_->search_field, &QSearchField::returnPressed, this, &CollectionFilterWidget::ReturnPressed);
+  QObject::connect(ui_->search_field, &SearchField::returnPressed, this, &CollectionFilterWidget::ReturnPressed);
   QObject::connect(timer_filter_delay_, &QTimer::timeout, this, &CollectionFilterWidget::FilterDelayTimeout);
 
   timer_filter_delay_->setInterval(kFilterDelay);
@@ -127,7 +129,7 @@ CollectionFilterWidget::CollectionFilterWidget(QWidget *parent)
   collection_menu_->addSeparator();
   ui_->options->setMenu(collection_menu_);
 
-  QObject::connect(ui_->search_field, &QSearchField::textChanged, this, &CollectionFilterWidget::FilterTextChanged);
+  QObject::connect(ui_->search_field, &SearchField::textChanged, this, &CollectionFilterWidget::FilterTextChanged);
   QObject::connect(ui_->options, &QToolButton::clicked, ui_->options, &QToolButton::showMenu);
 
   ReloadSettings();
@@ -158,7 +160,7 @@ void CollectionFilterWidget::Init(CollectionModel *model, CollectionFilter *filt
 
   const QList<QAction*> actions = filter_max_ages_.keys();
   for (QAction *action : actions) {
-    int filter_max_age = filter_max_ages_[action];
+    const int filter_max_age = filter_max_ages_.value(action);
     QObject::connect(action, &QAction::triggered, this, [this, filter_max_age]() { model_->SetFilterMaxAge(filter_max_age); } );
   }
 
@@ -296,7 +298,7 @@ QActionGroup *CollectionFilterWidget::CreateGroupByActions(const QString &saved_
   if (version == 1) {
     QStringList saved = s.childKeys();
     for (int i = 0; i < saved.size(); ++i) {
-      if (saved.at(i) == QLatin1String("version")) continue;
+      if (saved.at(i) == "version"_L1) continue;
       QByteArray bytes = s.value(saved.at(i)).toByteArray();
       QDataStream ds(&bytes, QIODevice::ReadOnly);
       CollectionModel::Grouping g;
@@ -307,7 +309,7 @@ QActionGroup *CollectionFilterWidget::CreateGroupByActions(const QString &saved_
   else {
     QStringList saved = s.childKeys();
     for (int i = 0; i < saved.size(); ++i) {
-      if (saved.at(i) == QLatin1String("version")) continue;
+      if (saved.at(i) == "version"_L1) continue;
       s.remove(saved.at(i));
     }
   }
@@ -479,12 +481,12 @@ void CollectionFilterWidget::keyReleaseEvent(QKeyEvent *e) {
 
   switch (e->key()) {
     case Qt::Key_Up:
-      emit UpPressed();
+      Q_EMIT UpPressed();
       e->accept();
       break;
 
     case Qt::Key_Down:
-      emit DownPressed();
+      Q_EMIT DownPressed();
       e->accept();
       break;
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.13)
 
 if(HAVE_TRANSLATIONS)
   include(../cmake/Translations.cmake)
@@ -43,6 +43,7 @@ set(SOURCES
   core/localredirectserver.cpp
   core/mimedata.cpp
   core/potranslator.cpp
+  core/temporaryfile.cpp
   utilities/strutils.cpp
   utilities/envutils.cpp
   utilities/colorutils.cpp
@@ -148,15 +149,20 @@ set(SOURCES
   smartplaylists/playlistgeneratormimedata.cpp
   smartplaylists/playlistquerygenerator.cpp
   smartplaylists/smartplaylistquerywizardplugin.cpp
+  smartplaylists/smartplaylistquerywizardpluginsortpage.cpp
+  smartplaylists/smartplaylistquerywizardpluginsearchpage.cpp
   smartplaylists/smartplaylistsearch.cpp
   smartplaylists/smartplaylistsearchpreview.cpp
   smartplaylists/smartplaylistsearchterm.cpp
   smartplaylists/smartplaylistsearchtermwidget.cpp
+  smartplaylists/smartplaylistsearchtermwidgetoverlay.cpp
   smartplaylists/smartplaylistsmodel.cpp
   smartplaylists/smartplaylistsviewcontainer.cpp
   smartplaylists/smartplaylistsview.cpp
   smartplaylists/smartplaylistwizard.cpp
   smartplaylists/smartplaylistwizardplugin.cpp
+  smartplaylists/smartplaylistwizardtypepage.cpp
+  smartplaylists/smartplaylistwizardfinishpage.cpp
 
   covermanager/albumcovermanager.cpp
   covermanager/albumcovermanagerlist.cpp
@@ -305,6 +311,8 @@ set(SOURCES
 
   organize/organize.cpp
   organize/organizeformat.cpp
+  organize/organizeformatvalidator.cpp
+  organize/organizesyntaxhighlighter.cpp
   organize/organizedialog.cpp
   organize/organizeerrordialog.cpp
 
@@ -407,13 +415,18 @@ set(HEADERS
   smartplaylists/playlistquerygenerator.h
   smartplaylists/playlistgeneratormimedata.h
   smartplaylists/smartplaylistquerywizardplugin.h
+  smartplaylists/smartplaylistquerywizardpluginsortpage.h
+  smartplaylists/smartplaylistquerywizardpluginsearchpage.h
   smartplaylists/smartplaylistsearchpreview.h
   smartplaylists/smartplaylistsearchtermwidget.h
+  smartplaylists/smartplaylistsearchtermwidgetoverlay.h
   smartplaylists/smartplaylistsmodel.h
   smartplaylists/smartplaylistsviewcontainer.h
   smartplaylists/smartplaylistsview.h
   smartplaylists/smartplaylistwizard.h
   smartplaylists/smartplaylistwizardplugin.h
+  smartplaylists/smartplaylistwizardtypepage.h
+  smartplaylists/smartplaylistwizardfinishpage.h
 
   covermanager/albumcovermanager.h
   covermanager/albumcovermanagerlist.h
@@ -509,7 +522,7 @@ set(HEADERS
   widgets/tracksliderpopup.h
   widgets/tracksliderslider.h
   widgets/loginstatewidget.h
-  widgets/qsearchfield.h
+  widgets/searchfield.h
   widgets/ratingwidget.h
   widgets/forcescrollperpixel.h
   widgets/resizabletextedit.h
@@ -550,6 +563,8 @@ set(HEADERS
   scrobbler/lastfmimport.h
 
   organize/organize.h
+  organize/organizeformatvalidator.h
+  organize/organizesyntaxhighlighter.h
   organize/organizedialog.h
   organize/organizeerrordialog.h
 
@@ -635,7 +650,7 @@ option(USE_INSTALL_PREFIX "Look for data in CMAKE_INSTALL_PREFIX" ON)
 
 if(NOT APPLE)
   set(NOT_APPLE ON)
-  optional_source(NOT_APPLE SOURCES widgets/qsearchfield_qt.cpp core/qtsystemtrayicon.cpp HEADERS core/qtsystemtrayicon.h)
+  optional_source(NOT_APPLE SOURCES widgets/searchfield_qt.cpp widgets/searchfield_qt_private.cpp core/qtsystemtrayicon.cpp HEADERS core/qtsystemtrayicon.h widgets/searchfield_qt_private.h)
 endif()
 
 if(HAVE_GLOBALSHORTCUTS)
@@ -853,7 +868,7 @@ optional_source(APPLE
     core/macsystemtrayicon.mm
     core/macfslistener.mm
     osd/osdmac.mm
-    widgets/qsearchfield_mac.mm
+    widgets/searchfield_mac.mm
     engine/macosdevicefinder.cpp
     globalshortcuts/globalshortcutsbackend-macos.mm
     globalshortcuts/globalshortcutgrabber.mm
@@ -973,6 +988,7 @@ optional_source(HAVE_MOODBAR
     moodbar/moodbarpipeline.cpp
     moodbar/moodbarproxystyle.cpp
     moodbar/moodbarrenderer.cpp
+    moodbar/gstfastspectrumplugin.cpp
     settings/moodbarsettingspage.cpp
   HEADERS
     moodbar/moodbarcontroller.h
@@ -1015,94 +1031,19 @@ if(HAVE_TRANSLATIONS)
     endif(NOT LINGUAS OR LINGUAS STREQUAL "None")
   endif(LINGUAS STREQUAL "All")
 
-  add_pot(POT
-    ${CMAKE_CURRENT_SOURCE_DIR}/translations/header
-    ${CMAKE_CURRENT_BINARY_DIR}/translations/translations.pot
-    ${SOURCES}
-    ${MOC}
-    ${UIC}
-    ${CMAKE_SOURCE_DIR}/data/html/oauthsuccess.html
-  )
+  if(NOT MSVC)
+    add_pot(POT
+      ${CMAKE_CURRENT_SOURCE_DIR}/translations/header
+      ${CMAKE_CURRENT_SOURCE_DIR}/translations/translations.pot
+      ${SOURCES}
+      ${MOC}
+      ${UIC}
+      ${CMAKE_SOURCE_DIR}/data/html/oauthsuccess.html
+    )
+  endif()
   add_po(PO strawberry_ LANGUAGES ${LANGUAGES} DIRECTORY translations)
 
 endif(HAVE_TRANSLATIONS)
-
-link_directories(
-  ${Boost_LIBRARY_DIRS}
-  ${GLIB_LIBRARY_DIRS}
-  ${GOBJECT_LIBRARY_DIRS}
-  ${SQLITE_LIBRARY_DIRS}
-  ${PROTOBUF_LIBRARY_DIRS}
-  ${SINGLEAPPLICATION_LIBRARY_DIRS}
-  ${ICU_LIBRARY_DIRS}
-)
-
-if(HAVE_ALSA)
-  link_directories(${ALSA_LIBRARY_DIRS})
-endif()
-
-if(HAVE_LIBPULSE)
-  link_directories(${LIBPULSE_LIBRARY_DIRS})
-endif()
-
-if(HAVE_GSTREAMER)
-  link_directories(
-    ${GSTREAMER_LIBRARY_DIRS}
-    ${GSTREAMER_BASE_LIBRARY_DIRS}
-    ${GSTREAMER_APP_LIBRARY_DIRS}
-    ${GSTREAMER_AUDIO_LIBRARY_DIRS}
-    ${GSTREAMER_TAG_LIBRARY_DIRS}
-    ${GSTREAMER_PBUTILS_LIBRARY_DIRS}
-  )
-endif()
-
-if(HAVE_VLC)
-  link_directories(${LIBVLC_LIBRARY_DIRS})
-endif()
-
-if(HAVE_SONGFINGERPRINTING OR HAVE_MUSICBRAINZ)
-  link_directories(${CHROMAPRINT_LIBRARY_DIRS})
-endif()
-
-if(X11_FOUND)
-  link_directories(${X11_LIBRARY_DIRS})
-endif()
-
-if(XCB_FOUND)
-  link_directories(${XCB_LIBRARY_DIRS})
-endif()
-
-if(HAVE_GIO)
-  link_directories(${GIO_LIBRARY_DIRS})
-endif()
-
-if(HAVE_GIO_UNIX)
-  link_directories(${GIO_UNIX_LIBRARY_DIRS})
-endif()
-
-if(HAVE_AUDIOCD)
-  link_directories(${LIBCDIO_LIBRARY_DIRS})
-endif()
-
-if(HAVE_LIBGPOD)
-  link_directories(${LIBGPOD_LIBRARY_DIRS} ${GDK_PIXBUF_LIBRARY_DIRS})
-endif()
-
-if(HAVE_LIBMTP)
-  link_directories(${LIBMTP_LIBRARY_DIRS})
-endif()
-
-if(HAVE_TAGLIB)
-  link_directories(${TAGLIB_LIBRARY_DIRS})
-endif()
-
-if(HAVE_TAGPARSER)
-  link_directories(${TAGPARSER_LIBRARY_DIRS})
-endif()
-
-if(HAVE_QTSPARKLE)
-  link_directories(${QTSPARKLE_LIBRARY_DIRS})
-endif()
 
 add_library(strawberry_lib STATIC
   ${SOURCES}
@@ -1138,6 +1079,16 @@ target_include_directories(strawberry_lib PUBLIC
   ${SINGLEAPPLICATION_INCLUDE_DIRS}
 )
 
+target_link_directories(strawberry_lib PUBLIC
+  ${Boost_LIBRARY_DIRS}
+  ${GLIB_LIBRARY_DIRS}
+  ${GOBJECT_LIBRARY_DIRS}
+  ${SQLITE_LIBRARY_DIRS}
+  ${PROTOBUF_LIBRARY_DIRS}
+  ${SINGLEAPPLICATION_LIBRARY_DIRS}
+  ${ICU_LIBRARY_DIRS}
+)
+
 target_link_libraries(strawberry_lib PUBLIC
   ${CMAKE_THREAD_LIBS_INIT}
   ${GLIB_LIBRARIES}
@@ -1160,17 +1111,15 @@ if(HAVE_DBUS)
   target_link_libraries(strawberry_lib PUBLIC Qt${QT_VERSION_MAJOR}::DBus)
 endif()
 
-if(HAVE_X11_GLOBALSHORTCUTS AND HAVE_X11EXTRAS)
-  target_link_libraries(strawberry_lib PUBLIC Qt${QT_VERSION_MAJOR}::X11Extras)
-endif()
-
 if(HAVE_ALSA)
   target_include_directories(strawberry_lib SYSTEM PRIVATE ${ALSA_INCLUDE_DIRS})
+  target_link_directories(strawberry_lib PRIVATE ${ALSA_LIBRARY_DIRS})
   target_link_libraries(strawberry_lib PRIVATE ${ALSA_LIBRARIES})
 endif()
 
 if(HAVE_LIBPULSE)
   target_include_directories(strawberry_lib SYSTEM PRIVATE ${LIBPULSE_INCLUDE_DIRS})
+  target_link_directories(strawberry_lib PRIVATE ${LIBPULSE_LIBRARY_DIRS})
   target_link_libraries(strawberry_lib PRIVATE ${LIBPULSE_LIBRARIES})
 endif()
 
@@ -1183,6 +1132,14 @@ if(HAVE_GSTREAMER)
     ${GSTREAMER_TAG_INCLUDE_DIRS}
     ${GSTREAMER_PBUTILS_INCLUDE_DIRS}
   )
+  target_link_directories(strawberry_lib PRIVATE
+    ${GSTREAMER_LIBRARY_DIRS}
+    ${GSTREAMER_BASE_LIBRARY_DIRS}
+    ${GSTREAMER_APP_LIBRARY_DIRS}
+    ${GSTREAMER_AUDIO_LIBRARY_DIRS}
+    ${GSTREAMER_TAG_LIBRARY_DIRS}
+    ${GSTREAMER_PBUTILS_LIBRARY_DIRS}
+  )
   target_link_libraries(strawberry_lib PRIVATE
     ${GSTREAMER_LIBRARIES}
     ${GSTREAMER_BASE_LIBRARIES}
@@ -1194,16 +1151,19 @@ if(HAVE_GSTREAMER)
 endif()
 
 if(HAVE_MOODBAR)
-  target_link_libraries(strawberry_lib PRIVATE gstmoodbar)
+  target_include_directories(strawberry_lib SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/3rdparty/gstfastspectrum)
+  target_link_libraries(strawberry_lib PRIVATE gstfastspectrum)
 endif()
 
 if(HAVE_VLC)
   target_include_directories(strawberry_lib SYSTEM PRIVATE ${LIBVLC_INCLUDE_DIRS})
+  target_link_directories(strawberry_lib PRIVATE ${LIBVLC_LIBRARY_DIRS})
   target_link_libraries(strawberry_lib PRIVATE ${LIBVLC_LIBRARIES})
 endif()
 
 if(HAVE_SONGFINGERPRINTING OR HAVE_MUSICBRAINZ)
   target_include_directories(strawberry_lib SYSTEM PRIVATE ${CHROMAPRINT_INCLUDE_DIRS})
+  target_link_directories(strawberry_lib PRIVATE ${CHROMAPRINT_LIBRARY_DIRS})
   target_link_libraries(strawberry_lib PRIVATE ${CHROMAPRINT_LIBRARIES})
 endif()
 
@@ -1213,36 +1173,43 @@ endif()
 
 if(X11_FOUND)
   target_include_directories(strawberry_lib SYSTEM PRIVATE ${X11_INCLUDE_DIR})
+  target_link_directories(strawberry_lib PRIVATE ${X11_LIBRARY_DIRS})
   target_link_libraries(strawberry_lib PRIVATE ${X11_LIBRARIES})
 endif()
 
 if(XCB_FOUND)
   target_include_directories(strawberry_lib SYSTEM PRIVATE ${XCB_INCLUDE_DIR})
+  target_link_directories(strawberry_lib PRIVATE ${XCB_LIBRARY_DIRS})
   target_link_libraries(strawberry_lib PRIVATE ${XCB_LIBRARIES})
 endif()
 
 if(HAVE_GIO)
   target_include_directories(strawberry_lib SYSTEM PRIVATE ${GIO_INCLUDE_DIRS})
+  target_link_directories(strawberry_lib PRIVATE ${GIO_LIBRARY_DIRS})
   target_link_libraries(strawberry_lib PRIVATE ${GIO_LIBRARIES})
 endif()
 
 if(HAVE_GIO_UNIX)
   target_include_directories(strawberry_lib SYSTEM PRIVATE ${GIO_UNIX_INCLUDE_DIRS})
+  target_link_directories(strawberry_lib PRIVATE ${GIO_UNIX_LIBRARY_DIRS})
   target_link_libraries(strawberry_lib PRIVATE ${GIO_UNIX_LIBRARIES})
 endif()
 
 if(HAVE_AUDIOCD)
   target_include_directories(strawberry_lib SYSTEM PRIVATE ${LIBCDIO_INCLUDE_DIRS})
+  target_link_directories(strawberry_lib PRIVATE ${LIBCDIO_LIBRARY_DIRS})
   target_link_libraries(strawberry_lib PRIVATE ${LIBCDIO_LIBRARIES})
 endif()
 
 if(HAVE_LIBGPOD)
   target_include_directories(strawberry_lib SYSTEM PRIVATE ${LIBGPOD_INCLUDE_DIRS} ${GDK_PIXBUF_INCLUDE_DIRS})
+  target_link_directories(strawberry_lib PRIVATE ${LIBGPOD_LIBRARY_DIRS} ${GDK_PIXBUF_LIBRARY_DIRS})
   target_link_libraries(strawberry_lib PRIVATE ${LIBGPOD_LIBRARIES} ${GDK_PIXBUF_LIBRARIES})
 endif()
 
 if(HAVE_LIBMTP)
   target_include_directories(strawberry_lib SYSTEM PRIVATE ${LIBMTP_INCLUDE_DIRS})
+  target_link_directories(strawberry_lib PRIVATE ${LIBMTP_LIBRARY_DIRS})
   target_link_libraries(strawberry_lib PRIVATE ${LIBMTP_LIBRARIES})
 endif()
 
@@ -1264,16 +1231,12 @@ if(WIN32)
   if(MSVC)
     target_link_libraries(strawberry_lib PRIVATE WindowsApp)
   endif()
-  if(GETOPT_INCLUDE_DIRS)
-    target_include_directories(strawberry_lib SYSTEM PRIVATE ${GETOPT_INCLUDE_DIRS})
-  endif()
-  if(GETOPT_LIBRARIES)
-    target_link_libraries(strawberry_lib PRIVATE ${GETOPT_LIBRARIES})
-  endif()
+  target_link_libraries(strawberry_lib PRIVATE getopt-win::getopt)
 endif()
 
 if(HAVE_QTSPARKLE)
   target_include_directories(strawberry_lib SYSTEM PRIVATE ${QTSPARKLE_INCLUDE_DIRS})
+  target_link_directories(strawberry_lib PRIVATE ${QTSPARKLE_LIBRARY_DIRS})
   target_link_libraries(strawberry_lib PRIVATE ${QTSPARKLE_LIBRARIES})
 endif()
 

@@ -32,11 +32,13 @@
 #include "core/logging.h"
 #include "scoped_nsobject.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 MacFSListener::MacFSListener(QObject *parent)
     : FileSystemWatcherInterface(parent),
-    run_loop_(nullptr),
-    stream_(nullptr),
-    update_timer_(new QTimer(this)) {
+      run_loop_(nullptr),
+      stream_(nullptr),
+      update_timer_(new QTimer(this)) {
 
   update_timer_->setSingleShot(true);
   update_timer_->setInterval(2000);
@@ -57,10 +59,10 @@ void MacFSListener::EventStreamCallback(ConstFSEventStreamRef stream, void *user
   for (size_t i = 0; i < num_events; ++i) {
     QString path = QString::fromUtf8(paths[i]);
     qLog(Debug) << "Something changed at:" << path;
-    while (path.endsWith(QLatin1Char('/'))) {
+    while (path.endsWith(u'/')) {
       path.chop(1);
     }
-    emit me->PathChanged(path);
+    Q_EMIT me->PathChanged(path);
   }
 
 }

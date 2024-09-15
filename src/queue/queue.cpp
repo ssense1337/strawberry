@@ -40,6 +40,8 @@
 #include "playlist/playlist.h"
 #include "queue.h"
 
+using namespace Qt::StringLiterals;
+
 namespace {
 constexpr char kRowsMimetype[] = "application/x-strawberry-queue-rows";
 }
@@ -106,9 +108,9 @@ void Queue::SourceDataChanged(const QModelIndex &top_left, const QModelIndex &bo
     QModelIndex proxy_index = mapFromSource(sourceModel()->index(row, 0));
     if (!proxy_index.isValid()) continue;
 
-    emit dataChanged(proxy_index, proxy_index);
+    Q_EMIT dataChanged(proxy_index, proxy_index);
   }
-  emit ItemCountChanged(ItemCount());
+  Q_EMIT ItemCountChanged(ItemCount());
 
 }
 
@@ -127,7 +129,7 @@ void Queue::SourceLayoutChanged() {
 
   signal_item_count_changed_ = QObject::connect(this, &Queue::ItemCountChanged, this, &Queue::UpdateTotalLength);
 
-  emit ItemCountChanged(ItemCount());
+  Q_EMIT ItemCountChanged(ItemCount());
 
 }
 
@@ -242,7 +244,7 @@ void Queue::UpdateTotalLength() {
 
   total_length_ns_ = total;
 
-  emit TotalLengthChanged(total);
+  Q_EMIT TotalLengthChanged(total);
 
 }
 
@@ -255,10 +257,10 @@ void Queue::UpdateSummaryText() {
   summary += tr("%n track(s)", "", tracks);
 
   if (nanoseconds > 0) {
-    summary += QLatin1String(" - [ ") + Utilities::WordyTimeNanosec(nanoseconds) + QLatin1String(" ]");
+    summary += " - [ "_L1 + Utilities::WordyTimeNanosec(nanoseconds) + " ]"_L1;
   }
 
-  emit SummaryTextChanged(summary);
+  Q_EMIT SummaryTextChanged(summary);
 
 }
 
@@ -274,7 +276,7 @@ void Queue::Clear() {
 
 void Queue::Move(const QList<int> &proxy_rows, int pos) {
 
-  emit layoutAboutToBeChanged();
+  Q_EMIT layoutAboutToBeChanged();
   QList<QPersistentModelIndex> moved_items;
 
   // Take the items out of the list first, keeping track of whether the insertion point changes
@@ -311,7 +313,7 @@ void Queue::Move(const QList<int> &proxy_rows, int pos) {
     }
   }
 
-  emit layoutChanged();
+  Q_EMIT layoutChanged();
 
 }
 
@@ -453,7 +455,7 @@ void Queue::Remove(QList<int> &proxy_rows) {
   std::stable_sort(proxy_rows.begin(), proxy_rows.end());
 
   // Reflects immediately changes in the playlist
-  emit layoutAboutToBeChanged();
+  Q_EMIT layoutAboutToBeChanged();
 
   int removed_rows = 0;
   for (int row : proxy_rows) {
@@ -465,6 +467,6 @@ void Queue::Remove(QList<int> &proxy_rows) {
     removed_rows++;
   }
 
-  emit layoutChanged();
+  Q_EMIT layoutChanged();
 
 }

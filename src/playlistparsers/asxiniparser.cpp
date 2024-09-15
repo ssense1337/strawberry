@@ -31,13 +31,9 @@
 #include "parserbase.h"
 #include "asxiniparser.h"
 
-class CollectionBackendInterface;
+using namespace Qt::StringLiterals;
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-constexpr auto qt_endl = Qt::endl;
-#else
-constexpr auto qt_endl = endl;
-#endif
+class CollectionBackendInterface;
 
 AsxIniParser::AsxIniParser(SharedPtr<CollectionBackendInterface> collection_backend, QObject *parent)
     : ParserBase(collection_backend, parent) {}
@@ -54,11 +50,11 @@ SongList AsxIniParser::Load(QIODevice *device, const QString &playlist_path, con
 
   while (!device->atEnd()) {
     QString line = QString::fromUtf8(device->readLine()).trimmed();
-    qint64 equals = line.indexOf(QLatin1Char('='));
+    qint64 equals = line.indexOf(u'=');
     QString key = line.left(equals).toLower();
     QString value = line.mid(equals + 1);
 
-    if (key.startsWith(QLatin1String("ref"))) {
+    if (key.startsWith("ref"_L1)) {
       Song song = LoadSong(value, 0, 0, dir, collection_lookup);
       if (song.is_valid()) {
         ret << song;
@@ -73,11 +69,11 @@ SongList AsxIniParser::Load(QIODevice *device, const QString &playlist_path, con
 void AsxIniParser::Save(const SongList &songs, QIODevice *device, const QDir &dir, const PlaylistSettingsPage::PathType path_type) const {
 
   QTextStream s(device);
-  s << "[Reference]" << qt_endl;
+  s << "[Reference]" << Qt::endl;
 
   int n = 1;
   for (const Song &song : songs) {
-    s << "Ref" << n << "=" << URLOrFilename(song.url(), dir, path_type) << qt_endl;
+    s << "Ref" << n << "=" << URLOrFilename(song.url(), dir, path_type) << Qt::endl;
     ++n;
   }
 

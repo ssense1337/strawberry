@@ -62,7 +62,7 @@ void PrintTo(const ::QUrl &url, std::ostream &os) {
 
 TemporaryResource::TemporaryResource(const QString &filename, QObject *parent) : QTemporaryFile(parent) {
 
-  setFileTemplate(QDir::tempPath() + QStringLiteral("/strawberry_test-XXXXXX.") + filename.section(QLatin1Char('.'), -1, -1));
+  setFileTemplate(QDir::tempPath() + QStringLiteral("/strawberry_test-XXXXXX.") + filename.section(u'.', -1, -1));
   open();
 
   QFile resource(filename);
@@ -79,7 +79,7 @@ TestQObject::TestQObject(QObject *parent)
 }
 
 void TestQObject::Emit() {
-  emit Emitted();
+  Q_EMIT Emitted();
 }
 
 void TestQObject::Invoke() {

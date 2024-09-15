@@ -171,16 +171,16 @@ class ApplicationImpl {
         lyrics_providers_([app]() {
           LyricsProviders *lyrics_providers = new LyricsProviders(app);
           // Initialize the repository of lyrics providers.
-          lyrics_providers->AddProvider(new GeniusLyricsProvider(app->network()));
-          lyrics_providers->AddProvider(new OVHLyricsProvider(app->network()));
-          lyrics_providers->AddProvider(new LoloLyricsProvider(app->network()));
-          lyrics_providers->AddProvider(new MusixmatchLyricsProvider(app->network()));
-          lyrics_providers->AddProvider(new ChartLyricsProvider(app->network()));
-          lyrics_providers->AddProvider(new SongLyricsComLyricsProvider(app->network()));
-          lyrics_providers->AddProvider(new AzLyricsComLyricsProvider(app->network()));
-          lyrics_providers->AddProvider(new ElyricsNetLyricsProvider(app->network()));
-          lyrics_providers->AddProvider(new LetrasLyricsProvider(app->network()));
-          lyrics_providers->AddProvider(new LyricFindLyricsProvider(app->network()));
+          lyrics_providers->AddProvider(new GeniusLyricsProvider(lyrics_providers->network()));
+          lyrics_providers->AddProvider(new OVHLyricsProvider(lyrics_providers->network()));
+          lyrics_providers->AddProvider(new LoloLyricsProvider(lyrics_providers->network()));
+          lyrics_providers->AddProvider(new MusixmatchLyricsProvider(lyrics_providers->network()));
+          lyrics_providers->AddProvider(new ChartLyricsProvider(lyrics_providers->network()));
+          lyrics_providers->AddProvider(new SongLyricsComLyricsProvider(lyrics_providers->network()));
+          lyrics_providers->AddProvider(new AzLyricsComLyricsProvider(lyrics_providers->network()));
+          lyrics_providers->AddProvider(new ElyricsNetLyricsProvider(lyrics_providers->network()));
+          lyrics_providers->AddProvider(new LetrasLyricsProvider(lyrics_providers->network()));
+          lyrics_providers->AddProvider(new LyricFindLyricsProvider(lyrics_providers->network()));
           lyrics_providers->ReloadSettings();
           return lyrics_providers;
         }),
@@ -248,6 +248,8 @@ class ApplicationImpl {
 Application::Application(QObject *parent)
     : QObject(parent), p_(new ApplicationImpl(this)) {
 
+  setObjectName(QLatin1String(metaObject()->className()));
+
   device_finders()->Init();
   collection()->Init();
   tag_reader_client();
@@ -274,6 +276,8 @@ Application::~Application() {
 QThread *Application::MoveToNewThread(QObject *object) {
 
   QThread *thread = new QThread(this);
+
+  thread->setObjectName(object->objectName());
 
   MoveToThread(object, thread);
 
@@ -343,9 +347,9 @@ void Application::ExitReceived() {
 
 }
 
-void Application::AddError(const QString &message) { emit ErrorAdded(message); }
-void Application::ReloadSettings() { emit SettingsChanged(); }
-void Application::OpenSettingsDialogAtPage(SettingsDialog::Page page) { emit SettingsDialogRequested(page); }
+void Application::AddError(const QString &message) { Q_EMIT ErrorAdded(message); }
+void Application::ReloadSettings() { Q_EMIT SettingsChanged(); }
+void Application::OpenSettingsDialogAtPage(SettingsDialog::Page page) { Q_EMIT SettingsDialogRequested(page); }
 
 SharedPtr<TagReaderClient> Application::tag_reader_client() const { return p_->tag_reader_client_.ptr(); }
 SharedPtr<Database> Application::database() const { return p_->database_.ptr(); }

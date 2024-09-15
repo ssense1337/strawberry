@@ -36,6 +36,8 @@
 #include "song.h"
 #include "tagreaderclient.h"
 
+using namespace Qt::StringLiterals;
+
 namespace {
 constexpr char kWorkerExecutableName[] = "strawberry-tagreader";
 }
@@ -43,6 +45,8 @@ constexpr char kWorkerExecutableName[] = "strawberry-tagreader";
 TagReaderClient *TagReaderClient::sInstance = nullptr;
 
 TagReaderClient::TagReaderClient(QObject *parent) : QObject(parent), worker_pool_(new WorkerPool<HandlerType>(this)) {
+
+  setObjectName(QLatin1String(metaObject()->className()));
 
   sInstance = this;
   original_thread_ = thread();
@@ -62,7 +66,7 @@ void TagReaderClient::Exit() {
 
   Q_ASSERT(QThread::currentThread() == thread());
   moveToThread(original_thread_);
-  emit ExitFinished();
+  Q_EMIT ExitFinished();
 
 }
 

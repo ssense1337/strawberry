@@ -192,7 +192,7 @@ void StreamingSearchView::Init(Application *app, StreamingServicePtr service) {
   QObject::connect(group_by_actions_, &QActionGroup::triggered, this, &StreamingSearchView::GroupByClicked);
   QObject::connect(group_by_actions_, &QActionGroup::triggered, this, &StreamingSearchView::GroupByClicked);
 
-  QObject::connect(ui_->search, &QSearchField::textChanged, this, &StreamingSearchView::TextEdited);
+  QObject::connect(ui_->search, &SearchField::textChanged, this, &StreamingSearchView::TextEdited);
   QObject::connect(ui_->results, &AutoExpandingTreeView::AddToPlaylistSignal, this, &StreamingSearchView::AddToPlaylist);
   QObject::connect(ui_->results, &AutoExpandingTreeView::FocusOnFilterSignal, this, &StreamingSearchView::FocusOnFilter);
 
@@ -363,10 +363,10 @@ bool StreamingSearchView::ResultsContextMenuEvent(QContextMenuEvent *e) {
 
 void StreamingSearchView::timerEvent(QTimerEvent *e) {
 
-  QMap<int, DelayedSearch>::iterator it = delayed_searches_.find(e->timerId());
-  if (it != delayed_searches_.end()) {
+  QMap<int, DelayedSearch>::const_iterator it = delayed_searches_.constFind(e->timerId());
+  if (it != delayed_searches_.constEnd()) {
     SearchAsync(it.value().id_, it.value().query_, it.value().type_);
-    delayed_searches_.erase(it);  // clazy:exclude=strict-iterators
+    delayed_searches_.erase(it);
     return;
   }
 
@@ -436,14 +436,15 @@ void StreamingSearchView::SwapModels() {
 
 QStringList StreamingSearchView::TokenizeQuery(const QString &query) {
 
-  QStringList tokens(query.split(QRegularExpression(QStringLiteral("\\s+"))));
+  static const QRegularExpression regex_whitespaces(QStringLiteral("\\s+"));
+  QStringList tokens = query.split(regex_whitespaces);
 
   for (QStringList::iterator it = tokens.begin(); it != tokens.end(); ++it) {
-    (*it).remove(QLatin1Char('('));
-    (*it).remove(QLatin1Char(')'));
-    (*it).remove(QLatin1Char('"'));
+    (*it).remove(u'(');
+    (*it).remove(u')');
+    (*it).remove(u'"');
 
-    const qint64 colon = (*it).indexOf(QLatin1Char(':'));
+    const qint64 colon = (*it).indexOf(u':');
     if (colon != -1) {
       (*it).remove(0, colon + 1);
     }
@@ -517,11 +518,10 @@ void StreamingSearchView::SearchDone(const int service_id, const SongMap &songs,
 
 void StreamingSearchView::CancelSearch(const int id) {
 
-  QMap<int, DelayedSearch>::iterator it;
-  for (it = delayed_searches_.begin(); it != delayed_searches_.end(); ++it) {
+  for (QMap<int, DelayedSearch>::const_iterator it = delayed_searches_.constBegin(); it != delayed_searches_.constEnd(); ++it) {
     if (it.value().id_ == id) {
       killTimer(it.key());
-      delayed_searches_.erase(it);  // clazy:exclude=strict-iterators
+      delayed_searches_.erase(it);
       return;
     }
   }
@@ -556,7 +556,7 @@ void StreamingSearchView::SearchError(const int id, const QString &error) {
 void StreamingSearchView::UpdateStatus(const int service_id, const QString &text) {
 
   if (!pending_searches_.contains(service_id)) return;
-  const PendingState state = pending_searches_[service_id];
+  const PendingState state = pending_searches_.value(service_id);
   const int search_id = state.orig_id_;
   if (search_id != last_search_id_) return;
   ui_->progressbar->show();
@@ -567,7 +567,7 @@ void StreamingSearchView::UpdateStatus(const int service_id, const QString &text
 void StreamingSearchView::ProgressSetMaximum(const int service_id, const int max) {
 
   if (!pending_searches_.contains(service_id)) return;
-  const PendingState state = pending_searches_[service_id];
+  const PendingState state = pending_searches_.value(service_id);
   const int search_id = state.orig_id_;
   if (search_id != last_search_id_) return;
   ui_->progressbar->setMaximum(max);
@@ -577,7 +577,7 @@ void StreamingSearchView::ProgressSetMaximum(const int service_id, const int max
 void StreamingSearchView::UpdateProgress(const int service_id, const int progress) {
 
   if (!pending_searches_.contains(service_id)) return;
-  const PendingState state = pending_searches_[service_id];
+  const PendingState state = pending_searches_.value(service_id);
   const int search_id = state.orig_id_;
   if (search_id != last_search_id_) return;
   ui_->progressbar->setValue(progress);
@@ -619,7 +619,7 @@ MimeData *StreamingSearchView::SelectedMimeData() {
 }
 
 void StreamingSearchView::AddSelectedToPlaylist() {
-  emit AddToPlaylist(SelectedMimeData());
+  Q_EMIT AddToPlaylist(SelectedMimeData());
 }
 
 void StreamingSearchView::LoadSelected() {
@@ -628,7 +628,7 @@ void StreamingSearchView::LoadSelected() {
   if (!mimedata) return;
 
   mimedata->clear_first_ = true;
-  emit AddToPlaylist(mimedata);
+  Q_EMIT AddToPlaylist(mimedata);
 
 }
 
@@ -638,7 +638,7 @@ void StreamingSearchView::AddSelectedToPlaylistEnqueue() {
   if (!mimedata) return;
 
   mimedata->enqueue_now_ = true;
-  emit AddToPlaylist(mimedata);
+  Q_EMIT AddToPlaylist(mimedata);
 
 }
 
@@ -648,7 +648,7 @@ void StreamingSearchView::OpenSelectedInNewPlaylist() {
   if (!mimedata) return;
 
   mimedata->open_in_new_playlist_ = true;
-  emit AddToPlaylist(mimedata);
+  Q_EMIT AddToPlaylist(mimedata);
 
 }
 
@@ -762,7 +762,7 @@ void StreamingSearchView::AddArtists() {
   MimeData *mimedata = SelectedMimeData();
   if (!mimedata) return;
   if (const StreamSongMimeData *streaming_song_data = qobject_cast<const StreamSongMimeData*>(mimedata)) {
-    emit AddArtistsSignal(streaming_song_data->songs);
+    Q_EMIT AddArtistsSignal(streaming_song_data->songs);
   }
 
 }
@@ -772,7 +772,7 @@ void StreamingSearchView::AddAlbums() {
   MimeData *mimedata = SelectedMimeData();
   if (!mimedata) return;
   if (const StreamSongMimeData *streaming_song_data = qobject_cast<const StreamSongMimeData*>(mimedata)) {
-    emit AddAlbumsSignal(streaming_song_data->songs);
+    Q_EMIT AddAlbumsSignal(streaming_song_data->songs);
   }
 
 }
@@ -782,7 +782,7 @@ void StreamingSearchView::AddSongs() {
   MimeData *mimedata = SelectedMimeData();
   if (!mimedata) return;
   if (const StreamSongMimeData *streaming_song_data = qobject_cast<const StreamSongMimeData*>(mimedata)) {
-    emit AddSongsSignal(streaming_song_data->songs);
+    Q_EMIT AddSongsSignal(streaming_song_data->songs);
   }
 
 }

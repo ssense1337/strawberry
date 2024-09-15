@@ -116,11 +116,7 @@ void AnalyzerContainer::mouseReleaseEvent(QMouseEvent *e) {
   }
 
   if (e->button() == Qt::RightButton) {
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
     context_menu_->popup(e->globalPosition().toPoint());
-#else
-    context_menu_->popup(e->globalPos());
-#endif
   }
 
 }
@@ -130,7 +126,7 @@ void AnalyzerContainer::ShowPopupMenu() {
 }
 
 void AnalyzerContainer::wheelEvent(QWheelEvent *e) {
-  emit WheelEvent(e->angleDelta().y());
+  Q_EMIT WheelEvent(e->angleDelta().y());
 }
 
 void AnalyzerContainer::SetEngine(SharedPtr<EngineBase> engine) {
@@ -149,7 +145,7 @@ void AnalyzerContainer::DisableAnalyzer() {
 
 void AnalyzerContainer::ChangeAnalyzer(const int id) {
 
-  QObject *instance = analyzer_types_[id]->newInstance(Q_ARG(QWidget*, this));
+  QObject *instance = analyzer_types_.at(id)->newInstance(Q_ARG(QWidget*, this));
 
   if (!instance) {
     qLog(Warning) << "Couldn't initialize a new" << analyzer_types_[id]->className();
@@ -200,22 +196,25 @@ void AnalyzerContainer::Load() {
     for (int i = 0; i < analyzer_types_.count(); ++i) {
       if (type == QString::fromLatin1(analyzer_types_[i]->className())) {
         ChangeAnalyzer(i);
-        actions_[i]->setChecked(true);
+        QAction *action = actions_.value(i);
+        action->setChecked(true);
         break;
       }
     }
     if (!current_analyzer_) {
       ChangeAnalyzer(0);
-      actions_[0]->setChecked(true);
+      QAction *action = actions_.value(0);
+      action->setChecked(true);
     }
   }
 
   // Framerate
-  QList<QAction*> actions = group_framerate_->actions();
+  const QList<QAction*> actions = group_framerate_->actions();
   for (int i = 0; i < framerate_list_.count(); ++i) {
-    if (current_framerate_ == framerate_list_[i]) {
+    if (current_framerate_ == framerate_list_.value(i)) {
       ChangeFramerate(current_framerate_);
-      actions[i]->setChecked(true);
+      QAction *action = actions[i];
+      action->setChecked(true);
       break;
     }
   }

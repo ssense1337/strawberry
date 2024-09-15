@@ -37,6 +37,7 @@
 #include <QtGlobal>
 #include <QFuture>
 #include <QFutureWatcher>
+#include <QMutexLocker>
 #include <QTimer>
 #include <QList>
 #include <QByteArray>
@@ -60,6 +61,7 @@
 #include "gstbufferconsumer.h"
 #include "enginemetadata.h"
 
+using namespace Qt::StringLiterals;
 using std::make_shared;
 
 const char *GstEngine::kAutoSink = "autoaudiosink";
@@ -322,7 +324,7 @@ void GstEngine::Stop(const bool stop_after) {
 
   BufferingFinished();
 
-  emit StateChanged(State::Empty);
+  Q_EMIT StateChanged(State::Empty);
 
 }
 
@@ -344,7 +346,7 @@ void GstEngine::Pause() {
     }
     else {
       current_pipeline_->SetStateAsync(GST_STATE_PAUSED);
-      emit StateChanged(State::Paused);
+      Q_EMIT StateChanged(State::Paused);
       StopTimers();
     }
   }
@@ -367,7 +369,7 @@ void GstEngine::Unpause() {
 
     current_pipeline_->SetStateAsync(GST_STATE_PLAYING);
 
-    emit StateChanged(State::Playing);
+    Q_EMIT StateChanged(State::Playing);
 
     StartTimers();
   }
@@ -454,24 +456,24 @@ EngineBase::OutputDetailsList GstEngine::GetOutputsList() const {
     GstElementFactory *factory = GST_ELEMENT_FACTORY(future->data);
     const QString metadata = QString::fromUtf8(gst_element_factory_get_metadata(factory, GST_ELEMENT_METADATA_KLASS));
     const QString name = QString::fromUtf8(gst_plugin_feature_get_name(future->data));
-    const QStringList classes = metadata.split(QLatin1Char('/'));
-    if (classes.contains(QLatin1String("Audio"), Qt::CaseInsensitive) && (classes.contains(QLatin1String("Sink"), Qt::CaseInsensitive) || (classes.contains(QLatin1String("Source"), Qt::CaseInsensitive) && name.contains(QLatin1String("sink"))))) {
+    const QStringList classes = metadata.split(u'/');
+    if (classes.contains("Audio"_L1, Qt::CaseInsensitive) && (classes.contains("Sink"_L1, Qt::CaseInsensitive) || (classes.contains("Source"_L1, Qt::CaseInsensitive) && name.contains("sink"_L1)))) {
       QString description = QString::fromUtf8(gst_element_factory_get_metadata(factory, GST_ELEMENT_METADATA_DESCRIPTION));
-      if (name == QLatin1String("wasapi2sink") && description == QLatin1String("Stream audio to an audio capture device through WASAPI")) {
-        description.append(QLatin1Char('2'));
+      if (name == "wasapi2sink"_L1 && description == "Stream audio to an audio capture device through WASAPI"_L1) {
+        description.append(u'2');
       }
-      else if (name == QLatin1String("pipewiresink") && description == QLatin1String("Send video to PipeWire")) {
-        description = QLatin1String("Send audio to PipeWire");
+      else if (name == "pipewiresink"_L1 && description == "Send video to PipeWire"_L1) {
+        description = "Send audio to PipeWire"_L1;
       }
       OutputDetails output;
       output.name = name;
       output.description = description;
-      if (output.name == QLatin1String(kAutoSink)) output.iconname = QLatin1String("soundcard");
-      else if (output.name == QLatin1String(kALSASink) || output.name == QLatin1String(kOSS4Sink)) output.iconname = QLatin1String("alsa");
-      else if (output.name == QLatin1String(kJackAudioSink)) output.iconname = QLatin1String("jack");
-      else if (output.name == QLatin1String(kPulseSink)) output.iconname = QLatin1String("pulseaudio");
-      else if (output.name == QLatin1String(kA2DPSink) || output.name == QLatin1String(kAVDTPSink)) output.iconname = QLatin1String("bluetooth");
-      else output.iconname = QLatin1String("soundcard");
+      if (output.name == QLatin1String(kAutoSink)) output.iconname = "soundcard"_L1;
+      else if (output.name == QLatin1String(kALSASink) || output.name == QLatin1String(kOSS4Sink)) output.iconname = "alsa"_L1;
+      else if (output.name == QLatin1String(kJackAudioSink)) output.iconname = "jack"_L1;
+      else if (output.name == QLatin1String(kPulseSink)) output.iconname = "pulseaudio"_L1;
+      else if (output.name == QLatin1String(kA2DPSink) || output.name == QLatin1String(kAVDTPSink)) output.iconname = "bluetooth"_L1;
+      else output.iconname = "soundcard"_L1;
       outputs << output;
     }
   }
@@ -598,45 +600,55 @@ void GstEngine::EndOfStreamReached(const int pipeline_id, const bool has_next_tr
     BufferingFinished();
   }
 
-  emit TrackEnded();
+  Q_EMIT TrackEnded();
 
 }
 
 void GstEngine::HandlePipelineError(const int pipeline_id, const int domain, const int error_code, const QString &message, const QString &debugstr) {
 
-  if (!current_pipeline_ || current_pipeline_->id() != pipeline_id) return;
-
   qLog(Error) << "GStreamer error:" << domain << error_code << message;
 
-  FinishPipeline(current_pipeline_);
-  current_pipeline_ = GstEnginePipelinePtr();
+  Q_EMIT Error(message);
+  Q_EMIT Error(debugstr);
 
-  BufferingFinished();
-  emit StateChanged(State::Error);
-
-  if (
-      (domain == static_cast<int>(GST_RESOURCE_ERROR) && (
-        error_code == static_cast<int>(GST_RESOURCE_ERROR_NOT_FOUND) ||
-        error_code == static_cast<int>(GST_RESOURCE_ERROR_OPEN_READ) ||
-        error_code == static_cast<int>(GST_RESOURCE_ERROR_NOT_AUTHORIZED)
-      ))
-      || (domain == static_cast<int>(GST_STREAM_ERROR))
-      ) {
-     emit InvalidSongRequested(stream_url_);
-   }
-  else {
-    emit FatalError();
+  if (fadeout_pause_pipeline_ && pipeline_id == fadeout_pause_pipeline_->id()) {
+    StopFadeoutPause();
   }
 
-  emit Error(message);
-  emit Error(debugstr);
+  if (current_pipeline_ && current_pipeline_->id() == pipeline_id) {
+
+    FinishPipeline(current_pipeline_);
+    current_pipeline_ = GstEnginePipelinePtr();
+
+    BufferingFinished();
+    Q_EMIT StateChanged(State::Error);
+
+    if (
+        (domain == static_cast<int>(GST_RESOURCE_ERROR) && (
+          error_code == static_cast<int>(GST_RESOURCE_ERROR_NOT_FOUND) ||
+          error_code == static_cast<int>(GST_RESOURCE_ERROR_OPEN_READ) ||
+          error_code == static_cast<int>(GST_RESOURCE_ERROR_NOT_AUTHORIZED)
+        ))
+        || (domain == static_cast<int>(GST_STREAM_ERROR))
+        ) {
+       Q_EMIT InvalidSongRequested(stream_url_);
+     }
+    else {
+      Q_EMIT FatalError();
+    }
+  }
+
+  else if (fadeout_pipelines_.contains(pipeline_id)) {
+    GstEnginePipelinePtr pipeline = fadeout_pipelines_.take(pipeline_id);
+    FinishPipeline(pipeline);
+  }
 
 }
 
 void GstEngine::NewMetaData(const int pipeline_id, const EngineMetadata &engine_metadata) {
 
   if (!current_pipeline_|| current_pipeline_->id() != pipeline_id) return;
-  emit MetaData(engine_metadata);
+  Q_EMIT MetaData(engine_metadata);
 
 }
 
@@ -663,22 +675,21 @@ void GstEngine::FadeoutFinished(const int pipeline_id) {
     return;
   }
 
-  GstEnginePipelinePtr pipeline = fadeout_pipelines_.value(pipeline_id);
-  fadeout_pipelines_.remove(pipeline_id);
-  FinishPipeline(pipeline);
+  GstEnginePipelinePtr pipeline = fadeout_pipelines_.take(pipeline_id);
 
-  emit FadeoutFinishedSignal();
+  FinishPipeline(pipeline);
 
 }
 
 void GstEngine::FadeoutPauseFinished() {
 
+  if (!fadeout_pause_pipeline_) return;
+
   fadeout_pause_pipeline_->SetStateAsync(GST_STATE_PAUSED);
-  emit StateChanged(State::Paused);
+  Q_EMIT StateChanged(State::Paused);
   StopTimers();
   has_faded_out_to_pause_ = true;
   fadeout_pause_pipeline_ = GstEnginePipelinePtr();
-  emit FadeoutFinishedSignal();
 
 }
 
@@ -703,26 +714,40 @@ void GstEngine::PlayDone(const GstStateChangeReturn ret, const bool pause, const
 
   if (ret == GST_STATE_CHANGE_FAILURE) {
     // Failure, but we got a redirection URL - try loading that instead
-    const QByteArray redirect_url = current_pipeline_->redirect_url();
-    if (!redirect_url.isEmpty() && redirect_url != current_pipeline_->gst_url()) {
+    GstEnginePipelinePtr old_pipeline = current_pipeline_;
+    current_pipeline_ = GstEnginePipelinePtr();
+    QByteArray redirect_url;
+    {
+      QMutexLocker l(old_pipeline->mutex_redirect_url());
+      redirect_url = old_pipeline->redirect_url();
+      redirect_url.detach();
+    }
+    QByteArray gst_url;
+    {
+      QMutexLocker l(old_pipeline->mutex_url());
+      gst_url = old_pipeline->gst_url();
+      gst_url.detach();
+    }
+    if (!redirect_url.isEmpty() && redirect_url != gst_url) {
       qLog(Info) << "Redirecting to" << redirect_url;
-      GstEnginePipelinePtr old_pipeline = current_pipeline_;
-      current_pipeline_ = GstEnginePipelinePtr();
-      if (old_pipeline) {
-        FinishPipeline(old_pipeline);
+      QUrl media_url;
+      QUrl stream_url;
+      {
+        QMutexLocker l(old_pipeline->mutex_url());
+        media_url = old_pipeline->media_url();
+        media_url.detach();
+        stream_url = old_pipeline->stream_url();
+        stream_url.detach();
       }
-      current_pipeline_ = CreatePipeline(current_pipeline_->media_url(), current_pipeline_->stream_url(), redirect_url, end_nanosec_, current_pipeline_->ebur128_loudness_normalizing_gain_db());
+      current_pipeline_ = CreatePipeline(media_url, stream_url, redirect_url, end_nanosec_, old_pipeline->ebur128_loudness_normalizing_gain_db());
+      FinishPipeline(old_pipeline);
       Play(pause, offset_nanosec);
       return;
     }
 
     // Failure - give up
     qLog(Warning) << "Could not set thread to PLAYING.";
-    GstEnginePipelinePtr old_pipeline = current_pipeline_;
-    current_pipeline_ = GstEnginePipelinePtr();
-    if (old_pipeline) {
-      FinishPipeline(old_pipeline);
-    }
+    FinishPipeline(old_pipeline);
     BufferingFinished();
     return;
   }
@@ -731,10 +756,10 @@ void GstEngine::PlayDone(const GstStateChangeReturn ret, const bool pause, const
     StartTimers();
   }
 
-  emit StateChanged(pause ? State::Paused : State::Playing);
+  Q_EMIT StateChanged(pause ? State::Paused : State::Playing);
 
   // We've successfully started playing a media stream with this url
-  emit ValidSongRequested(stream_url_);
+  Q_EMIT ValidSongRequested(stream_url_);
 
 }
 
@@ -772,22 +797,22 @@ QByteArray GstEngine::FixupUrl(const QUrl &url) {
   // QUrl::fromLocalFile does this when given a \\host\share\file path on Windows.
   // Munge it back into a path that gstreamer will recognise.
   if (url.isLocalFile() && !url.host().isEmpty()) {
-    QString str = QLatin1String("file:////") + url.host() + url.path();
+    QString str = "file:////"_L1 + url.host() + url.path();
     uri = str.toUtf8();
   }
-  else if (url.scheme() == QLatin1String("cdda")) {
+  else if (url.scheme() == "cdda"_L1) {
     QString str;
     if (url.path().isEmpty()) {
       str = url.toString();
-      str.remove(str.lastIndexOf(QLatin1Char('a')), 1);
+      str.remove(str.lastIndexOf(u'a'), 1);
     }
     else {
       // Currently, Gstreamer can't handle input CD devices inside cdda URL.
       // So we handle them ourselves: we extract the track number and re-create a URL with only cdda:// + the track number (which can be handled by Gstreamer).
       // We keep the device in mind, and we will set it later using SourceSetupCallback
-      QStringList path = url.path().split(QLatin1Char('/'));
+      QStringList path = url.path().split(u'/');
       str = QStringLiteral("cdda://%1").arg(path.takeLast());
-      QString device = path.join(QLatin1Char('/'));
+      QString device = path.join(u'/');
       if (current_pipeline_) current_pipeline_->SetSourceDevice(device);
     }
     uri = str.toUtf8();
@@ -806,7 +831,14 @@ void GstEngine::StartFadeout(GstEnginePipelinePtr pipeline) {
     return;
   }
 
-  QObject::disconnect(&*pipeline, nullptr, this, nullptr);
+  QObject::disconnect(&*pipeline, &GstEnginePipeline::FaderFinished, this, &GstEngine::FadeoutPauseFinished);
+  QObject::disconnect(&*pipeline, &GstEnginePipeline::EndOfStreamReached, this, &GstEngine::EndOfStreamReached);
+  QObject::disconnect(&*pipeline, &GstEnginePipeline::MetadataFound, this, &GstEngine::NewMetaData);
+  QObject::disconnect(&*pipeline, &GstEnginePipeline::BufferingStarted, this, &GstEngine::BufferingStarted);
+  QObject::disconnect(&*pipeline, &GstEnginePipeline::BufferingProgress, this, &GstEngine::BufferingProgress);
+  QObject::disconnect(&*pipeline, &GstEnginePipeline::BufferingFinished, this, &GstEngine::BufferingFinished);
+  QObject::disconnect(&*pipeline, &GstEnginePipeline::VolumeChanged, this, &EngineBase::UpdateVolume);
+  QObject::disconnect(&*pipeline, &GstEnginePipeline::AboutToFinish, this, &EngineBase::EmitAboutToFinish);
 
   fadeout_pipelines_.insert(pipeline->id(), pipeline);
   pipeline->RemoveAllBufferConsumers();
@@ -901,9 +933,9 @@ GstEnginePipelinePtr GstEngine::CreatePipeline(const QUrl &media_url, const QUrl
   QString error;
   if (!ret->InitFromUrl(media_url, stream_url, gst_url, end_nanosec, ebur128_loudness_normalizing_gain_db, error)) {
     ret.reset();
-    emit Error(error);
-    emit StateChanged(State::Error);
-    emit FatalError();
+    Q_EMIT Error(error);
+    Q_EMIT StateChanged(State::Error);
+    Q_EMIT FatalError();
   }
 
   return ret;
@@ -929,7 +961,7 @@ void GstEngine::PipelineFinished(const int pipeline_id) {
 
   qLog(Debug) << "Pipeline" << pipeline_id << "finished";
 
-  GstEnginePipelinePtr pipeline = old_pipelines_[pipeline_id];
+  GstEnginePipelinePtr pipeline = old_pipelines_.value(pipeline_id);
   old_pipelines_.remove(pipeline_id);
   if (pipeline == fadeout_pause_pipeline_) {
     StopFadeoutPause();
@@ -953,6 +985,10 @@ void GstEngine::PipelineFinished(const int pipeline_id) {
   }
 
   qLog(Debug) << (current_pipeline_ ? 1 : 0) + old_pipelines_.count() << "pipelines are active";
+
+  if (!current_pipeline_ && old_pipelines_.isEmpty()) {
+    Q_EMIT Finished();
+  }
 
 }
 
@@ -995,12 +1031,12 @@ void GstEngine::UpdateScope(const int chunk_length) {
 
   scope_chunk_++;
 
-  if (buffer_format_.startsWith(QLatin1String("S16LE")) ||
-      buffer_format_.startsWith(QLatin1String("U16LE")) ||
-      buffer_format_.startsWith(QLatin1String("S24LE")) ||
-      buffer_format_.startsWith(QLatin1String("S24_32LE")) ||
-      buffer_format_.startsWith(QLatin1String("S32LE")) ||
-      buffer_format_.startsWith(QLatin1String("F32LE"))
+  if (buffer_format_.startsWith("S16LE"_L1) ||
+      buffer_format_.startsWith("U16LE"_L1) ||
+      buffer_format_.startsWith("S24LE"_L1) ||
+      buffer_format_.startsWith("S24_32LE"_L1) ||
+      buffer_format_.startsWith("S32LE"_L1) ||
+      buffer_format_.startsWith("F32LE"_L1)
   ) {
     memcpy(dest, source, bytes);
   }
@@ -1038,15 +1074,23 @@ void GstEngine::StreamDiscovered(GstDiscoverer*, GstDiscovererInfo *info, GError
     GstDiscovererStreamInfo *stream_info = reinterpret_cast<GstDiscovererStreamInfo*>(g_list_first(audio_streams)->data);
 
     EngineMetadata engine_metadata;
-    if (discovered_url == instance->current_pipeline_->gst_url()) {
-      engine_metadata.type = EngineMetadata::Type::Current;
-      engine_metadata.media_url = instance->current_pipeline_->media_url();
-      engine_metadata.stream_url = instance->current_pipeline_->stream_url();
+    bool match = false;
+    {
+      QMutexLocker l(instance->current_pipeline_->mutex_url());
+      if (discovered_url == instance->current_pipeline_->gst_url()) {
+        match = true;
+        engine_metadata.type = EngineMetadata::Type::Current;
+        engine_metadata.media_url = instance->current_pipeline_->media_url();
+        engine_metadata.stream_url = instance->current_pipeline_->stream_url();
+      }
     }
-    else if (discovered_url == instance->current_pipeline_->next_gst_url()) {
-      engine_metadata.type = EngineMetadata::Type::Next;
-      engine_metadata.media_url = instance->current_pipeline_->next_media_url();
-      engine_metadata.stream_url = instance->current_pipeline_->next_stream_url();
+    if (!match) {
+      QMutexLocker l(instance->current_pipeline_->mutex_next_url());
+      if (discovered_url == instance->current_pipeline_->next_gst_url()) {
+        engine_metadata.type = EngineMetadata::Type::Next;
+        engine_metadata.media_url = instance->current_pipeline_->next_media_url();
+        engine_metadata.stream_url = instance->current_pipeline_->next_stream_url();
+      }
     }
     engine_metadata.samplerate = static_cast<int>(gst_discoverer_audio_info_get_sample_rate(GST_DISCOVERER_AUDIO_INFO(stream_info)));
     engine_metadata.bitdepth = static_cast<int>(gst_discoverer_audio_info_get_depth(GST_DISCOVERER_AUDIO_INFO(stream_info)));
@@ -1059,7 +1103,7 @@ void GstEngine::StreamDiscovered(GstDiscoverer*, GstDiscovererInfo *info, GError
       GstStructure *gst_structure = gst_caps_get_structure(caps, i);
       if (!gst_structure) continue;
       QString mimetype = QString::fromUtf8(gst_structure_get_name(gst_structure));
-      if (!mimetype.isEmpty() && mimetype != QLatin1String("audio/mpeg")) {
+      if (!mimetype.isEmpty() && mimetype != "audio/mpeg"_L1) {
         engine_metadata.filetype = Song::FiletypeByMimetype(mimetype);
         if (engine_metadata.filetype == Song::FileType::Unknown) {
           qLog(Error) << "Unknown mimetype" << mimetype;
@@ -1084,7 +1128,7 @@ void GstEngine::StreamDiscovered(GstDiscoverer*, GstDiscovererInfo *info, GError
 
     qLog(Debug) << "Got stream info for" << discovered_url + ":" << Song::TextForFiletype(engine_metadata.filetype);
 
-    emit instance->MetaData(engine_metadata);
+    Q_EMIT instance->MetaData(engine_metadata);
 
   }
   else {

@@ -19,6 +19,8 @@
 
 #include "config.h"
 
+#include <QApplication>
+#include <QThread>
 #include <QByteArray>
 #include <QVariant>
 #include <QString>
@@ -34,6 +36,8 @@
 #include "core/networkaccessmanager.h"
 #include "utilities/transliterate.h"
 #include "lyricfindlyricsprovider.h"
+
+using namespace Qt::StringLiterals;
 
 namespace {
 constexpr char kUrl[] = "https://lyrics.lyricfind.com/lyrics";
@@ -62,16 +66,23 @@ QUrl LyricFindLyricsProvider::Url(const LyricsSearchRequest &request) {
 
 QString LyricFindLyricsProvider::StringFixup(const QString &text) {
 
+  Q_ASSERT(QThread::currentThread() != qApp->thread());
+
+  static const QRegularExpression regex_illegal_characters(QStringLiteral("[^\\w0-9_\\- ]"));
+  static const QRegularExpression regex_multiple_whitespaces(QStringLiteral(" {2,}"));
+
   return Utilities::Transliterate(text)
-    .remove(QRegularExpression(QStringLiteral("[^\\w0-9_\\- ]")))
-    .replace(QRegularExpression(QStringLiteral(" {2,}")), QStringLiteral(" "))
+    .remove(regex_illegal_characters)
+    .replace(regex_multiple_whitespaces, QStringLiteral(" "))
     .simplified()
-    .replace(QLatin1Char(' '), QLatin1Char('-'))
+    .replace(u' ', u'-')
     .toLower();
 
 }
 
-bool LyricFindLyricsProvider::StartSearch(const int id, const LyricsSearchRequest &request) {
+void LyricFindLyricsProvider::StartSearch(const int id, const LyricsSearchRequest &request) {
+
+  Q_ASSERT(QThread::currentThread() != qApp->thread());
 
   const QUrl url = Url(request);
   QNetworkRequest req(url);
@@ -83,13 +94,11 @@ bool LyricFindLyricsProvider::StartSearch(const int id, const LyricsSearchReques
 
   qLog(Debug) << "LyricFind: Sending request for" << url;
 
-  return true;
-
 }
 
-void LyricFindLyricsProvider::CancelSearch(const int id) { Q_UNUSED(id); }
-
 void LyricFindLyricsProvider::HandleSearchReply(QNetworkReply *reply, const int id, const LyricsSearchRequest &request) {
+
+  Q_ASSERT(QThread::currentThread() != qApp->thread());
 
   if (!replies_.contains(reply)) return;
   replies_.removeAll(reply);
@@ -144,48 +153,48 @@ void LyricFindLyricsProvider::HandleSearchReply(QNetworkReply *reply, const int 
   if (obj.isEmpty()) {
     return;
   }
-  if (!obj.contains(QLatin1String("props")) || !obj[QLatin1String("props")].isObject()) {
+  if (!obj.contains("props"_L1) || !obj["props"_L1].isObject()) {
     Error(QStringLiteral("Missing props."));
     return;
   }
-  obj = obj[QLatin1String("props")].toObject();
-  if (!obj.contains(QLatin1String("pageProps")) || !obj[QLatin1String("pageProps")].isObject()) {
+  obj = obj["props"_L1].toObject();
+  if (!obj.contains("pageProps"_L1) || !obj["pageProps"_L1].isObject()) {
     Error(QStringLiteral("Missing pageProps."));
     return;
   }
-  obj = obj[QLatin1String("pageProps")].toObject();
-  if (!obj.contains(QLatin1String("songData")) || !obj[QLatin1String("songData")].isObject()) {
+  obj = obj["pageProps"_L1].toObject();
+  if (!obj.contains("songData"_L1) || !obj["songData"_L1].isObject()) {
     Error(QStringLiteral("Missing songData."));
     return;
   }
-  obj = obj[QLatin1String("songData")].toObject();
+  obj = obj["songData"_L1].toObject();
 
-  if (!obj.contains(QLatin1String("response")) || !obj[QLatin1String("response")].isObject()) {
+  if (!obj.contains("response"_L1) || !obj["response"_L1].isObject()) {
     Error(QStringLiteral("Missing response."));
     return;
   }
   //const QJsonObject obj_response = obj[QLatin1String("response")].toObject();
 
-  if (!obj.contains(QLatin1String("track")) || !obj[QLatin1String("track")].isObject()) {
+  if (!obj.contains("track"_L1) || !obj["track"_L1].isObject()) {
     Error(QStringLiteral("Missing track."));
     return;
   }
-  const QJsonObject obj_track = obj[QLatin1String("track")].toObject();
+  const QJsonObject obj_track = obj["track"_L1].toObject();
 
-  if (!obj_track.contains(QLatin1String("title")) ||
-      !obj_track.contains(QLatin1String("lyrics"))) {
+  if (!obj_track.contains("title"_L1) ||
+      !obj_track.contains("lyrics"_L1)) {
     Error(QStringLiteral("Missing title or lyrics."));
     return;
   }
 
   LyricsSearchResult result;
 
-  const QJsonObject obj_artist = obj[QLatin1String("artist")].toObject();
-  if (obj_artist.contains(QLatin1String("name"))) {
-    result.artist = obj_artist[QLatin1String("name")].toString();
+  const QJsonObject obj_artist = obj["artist"_L1].toObject();
+  if (obj_artist.contains("name"_L1)) {
+    result.artist = obj_artist["name"_L1].toString();
   }
-  result.title = obj_track[QLatin1String("title")].toString();
-  result.lyrics = obj_track[QLatin1String("lyrics")].toString();
+  result.title = obj_track["title"_L1].toString();
+  result.lyrics = obj_track["lyrics"_L1].toString();
   results << result;
 
 }
@@ -206,6 +215,6 @@ void LyricFindLyricsProvider::EndSearch(const int id, const LyricsSearchRequest 
     qLog(Debug) << "LyricFind: Got lyrics for" << request.artist << request.title;
   }
 
-  emit SearchFinished(id, results);
+  Q_EMIT SearchFinished(id, results);
 
 }

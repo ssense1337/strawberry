@@ -104,6 +104,8 @@ CollectionView::CollectionView(QWidget *parent)
       is_in_keyboard_search_(false),
       delete_files_(false) {
 
+  setObjectName(QLatin1String(metaObject()->className()));
+
   setItemDelegate(new CollectionItemDelegate(this));
   setAttribute(Qt::WA_MacShowFocusRect, false);
   setHeaderHidden(true);
@@ -273,7 +275,7 @@ void CollectionView::TotalSongCountUpdated(const int count) {
     unsetCursor();
   }
 
-  emit TotalSongCountUpdated_();
+  Q_EMIT TotalSongCountUpdated_();
 
 }
 
@@ -290,7 +292,7 @@ void CollectionView::TotalArtistCountUpdated(const int count) {
     unsetCursor();
   }
 
-  emit TotalArtistCountUpdated_();
+  Q_EMIT TotalArtistCountUpdated_();
 
 }
 
@@ -307,7 +309,7 @@ void CollectionView::TotalAlbumCountUpdated(const int count) {
     unsetCursor();
   }
 
-  emit TotalAlbumCountUpdated_();
+  Q_EMIT TotalAlbumCountUpdated_();
 
 }
 
@@ -348,7 +350,7 @@ void CollectionView::mouseReleaseEvent(QMouseEvent *e) {
   QTreeView::mouseReleaseEvent(e);
 
   if (total_song_count_ == 0) {
-    emit ShowConfigDialog();
+    Q_EMIT ShowConfigDialog();
   }
 
 }
@@ -457,11 +459,7 @@ void CollectionView::contextMenuEvent(QContextMenuEvent *e) {
   action_copy_to_device_->setVisible(regular_elements == regular_editable);
 #endif
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
   action_delete_files_->setVisible(delete_files_);
-#else
-  action_delete_files_->setVisible(false);
-#endif
 
   action_show_in_various_->setVisible(songs_selected > 0);
   action_no_show_in_various_->setVisible(songs_selected > 0);
@@ -472,11 +470,7 @@ void CollectionView::contextMenuEvent(QContextMenuEvent *e) {
   action_copy_to_device_->setEnabled(regular_elements == regular_editable);
 #endif
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
   action_delete_files_->setEnabled(delete_files_);
-#else
-  action_delete_files_->setEnabled(false);
-#endif
 
   context_menu_->popup(e->globalPos());
 
@@ -521,11 +515,7 @@ void CollectionView::SetShowInVarious(const bool on) {
     }
   }
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
   const QSet<QString> albums_set = QSet<QString>(albums.keyBegin(), albums.keyEnd());
-#else
-  const QSet<QString> albums_set = QSet<QString>::fromList(albums.keys());
-#endif
   for (const QString &album : albums_set) {
     app_->collection_backend()->ForceCompilation(album, albums.values(album), on);
   }
@@ -538,13 +528,13 @@ void CollectionView::Load() {
   if (MimeData *mimedata = qobject_cast<MimeData*>(q_mimedata)) {
     mimedata->clear_first_ = true;
   }
-  emit AddToPlaylistSignal(q_mimedata);
+  Q_EMIT AddToPlaylistSignal(q_mimedata);
 
 }
 
 void CollectionView::AddToPlaylist() {
 
-  emit AddToPlaylistSignal(model()->mimeData(selectedIndexes()));
+  Q_EMIT AddToPlaylistSignal(model()->mimeData(selectedIndexes()));
 
 }
 
@@ -554,7 +544,7 @@ void CollectionView::AddToPlaylistEnqueue() {
   if (MimeData *mimedata = qobject_cast<MimeData*>(q_mimedata)) {
     mimedata->enqueue_now_ = true;
   }
-  emit AddToPlaylistSignal(q_mimedata);
+  Q_EMIT AddToPlaylistSignal(q_mimedata);
 
 }
 
@@ -564,7 +554,7 @@ void CollectionView::AddToPlaylistEnqueueNext() {
   if (MimeData *mimedata = qobject_cast<MimeData*>(q_mimedata)) {
     mimedata->enqueue_next_now_ = true;
   }
-  emit AddToPlaylistSignal(q_mimedata);
+  Q_EMIT AddToPlaylistSignal(q_mimedata);
 
 }
 
@@ -574,7 +564,7 @@ void CollectionView::OpenInNewPlaylist() {
   if (MimeData *mimedata = qobject_cast<MimeData*>(q_mimedata)) {
     mimedata->open_in_new_playlist_ = true;
   }
-  emit AddToPlaylistSignal(q_mimedata);
+  Q_EMIT AddToPlaylistSignal(q_mimedata);
 
 }
 
@@ -611,7 +601,7 @@ void CollectionView::SearchForThis() {
       CollectionItem *item = app_->collection_model()->IndexToItem(index);
       const CollectionModel::GroupBy group_by = app_->collection_model()->GetGroupBy()[item->container_level];
       while (!item->children.isEmpty()) {
-        item = item->children.first();
+        item = item->children.constFirst();
       }
 
       switch (group_by) {
@@ -731,7 +721,7 @@ void CollectionView::EditTracks() {
 }
 
 void CollectionView::EditTagError(const QString &message) {
-  emit Error(message);
+  Q_EMIT Error(message);
 }
 
 void CollectionView::RescanSongs() {
@@ -773,7 +763,7 @@ void CollectionView::FilterReturnPressed() {
 
   if (!currentIndex().isValid()) return;
 
-  emit doubleClicked(currentIndex());
+  Q_EMIT doubleClicked(currentIndex());
 }
 
 void CollectionView::ShowInBrowser() const {

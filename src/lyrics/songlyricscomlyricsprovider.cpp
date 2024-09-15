@@ -17,7 +17,8 @@
  *
  */
 
-#include <QObject>
+#include <QApplication>
+#include <QThread>
 #include <QString>
 #include <QUrl>
 #include <QRegularExpression>
@@ -26,6 +27,8 @@
 #include "core/networkaccessmanager.h"
 #include "lyricssearchrequest.h"
 #include "songlyricscomlyricsprovider.h"
+
+using namespace Qt::StringLiterals;
 
 namespace {
 constexpr char kUrl[] = "https://www.songlyrics.com/";
@@ -39,19 +42,25 @@ SongLyricsComLyricsProvider::SongLyricsComLyricsProvider(SharedPtr<NetworkAccess
 
 QUrl SongLyricsComLyricsProvider::Url(const LyricsSearchRequest &request) {
 
-  return QUrl(QLatin1String(kUrl) + StringFixup(request.artist) + QLatin1Char('/') + StringFixup(request.title) + QLatin1String("-lyrics/"));
+  return QUrl(QLatin1String(kUrl) + StringFixup(request.artist) + QLatin1Char('/') + StringFixup(request.title) + "-lyrics/"_L1);
 
 }
 
 QString SongLyricsComLyricsProvider::StringFixup(QString text) {
 
-  return text.replace(QLatin1Char('/'), QLatin1Char('-'))
-             .replace(QLatin1Char('\''), QLatin1Char('-'))
-             .remove(QRegularExpression(QStringLiteral("[^\\w0-9\\- ]")))
-             .replace(QRegularExpression(QStringLiteral(" {2,}")), QStringLiteral(" "))
+  Q_ASSERT(QThread::currentThread() != qApp->thread());
+
+  static const QRegularExpression regex_illegal_characters(QStringLiteral("[^\\w0-9\\- ]"));
+  static const QRegularExpression regex_multiple_whitespaces(QStringLiteral(" {2,}"));
+  static const QRegularExpression regex_multiple_dashes(QStringLiteral("(-)\\1+"));
+
+  return text.replace(u'/', u'-')
+             .replace(u'\'', u'-')
+             .remove(regex_illegal_characters)
+             .replace(regex_multiple_whitespaces, QStringLiteral(" "))
              .simplified()
-             .replace(QLatin1Char(' '), QLatin1Char('-'))
-             .replace(QRegularExpression(QStringLiteral("(-)\\1+")), QStringLiteral("-"))
+             .replace(u' ', u'-')
+             .replace(regex_multiple_dashes, QStringLiteral("-"))
              .toLower();
 
 }

@@ -24,6 +24,7 @@
 #include <QByteArray>
 #include <QString>
 #include <QDateTime>
+#include <QRegularExpression>
 #include <QtDebug>
 
 #include "test_utils.h"
@@ -35,6 +36,9 @@
 #include "utilities/colorutils.h"
 #include "utilities/transliterate.h"
 #include "core/logging.h"
+#include "core/temporaryfile.h"
+
+using namespace Qt::StringLiterals;
 
 TEST(UtilitiesTest, PrettyTimeDelta) {
 
@@ -156,7 +160,7 @@ TEST(UtilitiesTest, SetEnvGetEnv) {
 
   Utilities::SetEnv(var.toUtf8().constData(), value);
   ASSERT_EQ(Utilities::GetEnv(var), value);
-  Utilities::SetEnv(var.toUtf8().constData(), QLatin1String(""));
+  Utilities::SetEnv(var.toUtf8().constData(), ""_L1);
 
 }
 
@@ -199,24 +203,24 @@ TEST(UtilitiesTest, ReplaceVariable) {
   song.set_playcount(90);
   song.set_rating(1.0);
 
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%title%"), song, QLatin1String("")), song.title());
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%album%"), song, QLatin1String("")), song.album());
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%artist%"), song, QLatin1String("")), song.artist());
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%albumartist%"), song, QLatin1String("")), song.effective_albumartist());
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%track%"), song, QLatin1String("")), QString::number(song.track()));
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%disc%"), song, QLatin1String("")), QString::number(song.disc()));
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%year%"), song, QLatin1String("")), QString::number(song.year()));
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%originalyear%"), song, QLatin1String("")), QString::number(song.originalyear()));
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%genre%"), song, QLatin1String("")), song.genre());
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%composer%"), song, QLatin1String("")), song.composer());
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%performer%"), song, QLatin1String("")), song.performer());
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%grouping%"), song, QLatin1String("")), song.grouping());
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%length%"), song, QLatin1String("")), song.PrettyLength());
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%filename%"), song, QLatin1String("")), song.basefilename());
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%url%"), song, QLatin1String("")), song.url().toString());
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%playcount%"), song, QLatin1String("")), QString::number(song.playcount()));
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%skipcount%"), song, QLatin1String("")), QString::number(song.skipcount()));
-  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%rating%"), song, QLatin1String("")), song.PrettyRating());
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%title%"), song, ""_L1), song.title());
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%album%"), song, ""_L1), song.album());
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%artist%"), song, ""_L1), song.artist());
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%albumartist%"), song, ""_L1), song.effective_albumartist());
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%track%"), song, ""_L1), QString::number(song.track()));
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%disc%"), song, ""_L1), QString::number(song.disc()));
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%year%"), song, ""_L1), QString::number(song.year()));
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%originalyear%"), song, ""_L1), QString::number(song.originalyear()));
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%genre%"), song, ""_L1), song.genre());
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%composer%"), song, ""_L1), song.composer());
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%performer%"), song, ""_L1), song.performer());
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%grouping%"), song, ""_L1), song.grouping());
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%length%"), song, ""_L1), song.PrettyLength());
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%filename%"), song, ""_L1), song.basefilename());
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%url%"), song, ""_L1), song.url().toString());
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%playcount%"), song, ""_L1), QString::number(song.playcount()));
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%skipcount%"), song, ""_L1), QString::number(song.skipcount()));
+  ASSERT_EQ(Utilities::ReplaceVariable(QStringLiteral("%rating%"), song, ""_L1), song.PrettyRating());
 
 }
 
@@ -241,6 +245,22 @@ TEST(UtilitiesTest, ReplaceMessage) {
   song.set_playcount(90);
   song.set_rating(1.0);
 
-  ASSERT_EQ(Utilities::ReplaceMessage(QStringLiteral("%title% - %artist%"), song, QLatin1String("")), song.title() + QStringLiteral(" - ") + song.artist());
+  ASSERT_EQ(Utilities::ReplaceMessage(QStringLiteral("%title% - %artist%"), song, ""_L1), song.title() + QStringLiteral(" - ") + song.artist());
+
+}
+
+TEST(UtilitiesTest, TemporaryFile) {
+
+  QString filename_pattern = QStringLiteral("/tmp/test-XXXX.jpg");
+
+  TemporaryFile temp_file(filename_pattern);
+
+  EXPECT_FALSE(temp_file.filename().isEmpty());
+
+  EXPECT_FALSE(temp_file.filename() == filename_pattern);
+
+  static const QRegularExpression regex_temp_filename(QStringLiteral("^\\/tmp\\/test-....\\.jpg$"));
+
+  EXPECT_TRUE(regex_temp_filename.match(temp_file.filename()).hasMatch());
 
 }

@@ -81,6 +81,8 @@
 #  include "moodbar/moodbaritemdelegate.h"
 #endif
 
+using namespace Qt::StringLiterals;
+
 namespace {
 constexpr int kGlowIntensitySteps = 24;
 constexpr int kAutoscrollGraceTimeout = 30;  // seconds
@@ -91,11 +93,7 @@ constexpr int kDropIndicatorGradientWidth = 5;
 PlaylistView::PlaylistView(QWidget *parent)
     : QTreeView(parent),
       app_(nullptr),
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
       style_(new PlaylistProxyStyle(QApplication::style()->name())),
-#else
-      style_(new PlaylistProxyStyle(QApplication::style()->objectName())),
-#endif
       playlist_(nullptr),
       header_(new PlaylistHeader(Qt::Horizontal, this, this)),
       background_image_type_(AppearanceSettingsPage::BackgroundImageType::Default),
@@ -411,7 +409,7 @@ void PlaylistView::RestoreHeaderState() {
 
   header_state_restored_ = true;
 
-  emit ColumnAlignmentChanged(column_alignment_);
+  Q_EMIT ColumnAlignmentChanged(column_alignment_);
 
 }
 
@@ -671,23 +669,23 @@ void PlaylistView::keyPressEvent(QKeyEvent *event) {
     CopyCurrentSongToClipboard();
   }
   else if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
-    if (currentIndex().isValid()) emit PlayItem(currentIndex(), Playlist::AutoScroll::Never);
+    if (currentIndex().isValid()) Q_EMIT PlayItem(currentIndex(), Playlist::AutoScroll::Never);
     event->accept();
   }
   else if (event->modifiers() != Qt::ControlModifier && event->key() == Qt::Key_Space) {
-    emit PlayPause();
+    Q_EMIT PlayPause();
     event->accept();
   }
   else if (event->key() == Qt::Key_Left) {
-    emit SeekBackward();
+    Q_EMIT SeekBackward();
     event->accept();
   }
   else if (event->key() == Qt::Key_Right) {
-    emit SeekForward();
+    Q_EMIT SeekForward();
     event->accept();
   }
   else if (event->modifiers() == Qt::NoModifier && ((event->key() >= Qt::Key_Exclam && event->key() <= Qt::Key_Z) || event->key() == Qt::Key_Backspace || event->key() == Qt::Key_Escape)) {
-    emit FocusOnFilterSignal(event);
+    Q_EMIT FocusOnFilterSignal(event);
     event->accept();
   }
   else {
@@ -697,7 +695,7 @@ void PlaylistView::keyPressEvent(QKeyEvent *event) {
 }
 
 void PlaylistView::contextMenuEvent(QContextMenuEvent *e) {
-  emit RightClicked(e->globalPos(), indexAt(e->pos()));
+  Q_EMIT RightClicked(e->globalPos(), indexAt(e->pos()));
   e->accept();
 }
 
@@ -1130,11 +1128,7 @@ void PlaylistView::dragMoveEvent(QDragMoveEvent *event) {
 
   QTreeView::dragMoveEvent(event);
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   QModelIndex idx(indexAt(event->position().toPoint()));
-#else
-  QModelIndex idx(indexAt(event->pos()));
-#endif
 
   drop_indicator_row_ = idx.isValid() ? idx.row() : 0;
 
@@ -1271,7 +1265,7 @@ void PlaylistView::ReloadSettings() {
     }
     setProperty("default_background_enabled", background_image_type_ == AppearanceSettingsPage::BackgroundImageType::Default);
     setProperty("strawbs_background_enabled", background_image_type_ == AppearanceSettingsPage::BackgroundImageType::Strawbs);
-    emit BackgroundPropertyChanged();
+    Q_EMIT BackgroundPropertyChanged();
     force_background_redraw_ = true;
   }
 
@@ -1365,7 +1359,7 @@ void PlaylistView::SetColumnAlignment(const int section, const Qt::Alignment ali
   if (section < 0) return;
 
   column_alignment_[section] = alignment;
-  emit ColumnAlignmentChanged(column_alignment_);
+  Q_EMIT ColumnAlignmentChanged(column_alignment_);
   SaveSettings();
 
 }
@@ -1385,11 +1379,7 @@ void PlaylistView::CopyCurrentSongToClipboard() const {
     }
 
     const QVariant var_data = model()->data(currentIndex().sibling(currentIndex().row(), i));
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     if (var_data.metaType().id() == QMetaType::QString) {
-#else
-    if (var_data.type() == QVariant::String) {
-#endif
       columns << var_data.toString();
     }
   }
@@ -1399,7 +1389,7 @@ void PlaylistView::CopyCurrentSongToClipboard() const {
 
   QMimeData *mime_data = new QMimeData;
   mime_data->setUrls(QList<QUrl>() << url);
-  mime_data->setText(columns.join(QLatin1String(" - ")));
+  mime_data->setText(columns.join(" - "_L1));
 
   QApplication::clipboard()->setMimeData(mime_data);
 

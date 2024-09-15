@@ -38,6 +38,8 @@
 #include "collectionquery.h"
 #include "collectionfilteroptions.h"
 
+using namespace Qt::StringLiterals;
+
 CollectionQuery::CollectionQuery(const QSqlDatabase &db, const QString &songs_table, const CollectionFilterOptions &filter_options)
     : SqlQuery(db),
       songs_table_(songs_table),
@@ -46,7 +48,7 @@ CollectionQuery::CollectionQuery(const QSqlDatabase &db, const QString &songs_ta
       limit_(-1) {
 
   if (filter_options.max_age() != -1) {
-    qint64 cutoff = QDateTime::currentDateTime().toSecsSinceEpoch() - filter_options.max_age();
+    qint64 cutoff = QDateTime::currentSecsSinceEpoch() - filter_options.max_age();
 
     where_clauses_ << QStringLiteral("ctime > ?");
     bound_values_ << cutoff;
@@ -63,35 +65,25 @@ CollectionQuery::CollectionQuery(const QSqlDatabase &db, const QString &songs_ta
 void CollectionQuery::AddWhere(const QString &column, const QVariant &value, const QString &op) {
 
   // Ignore 'literal' for IN
-  if (op.compare(QLatin1String("IN"), Qt::CaseInsensitive) == 0) {
-    QStringList values = value.toStringList();
+  if (op.compare("IN"_L1, Qt::CaseInsensitive) == 0) {
+    const QStringList values = value.toStringList();
     QStringList final_values;
     final_values.reserve(values.count());
-    for (const QString &single_value : std::as_const(values)) {
+    for (const QString &single_value : values) {
       final_values.append(QStringLiteral("?"));
       bound_values_ << single_value;
     }
 
-    where_clauses_ << QStringLiteral("%1 IN (%2)").arg(column, final_values.join(QLatin1Char(',')));
+    where_clauses_ << QStringLiteral("%1 IN (%2)").arg(column, final_values.join(u','));
   }
   else {
     // Do integers inline - sqlite seems to get confused when you pass integers to bound parameters
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     if (value.metaType().id() == QMetaType::Int) {
-#else
-    if (value.type() == QVariant::Int) {
-#endif
       where_clauses_ << QStringLiteral("%1 %2 %3").arg(column, op, value.toString());
     }
-    else if (
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-      value.metaType().id() == QMetaType::QString
-#else
-      value.type() == QVariant::String
-#endif
-      && value.toString().isNull()) {
+    else if (value.metaType().id() == QMetaType::QString && value.toString().isNull()) {
       where_clauses_ << QStringLiteral("%1 %2 ?").arg(column, op);
-      bound_values_ << QLatin1String("");
+      bound_values_ << ""_L1;
     }
     else {
       where_clauses_ << QStringLiteral("%1 %2 ?").arg(column, op);
@@ -125,13 +117,13 @@ bool CollectionQuery::Exec() {
     where_clauses << QStringLiteral("unavailable = 0");
   }
 
-  if (!where_clauses.isEmpty()) sql += QLatin1String(" WHERE ") + where_clauses.join(QLatin1String(" AND "));
+  if (!where_clauses.isEmpty()) sql += " WHERE "_L1 + where_clauses.join(" AND "_L1);
 
-  if (!order_by_.isEmpty()) sql += QLatin1String(" ORDER BY ") + order_by_;
+  if (!order_by_.isEmpty()) sql += " ORDER BY "_L1 + order_by_;
 
-  if (limit_ != -1) sql += QLatin1String(" LIMIT ") + QString::number(limit_);
+  if (limit_ != -1) sql += " LIMIT "_L1 + QString::number(limit_);
 
-  sql.replace(QLatin1String("%songs_table"), songs_table_);
+  sql.replace("%songs_table"_L1, songs_table_);
 
   if (!QSqlQuery::prepare(sql)) return false;
 

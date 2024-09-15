@@ -68,7 +68,7 @@ bool PlaylistListView::ItemsSelected() const {
 }
 
 void PlaylistListView::selectionChanged(const QItemSelection&, const QItemSelection&) {
-  emit ItemsSelectedChanged(selectionModel()->selectedRows().count() > 0);
+  Q_EMIT ItemsSelectedChanged(selectionModel()->selectedRows().count() > 0);
 }
 
 void PlaylistListView::dragEnterEvent(QDragEnterEvent *e) {
@@ -84,11 +84,7 @@ void PlaylistListView::dragEnterEvent(QDragEnterEvent *e) {
 
 void PlaylistListView::dragMoveEvent(QDragMoveEvent *e) {
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    QModelIndex drag_hover_tab_ = indexAt(e->position().toPoint());
-#else
-    QModelIndex drag_hover_tab_ = indexAt(e->pos());
-#endif
+  QModelIndex drag_hover_tab_ = indexAt(e->position().toPoint());
 
   if (e->mimeData()->hasFormat(QLatin1String(Playlist::kRowsMimetype))) {
     if (drag_hover_tab_ != currentIndex()) {
@@ -121,7 +117,7 @@ void PlaylistListView::timerEvent(QTimerEvent *e) {
   QTreeView::timerEvent(e);
   if (e->timerId() == drag_hover_timer_.timerId()) {
     drag_hover_timer_.stop();
-    emit doubleClicked(currentIndex());
+    Q_EMIT doubleClicked(currentIndex());
   }
 
 }
@@ -132,7 +128,7 @@ void PlaylistListView::dropEvent(QDropEvent *e) {
     if (drag_hover_timer_.isActive()) {
       drag_hover_timer_.stop();
     }
-    emit ItemMimeDataDroppedSignal(currentIndex(), e->mimeData());
+    Q_EMIT ItemMimeDataDroppedSignal(currentIndex(), e->mimeData());
   }
   else  {
     AutoExpandingTreeView::dropEvent(e);

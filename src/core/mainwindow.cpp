@@ -217,16 +217,13 @@
 #endif
 
 #ifdef HAVE_QTSPARKLE
-#  if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-#    include <qtsparkle-qt6/Updater>
-#  else
-#    include <qtsparkle-qt5/Updater>
-#  endif
+#  include <qtsparkle-qt6/Updater>
 #endif  // HAVE_QTSPARKLE
 
 using std::make_unique;
 using std::make_shared;
 using namespace std::chrono_literals;
+using namespace Qt::StringLiterals;
 
 const char *MainWindow::kSettingsGroup = "MainWindow";
 const char *MainWindow::kAllFilesFilterSpec = QT_TR_NOOP("All Files (*)");
@@ -400,7 +397,7 @@ MainWindow::MainWindow(Application *app, SharedPtr<SystemTrayIcon> tray_icon, OS
   ui_->tabs->AddTab(tidal_view_, QStringLiteral("tidal"), IconLoader::Load(QStringLiteral("tidal"), true, 0, 32), tr("Tidal"));
 #endif
 #ifdef HAVE_SPOTIFY
-  ui_->tabs->AddTab(spotify_view_, QLatin1String("spotify"), IconLoader::Load(QStringLiteral("spotify"), true, 0, 32), tr("Spotify"));
+  ui_->tabs->AddTab(spotify_view_, QStringLiteral("spotify"), IconLoader::Load(QStringLiteral("spotify"), true, 0, 32), tr("Spotify"));
 #endif
 #ifdef HAVE_QOBUZ
   ui_->tabs->AddTab(qobuz_view_, QStringLiteral("qobuz"), IconLoader::Load(QStringLiteral("qobuz"), true, 0, 32), tr("Qobuz"));
@@ -490,7 +487,7 @@ MainWindow::MainWindow(Application *app, SharedPtr<SystemTrayIcon> tray_icon, OS
   ui_->action_transcoder->setIcon(IconLoader::Load(QStringLiteral("tools-wizard")));
   ui_->action_update_collection->setIcon(IconLoader::Load(QStringLiteral("view-refresh")));
   ui_->action_full_collection_scan->setIcon(IconLoader::Load(QStringLiteral("view-refresh")));
-  ui_->action_abort_collection_scan->setIcon(IconLoader::Load(QStringLiteral("dialog-error")));
+  ui_->action_stop_collection_scan->setIcon(IconLoader::Load(QStringLiteral("dialog-error")));
   ui_->action_settings->setIcon(IconLoader::Load(QStringLiteral("configure")));
   ui_->action_import_data_from_last_fm->setIcon(IconLoader::Load(QStringLiteral("scrobble")));
   ui_->action_console->setIcon(IconLoader::Load(QStringLiteral("keyboard")));
@@ -556,7 +553,7 @@ MainWindow::MainWindow(Application *app, SharedPtr<SystemTrayIcon> tray_icon, OS
   QObject::connect(ui_->action_jump, &QAction::triggered, ui_->playlist->view(), &PlaylistView::JumpToCurrentlyPlayingTrack);
   QObject::connect(ui_->action_update_collection, &QAction::triggered, &*app_->collection(), &SCollection::IncrementalScan);
   QObject::connect(ui_->action_full_collection_scan, &QAction::triggered, &*app_->collection(), &SCollection::FullScan);
-  QObject::connect(ui_->action_abort_collection_scan, &QAction::triggered, &*app_->collection(), &SCollection::AbortScan);
+  QObject::connect(ui_->action_stop_collection_scan, &QAction::triggered, &*app_->collection(), &SCollection::StopScan);
 #if defined(HAVE_GSTREAMER)
   QObject::connect(ui_->action_add_files_to_transcoder, &QAction::triggered, this, &MainWindow::AddFilesToTranscoder);
   ui_->action_add_files_to_transcoder->setIcon(IconLoader::Load(QStringLiteral("tools-wizard")));
@@ -833,6 +830,7 @@ MainWindow::MainWindow(Application *app, SharedPtr<SystemTrayIcon> tray_icon, OS
   QObject::connect(globalshortcuts_manager_, &GlobalShortcutsManager::StopAfter, ui_->action_stop_after_this_track, &QAction::trigger);
   QObject::connect(globalshortcuts_manager_, &GlobalShortcutsManager::Next, ui_->action_next_track, &QAction::trigger);
   QObject::connect(globalshortcuts_manager_, &GlobalShortcutsManager::Previous, ui_->action_previous_track, &QAction::trigger);
+  QObject::connect(globalshortcuts_manager_, &GlobalShortcutsManager::RestartOrPrevious, &*app_->player(), &Player::RestartOrPrevious);
   QObject::connect(globalshortcuts_manager_, &GlobalShortcutsManager::IncVolume, &*app_->player(), &Player::VolumeUp);
   QObject::connect(globalshortcuts_manager_, &GlobalShortcutsManager::DecVolume, &*app_->player(), &Player::VolumeDown);
   QObject::connect(globalshortcuts_manager_, &GlobalShortcutsManager::Mute, &*app_->player(), &Player::Mute);
@@ -1272,7 +1270,7 @@ void MainWindow::ReloadAllSettings() {
 
 void MainWindow::RefreshStyleSheet() {
   QString contents(styleSheet());
-  setStyleSheet(QLatin1String(""));
+  setStyleSheet(""_L1);
   setStyleSheet(contents);
 }
 
@@ -1306,7 +1304,7 @@ void MainWindow::Exit() {
   else {
     if (app_->player()->engine()->is_fadeout_enabled()) {
       // To shut down the application when fadeout will be finished
-      QObject::connect(&*app_->player()->engine(), &EngineBase::FadeoutFinishedSignal, this, &MainWindow::DoExit);
+      QObject::connect(&*app_->player()->engine(), &EngineBase::Finished, this, &MainWindow::DoExit);
       if (app_->player()->GetState() == EngineBase::State::Playing) {
         app_->player()->Stop();
         ignore_close_ = true;
@@ -1624,7 +1622,7 @@ void MainWindow::ToggleHide() {
 
 void MainWindow::StopAfterCurrent() {
   app_->playlist_manager()->current()->StopAfter(app_->playlist_manager()->current()->current_row());
-  emit StopAfterToggled(app_->playlist_manager()->active()->stop_after_current());
+  Q_EMIT StopAfterToggled(app_->playlist_manager()->active()->stop_after_current());
 }
 
 void MainWindow::showEvent(QShowEvent *e) {
@@ -2044,9 +2042,7 @@ void MainWindow::PlaylistRightClick(const QPoint global_pos, const QModelIndex &
     playlist_copy_to_device_->setVisible(local_songs > 0);
 #endif
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
     playlist_delete_->setVisible(delete_files_ && local_songs > 0);
-#endif
 
     // Remove old item actions, if any.
     for (QAction *action : std::as_const(playlistitem_actions_)) {
@@ -2059,7 +2055,7 @@ void MainWindow::PlaylistRightClick(const QPoint global_pos, const QModelIndex &
     playlist_menu_->insertActions(playlistitem_actions_separator_, playlistitem_actions_);
   }
 
-  //if it isn't the first time we right click, we need to remove the menu previously created
+  // If it isn't the first time we right click, we need to remove the menu previously created
   if (playlist_add_to_another_ != nullptr) {
     playlist_menu_->removeAction(playlist_add_to_another_);
     delete playlist_add_to_another_;
@@ -2071,19 +2067,19 @@ void MainWindow::PlaylistRightClick(const QPoint global_pos, const QModelIndex &
     QMenu *add_to_another_menu = new QMenu(tr("Add to another playlist"), this);
     add_to_another_menu->setIcon(IconLoader::Load(QStringLiteral("list-add")));
 
-    const PlaylistBackend::PlaylistList playlists = app_->playlist_backend()->GetAllOpenPlaylists();
-    for (const PlaylistBackend::Playlist &playlist : playlists) {
-      // don't add the current playlist
-      if (playlist.id != app_->playlist_manager()->current()->id()) {
+    const QList<int> playlist_ids = app_->playlist_manager()->playlist_ids();
+    for (const int playlist_id : playlist_ids) {
+      // Don't add the current playlist
+      if (playlist_id != app_->playlist_manager()->current()->id()) {
         QAction *existing_playlist = new QAction(this);
-        existing_playlist->setText(playlist.name);
-        existing_playlist->setData(playlist.id);
+        existing_playlist->setText(app_->playlist_manager()->playlist_name(playlist_id));
+        existing_playlist->setData(playlist_id);
         add_to_another_menu->addAction(existing_playlist);
       }
     }
 
     add_to_another_menu->addSeparator();
-    // add to a new playlist
+    // Add to a new playlist
     QAction *new_playlist = new QAction(this);
     new_playlist->setText(tr("New playlist"));
     new_playlist->setData(-1);  // fake id
@@ -2186,7 +2182,7 @@ void MainWindow::RenumberTracks() {
   // Get the index list in order
   std::stable_sort(indexes.begin(), indexes.end());
 
-  // if first selected song has a track number set, start from that offset
+  // If first selected song has a track number set, start from that offset
   if (!indexes.isEmpty()) {
     const Song first_song = app_->playlist_manager()->current()->item_at(indexes[0].row())->OriginalMetadata();
     if (first_song.track() > 0) track = first_song.track();
@@ -2350,7 +2346,7 @@ void MainWindow::ShowInCollection() {
   }
   QString search;
   if (!songs.isEmpty()) {
-    search = QLatin1String("artist:") + songs.first().artist() + QLatin1String(" album:") + songs.first().album();
+    search = "artist:"_L1 + songs.first().artist() + " album:"_L1 + songs.first().album();
   }
   collection_view_->filter_widget()->ShowInCollection(search);
 
@@ -2443,9 +2439,9 @@ void MainWindow::CommandlineOptionsReceived(const CommandlineOptions &options) {
       break;
 
     case CommandlineOptions::PlayerAction::ResizeWindow:{
-      if (options.window_size().contains(QLatin1Char('x')) && options.window_size().length() >= 4) {
-        QString str_w = options.window_size().left(options.window_size().indexOf(QLatin1Char('x')));
-        QString str_h = options.window_size().right(options.window_size().length() - options.window_size().indexOf(QLatin1Char('x')) - 1);
+      if (options.window_size().contains(u'x') && options.window_size().length() >= 4) {
+        QString str_w = options.window_size().left(options.window_size().indexOf(u'x'));
+        QString str_h = options.window_size().right(options.window_size().length() - options.window_size().indexOf(u'x') - 1);
         bool w_ok = false;
         bool h_ok = false;
         int w = str_w.toInt(&w_ok);
@@ -2485,8 +2481,8 @@ void MainWindow::CommandlineOptionsReceived(const CommandlineOptions &options) {
 #ifdef HAVE_TIDAL
     const QList<QUrl> urls = options.urls();
     for (const QUrl &url : urls) {
-      if (url.scheme() == QLatin1String("tidal") && url.host() == QLatin1String("login")) {
-        emit AuthorizationUrlReceived(url);
+      if (url.scheme() == "tidal"_L1 && url.host() == "login"_L1) {
+        Q_EMIT AuthorizationUrlReceived(url);
         return;
       }
     }
@@ -2563,8 +2559,8 @@ bool MainWindow::LoadUrl(const QString &url) {
     return true;
   }
 #ifdef HAVE_TIDAL
-  if (url.startsWith(QLatin1String("tidal://login"))) {
-    emit AuthorizationUrlReceived(QUrl(url));
+  if (url.startsWith("tidal://login"_L1)) {
+    Q_EMIT AuthorizationUrlReceived(QUrl(url));
     return true;
   }
 #endif
@@ -2915,7 +2911,7 @@ void MainWindow::CheckFullRescanRevisions() {
   int from = app_->database()->startup_schema_version();
   int to = app_->database()->current_schema_version();
 
-  // if we're restoring DB from scratch or nothing has changed, do nothing
+  // If we're restoring DB from scratch or nothing has changed, do nothing
   if (from == 0 || from == to) {
     return;
   }
@@ -2929,13 +2925,13 @@ void MainWindow::CheckFullRescanRevisions() {
     }
   }
 
-  // if we have any...
+  // If we have any...
   if (!reasons.isEmpty()) {
     QString message = tr("The version of Strawberry you've just updated to requires a full collection rescan because of the new features listed below:") + QStringLiteral("<ul>");
     for (const QString &reason : reasons) {
-      message += QLatin1String("<li>") + reason + QLatin1String("</li>");
+      message += "<li>"_L1 + reason + "</li>"_L1;
     }
-    message += QLatin1String("</ul>") + tr("Would you like to run a full rescan right now?");
+    message += "</ul>"_L1 + tr("Would you like to run a full rescan right now?");
     if (QMessageBox::question(this, tr("Collection rescan notice"), message, QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
       app_->collection()->FullScan();
     }
@@ -2966,11 +2962,7 @@ void MainWindow::Raise() {
 }
 
 #ifdef Q_OS_WIN
-#  if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, qintptr *result) {
-#  else
-bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result) {
-#  endif
 
   if (exit_count_ == 0 && message) {
     MSG *msg = static_cast<MSG*>(message);
@@ -3132,7 +3124,7 @@ void MainWindow::AlbumCoverLoaded(const Song &song, const AlbumCoverLoaderResult
   song_ = song;
   album_cover_ = result.album_cover;
 
-  emit AlbumCoverReady(song, result.album_cover.image);
+  Q_EMIT AlbumCoverReady(song, result.album_cover.image);
 
   const bool enable_change_art = song.is_collection_song() && !song.effective_albumartist().isEmpty() && !song.album().isEmpty();
   album_cover_choice_controller_->show_cover_action()->setEnabled(result.success && result.type != AlbumCoverLoaderResult::Type::Unset);
@@ -3160,7 +3152,7 @@ void MainWindow::GetCoverAutomatically() {
                       !song_.effective_album().isEmpty();
 
   if (search) {
-    emit SearchCoverInProgress();
+    Q_EMIT SearchCoverInProgress();
     album_cover_choice_controller_->SearchCoverAutomatically(song_);
   }
 

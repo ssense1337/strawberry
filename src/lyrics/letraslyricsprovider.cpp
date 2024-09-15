@@ -17,7 +17,8 @@
  *
  */
 
-#include <QObject>
+#include <QApplication>
+#include <QThread>
 #include <QString>
 #include <QUrl>
 #include <QRegularExpression>
@@ -28,6 +29,8 @@
 #include "utilities/transliterate.h"
 #include "lyricssearchrequest.h"
 #include "letraslyricsprovider.h"
+
+using namespace Qt::StringLiterals;
 
 namespace {
 constexpr char kUrl[] = "https://www.letras.mus.br/winamp.php";
@@ -41,17 +44,22 @@ LetrasLyricsProvider::LetrasLyricsProvider(SharedPtr<NetworkAccessManager> netwo
 
 QUrl LetrasLyricsProvider::Url(const LyricsSearchRequest &request) {
 
-  return QUrl(QLatin1String(kUrl) + QLatin1String("?musica=") + StringFixup(request.artist) + QLatin1String("&artista=") + StringFixup(request.title));
+  return QUrl(QLatin1String(kUrl) + "?musica="_L1 + StringFixup(request.artist) + "&artista="_L1 + StringFixup(request.title));
 
 }
 
 QString LetrasLyricsProvider::StringFixup(const QString &text) {
 
+  Q_ASSERT(QThread::currentThread() != qApp->thread());
+
+  static const QRegularExpression regex_illegal_characters(QStringLiteral("[^\\w0-9_,&\\-\\(\\) ]"));
+  static const QRegularExpression regex_multiple_whitespaces(QStringLiteral(" {2,}"));
+
   return QString::fromLatin1(QUrl::toPercentEncoding(Utilities::Transliterate(text)
-    .replace(QRegularExpression(QStringLiteral("[^\\w0-9_,&\\-\\(\\) ]")), QStringLiteral("_"))
-    .replace(QRegularExpression(QStringLiteral(" {2,}")), QStringLiteral(" "))
+    .replace(regex_illegal_characters, QStringLiteral("_"))
+    .replace(regex_multiple_whitespaces, QStringLiteral(" "))
     .simplified()
-    .replace(QLatin1Char(' '), QLatin1Char('-'))
+    .replace(u' ', u'-')
     .toLower()
     ));
 

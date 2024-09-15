@@ -63,6 +63,8 @@ SCollection::SCollection(Application *app, QObject *parent)
       save_playcounts_to_files_(false),
       save_ratings_to_files_(false) {
 
+  setObjectName(QLatin1String(metaObject()->className()));
+
   original_thread_ = thread();
 
   backend_ = make_shared<CollectionBackend>();
@@ -80,7 +82,7 @@ SCollection::SCollection(Application *app, QObject *parent)
 SCollection::~SCollection() {
 
   if (watcher_) {
-    watcher_->Stop();
+    watcher_->Abort();
     watcher_->deleteLater();
   }
   if (watcher_thread_) {
@@ -94,6 +96,7 @@ void SCollection::Init() {
 
   watcher_ = new CollectionWatcher(Song::Source::Collection);
   watcher_thread_ = new Thread(this);
+  watcher_thread_->setObjectName(watcher_->objectName());
 
   watcher_thread_->SetIoPriority(Utilities::IoPriority::IOPRIO_CLASS_IDLE);
 
@@ -151,7 +154,7 @@ void SCollection::ExitReceived() {
   QObject::disconnect(obj, nullptr, this, nullptr);
   qLog(Debug) << obj << "successfully exited.";
   wait_for_exit_.removeAll(obj);
-  if (wait_for_exit_.isEmpty()) emit ExitFinished();
+  if (wait_for_exit_.isEmpty()) Q_EMIT ExitFinished();
 
 }
 
@@ -159,7 +162,7 @@ void SCollection::IncrementalScan() { watcher_->IncrementalScanAsync(); }
 
 void SCollection::FullScan() { watcher_->FullScanAsync(); }
 
-void SCollection::AbortScan() { watcher_->Stop(); }
+void SCollection::StopScan() { watcher_->Stop(); }
 
 void SCollection::Rescan(const SongList &songs) {
 
@@ -189,11 +192,7 @@ void SCollection::ReloadSettings() {
 
 void SCollection::SyncPlaycountAndRatingToFilesAsync() {
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   (void)QtConcurrent::run(&SCollection::SyncPlaycountAndRatingToFiles, this);
-#else
-  (void)QtConcurrent::run(this, &SCollection::SyncPlaycountAndRatingToFiles);
-#endif
 
 }
 

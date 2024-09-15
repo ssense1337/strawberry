@@ -54,6 +54,8 @@
 #include "playlistmanager.h"
 #include "playlisttabbar.h"
 
+using namespace Qt::StringLiterals;
+
 namespace {
 constexpr char kSettingsGroup[] = "PlaylistTabBar";
 constexpr int kDragHoverTimeout = 500;
@@ -183,12 +185,12 @@ void PlaylistTabBar::RenameSlot() {
 
   if (new_name.isEmpty() || new_name == old_name) return;
 
-  emit Rename(playlist_id, new_name);
+  Q_EMIT Rename(playlist_id, new_name);
 
 }
 
 void PlaylistTabBar::RenameInline() {
-  emit Rename(tabData(menu_index_).toInt(), rename_editor_->text());
+  Q_EMIT Rename(tabData(menu_index_).toInt(), rename_editor_->text());
   HideEditor();
 }
 
@@ -267,7 +269,7 @@ void PlaylistTabBar::CloseSlot() {
 
   // Close the playlist. If the playlist is not a favorite playlist, it will be deleted, as it will not be visible after being closed.
   // Otherwise, the tab is closed but the playlist still exists and can be resurrected from the "Playlists" tab.
-  emit Close(playlist_id);
+  Q_EMIT Close(playlist_id);
 
   // Select the nearest tab.
   if (menu_index_ > 1) {
@@ -291,7 +293,7 @@ void PlaylistTabBar::SaveSlot() {
 
   if (menu_index_ == -1) return;
 
-  emit Save(tabData(menu_index_).toInt());
+  Q_EMIT Save(tabData(menu_index_).toInt());
 
 }
 
@@ -334,21 +336,21 @@ void PlaylistTabBar::RemoveTab(const int id) {
 void PlaylistTabBar::set_text_by_id(const int id, const QString &text) {
 
   QString new_text = text;
-  new_text = new_text.replace(QLatin1Char('&'), QLatin1String("&&"));
+  new_text = new_text.replace(u'&', "&&"_L1);
   setTabText(index_of(id), new_text);
   setTabToolTip(index_of(id), text);
 
 }
 
 void PlaylistTabBar::CurrentIndexChanged(const int index) {
-  if (!suppress_current_changed_) emit CurrentIdChanged(tabData(index).toInt());
+  if (!suppress_current_changed_) Q_EMIT CurrentIdChanged(tabData(index).toInt());
 }
 
 void PlaylistTabBar::InsertTab(const int id, const int index, const QString &text, const bool favorite) {
 
   QString new_text = text;
-  if (new_text.contains(QLatin1Char('&'))) {
-    new_text = new_text.replace(QLatin1Char('&'), QLatin1String("&&"));
+  if (new_text.contains(u'&')) {
+    new_text = new_text.replace(u'&', "&&"_L1);
   }
 
   suppress_current_changed_ = true;
@@ -363,7 +365,7 @@ void PlaylistTabBar::InsertTab(const int id, const int index, const QString &tex
 
   // If we are still starting up, we don't need to do this, as the tab ordering after startup will be the same as was already in the db.
   if (initialized_) {
-    if (currentIndex() == index) emit CurrentIdChanged(id);
+    if (currentIndex() == index) Q_EMIT CurrentIdChanged(id);
 
     // Update playlist tab order/visibility
     TabMoved();
@@ -378,7 +380,7 @@ void PlaylistTabBar::TabMoved() {
   for (int i = 0; i < count(); ++i) {
     ids << tabData(i).toInt();
   }
-  emit PlaylistOrderChanged(ids);
+  Q_EMIT PlaylistOrderChanged(ids);
 
 }
 
@@ -390,11 +392,7 @@ void PlaylistTabBar::dragEnterEvent(QDragEnterEvent *e) {
 
 void PlaylistTabBar::dragMoveEvent(QDragMoveEvent *e) {
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   drag_hover_tab_ = tabAt(e->position().toPoint());
-#else
-  drag_hover_tab_ = tabAt(e->pos());
-#endif
 
   if (drag_hover_tab_ != -1) {
     e->setDropAction(Qt::CopyAction);

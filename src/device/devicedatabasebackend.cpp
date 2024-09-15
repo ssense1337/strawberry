@@ -38,6 +38,8 @@
 #include "core/scopedtransaction.h"
 #include "devicedatabasebackend.h"
 
+using namespace Qt::StringLiterals;
+
 namespace {
 constexpr int kDeviceSchemaVersion = 5;
 }
@@ -46,6 +48,8 @@ DeviceDatabaseBackend::DeviceDatabaseBackend(QObject *parent)
     : QObject(parent),
       db_(nullptr),
       original_thread_(nullptr) {
+
+  setObjectName(QLatin1String(metaObject()->className()));
 
   original_thread_ = thread();
 
@@ -71,7 +75,7 @@ void DeviceDatabaseBackend::Exit() {
   Q_ASSERT(QThread::currentThread() == thread());
   Close();
   moveToThread(original_thread_);
-  emit ExitFinished();
+  Q_EMIT ExitFinished();
 
 }
 
@@ -142,13 +146,13 @@ int DeviceDatabaseBackend::AddDevice(const Device &device) {
   int id = q.lastInsertId().toInt();
 
   // Create the songs tables for the device
-  QString filename(QLatin1String(":/schema/device-schema.sql"));
+  QString filename(":/schema/device-schema.sql"_L1);
   QFile schema_file(filename);
   if (!schema_file.open(QIODevice::ReadOnly)) {
     qFatal("Couldn't open schema file %s: %s", filename.toUtf8().constData(), schema_file.errorString().toUtf8().constData());
   }
   QString schema = QString::fromUtf8(schema_file.readAll());
-  schema.replace(QLatin1String("%deviceid"), QString::number(id));
+  schema.replace("%deviceid"_L1, QString::number(id));
 
   db_->ExecSchemaCommands(db, schema, 0, true);
 

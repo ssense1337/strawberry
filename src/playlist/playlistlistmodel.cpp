@@ -68,7 +68,7 @@ QString PlaylistListModel::ItemPath(const QStandardItem *item) {
     current = current->parent();
   }
 
-  return components.join(QLatin1Char('/'));
+  return components.join(u'/');
 
 }
 
@@ -105,7 +105,7 @@ void PlaylistListModel::AddRowItem(QStandardItem *item, const QString &parent_pa
 
       playlists_by_id_[id] = item;
       if (dropping_rows_) {
-        emit PlaylistPathChanged(id, parent_path);
+        Q_EMIT PlaylistPathChanged(id, parent_path);
       }
 
       break;
@@ -133,9 +133,9 @@ void PlaylistListModel::RowsAboutToBeRemoved(const QModelIndex &parent, const in
     switch (idx.data(Role_Type).toInt()) {
       case Type_Playlist:{
         const int id = idx.data(Role_PlaylistId).toInt();
-        QMap<int, QStandardItem*>::iterator it = playlists_by_id_.find(id);
-        if (it != playlists_by_id_.end() && it.value() == item) {
-          playlists_by_id_.erase(it);  // clazy:exclude=strict-iterators
+        QMap<int, QStandardItem*>::const_iterator it = playlists_by_id_.constFind(id);
+        if (it != playlists_by_id_.constEnd() && it.value() == item) {
+          playlists_by_id_.erase(it);
         }
         break;
       }
@@ -164,12 +164,7 @@ QStandardItem *PlaylistListModel::FolderByPath(const QString &path) {
   // inefficient but maintaining a path -> item map is difficult.
   QStandardItem *parent = invisibleRootItem();
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-  const QStringList parts = path.split(QLatin1Char('/'), Qt::SkipEmptyParts);
-#else
-  const QStringList parts = path.split(QLatin1Char('/'), QString::SkipEmptyParts);
-#endif
-
+  const QStringList parts = path.split(u'/', Qt::SkipEmptyParts);
   for (const QString &part : parts) {
     QStandardItem *matching_child = nullptr;
 
@@ -227,7 +222,7 @@ bool PlaylistListModel::setData(const QModelIndex &idx, const QVariant &value, i
 
   switch (idx.data(Role_Type).toInt()) {
     case Type_Playlist:
-      emit PlaylistRenamed(idx.data(Role_PlaylistId).toInt(), value.toString());
+      Q_EMIT PlaylistRenamed(idx.data(Role_PlaylistId).toInt(), value.toString());
       break;
 
     case Type_Folder:
@@ -247,7 +242,7 @@ void PlaylistListModel::UpdatePathsRecursive(const QModelIndex &parent) {
 
   switch (parent.data(Role_Type).toInt()) {
     case Type_Playlist:
-      emit PlaylistPathChanged(parent.data(Role_PlaylistId).toInt(), ItemPath(itemFromIndex(parent)));
+      Q_EMIT PlaylistPathChanged(parent.data(Role_PlaylistId).toInt(), ItemPath(itemFromIndex(parent)));
       break;
 
     case Type_Folder:

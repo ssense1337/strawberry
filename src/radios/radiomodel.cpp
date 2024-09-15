@@ -39,6 +39,8 @@
 #include "radiomimedata.h"
 #include "radiochannel.h"
 
+using namespace Qt::StringLiterals;
+
 namespace {
 constexpr int kTreeIconSize = 22;
 }
@@ -163,7 +165,7 @@ void RadioModel::AddChannels(const RadioChannelList &channels) {
   for (const RadioChannel &channel : channels) {
     RadioItem *container = nullptr;
     if (container_nodes_.contains(channel.source)) {
-      container = container_nodes_[channel.source];
+      container = container_nodes_.value(channel.source);
     }
     else {
       beginInsertRows(ItemToIndex(root_), static_cast<int>(root_->children.count()), static_cast<int>(root_->children.count()));
@@ -179,7 +181,7 @@ void RadioModel::AddChannels(const RadioChannelList &channels) {
     RadioItem *item = new RadioItem(RadioItem::Type::Channel, container);
     item->source = channel.source;
     item->display_text = channel.name;
-    item->sort_text = SortText(Song::TextForSource(channel.source) + QLatin1String(" - ") + channel.name);
+    item->sort_text = SortText(Song::TextForSource(channel.source) + " - "_L1 + channel.name);
     item->channel = channel;
     items_ << item;
     endInsertRows();
@@ -198,11 +200,7 @@ bool RadioModel::CompareItems(const RadioItem *a, const RadioItem *b) const {
   QVariant left(data(a, RadioModel::Role_SortText));
   QVariant right(data(b, RadioModel::Role_SortText));
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   if (left.metaType().id() == QMetaType::Int)
-#else
-  if (left.type() == QVariant::Int)
-#endif
     return left.toInt() < right.toInt();
   else return left.toString() < right.toString();
 
@@ -255,7 +253,7 @@ QString RadioModel::ChannelIconPixmapCacheKey(const QModelIndex &idx) const {
     idx_copy = idx_copy.parent();
   }
 
-  return path.join(QLatin1Char('/'));
+  return path.join(u'/');
 
 }
 
@@ -320,19 +318,20 @@ void RadioModel::AlbumCoverLoaded(const quint64 id, const AlbumCoverLoaderResult
   const QModelIndex idx = ItemToIndex(item);
   if (!idx.isValid()) return;
 
-  emit dataChanged(idx, idx);
+  Q_EMIT dataChanged(idx, idx);
 
 }
 
 QString RadioModel::SortText(QString text) {
 
   if (text.isEmpty()) {
-    text = QLatin1String(" unknown");
+    text = " unknown"_L1;
   }
   else {
     text = text.toLower();
   }
-  text = text.remove(QRegularExpression(QStringLiteral("[^\\w ]"), QRegularExpression::UseUnicodePropertiesOption));
+  static const QRegularExpression regex_words_and_whitespaces(QStringLiteral("[^\\w ]"), QRegularExpression::UseUnicodePropertiesOption);
+  text = text.remove(regex_words_and_whitespaces);
 
   return text;
 

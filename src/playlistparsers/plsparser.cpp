@@ -34,13 +34,9 @@
 #include "parserbase.h"
 #include "plsparser.h"
 
-class CollectionBackendInterface;
+using namespace Qt::StringLiterals;
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-constexpr auto qt_endl = Qt::endl;
-#else
-constexpr auto qt_endl = endl;
-#endif
+class CollectionBackendInterface;
 
 PLSParser::PLSParser(SharedPtr<CollectionBackendInterface> collection_backend, QObject *parent)
     : ParserBase(collection_backend, parent) {}
@@ -50,18 +46,18 @@ SongList PLSParser::Load(QIODevice *device, const QString &playlist_path, const 
   Q_UNUSED(playlist_path);
 
   QMap<int, Song> songs;
-  QRegularExpression n_re(QStringLiteral("\\d+$"));
+  static const QRegularExpression n_re(QStringLiteral("\\d+$"));
 
   while (!device->atEnd()) {
     QString line = QString::fromUtf8(device->readLine()).trimmed();
-    qint64 equals = line.indexOf(QLatin1Char('='));
+    qint64 equals = line.indexOf(u'=');
     QString key = line.left(equals).toLower();
     QString value = line.mid(equals + 1);
 
     QRegularExpressionMatch re_match = n_re.match(key);
     int n = re_match.captured(0).toInt();
 
-    if (key.startsWith(QLatin1String("file"))) {
+    if (key.startsWith("file"_L1)) {
       Song song = LoadSong(value, 0, 0, dir, collection_lookup);
 
       // Use the title and length we've already loaded if any
@@ -72,10 +68,10 @@ SongList PLSParser::Load(QIODevice *device, const QString &playlist_path, const 
 
       songs[n] = song;
     }
-    else if (key.startsWith(QLatin1String("title"))) {
+    else if (key.startsWith("title"_L1)) {
       songs[n].set_title(value);
     }
-    else if (key.startsWith(QLatin1String("length"))) {
+    else if (key.startsWith("length"_L1)) {
       qint64 seconds = value.toLongLong();
       if (seconds > 0) {
         songs[n].set_length_nanosec(seconds * kNsecPerSec);
@@ -90,15 +86,15 @@ SongList PLSParser::Load(QIODevice *device, const QString &playlist_path, const 
 void PLSParser::Save(const SongList &songs, QIODevice *device, const QDir &dir, const PlaylistSettingsPage::PathType path_type) const {
 
   QTextStream s(device);
-  s << "[playlist]" << qt_endl;
-  s << "Version=2" << qt_endl;
-  s << "NumberOfEntries=" << songs.count() << qt_endl;
+  s << "[playlist]" << Qt::endl;
+  s << "Version=2" << Qt::endl;
+  s << "NumberOfEntries=" << songs.count() << Qt::endl;
 
   int n = 1;
   for (const Song &song : songs) {
-    s << "File" << n << "=" << URLOrFilename(song.url(), dir, path_type) << qt_endl;
-    s << "Title" << n << "=" << song.title() << qt_endl;
-    s << "Length" << n << "=" << song.length_nanosec() / kNsecPerSec << qt_endl;
+    s << "File" << n << "=" << URLOrFilename(song.url(), dir, path_type) << Qt::endl;
+    s << "Title" << n << "=" << song.title() << Qt::endl;
+    s << "Length" << n << "=" << song.length_nanosec() / kNsecPerSec << Qt::endl;
     ++n;
   }
 

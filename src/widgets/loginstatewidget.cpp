@@ -61,7 +61,7 @@ LoginStateWidget::~LoginStateWidget() { delete ui_; }
 
 void LoginStateWidget::Logout() {
   SetLoggedIn(State::LoggedOut);
-  emit LogoutClicked();
+  Q_EMIT LogoutClicked();
 }
 
 void LoginStateWidget::SetAccountTypeText(const QString &text) {
@@ -101,7 +101,7 @@ void LoginStateWidget::SetLoggedIn(const State state, const QString &account_nam
 void LoginStateWidget::FocusLastCredentialField() {
 
   if (!credential_fields_.isEmpty()) {
-    QObject *object = credential_fields_.last();
+    QObject *object = credential_fields_.constLast();
     QWidget *widget = qobject_cast<QWidget*>(object);
     QLineEdit *line_edit = qobject_cast<QLineEdit*>(object);
 
@@ -138,7 +138,7 @@ bool LoginStateWidget::eventFilter(QObject *object, QEvent *event) {
   if (event->type() == QEvent::KeyPress) {
     QKeyEvent *key_event = static_cast<QKeyEvent*>(event);
     if (key_event->key() == Qt::Key_Enter || key_event->key() == Qt::Key_Return) {
-      emit LoginClicked();
+      Q_EMIT LoginClicked();
       return true;
     }
   }

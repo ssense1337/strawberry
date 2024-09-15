@@ -293,7 +293,7 @@ void WorkerPool<HandlerType>::StartOneWorker(Worker *worker) {
   QObject::connect(worker->process_, &QProcess::readyReadStandardError, this, &WorkerPool::ProcessReadyReadStandardError);
 
   // Create a server, find an unused name and start listening
-  forever {
+  Q_FOREVER {
     const quint32 unique_number = QRandomGenerator::global()->bounded(static_cast<quint32>(quint64(this) & 0xFFFFFFFF));
     const QString name = QStringLiteral("%1_%2").arg(local_server_name_).arg(unique_number);
 
@@ -357,7 +357,7 @@ void WorkerPool<HandlerType>::ProcessError(QProcess::ProcessError error) {
       // Failed to start errors are bad - it usually means the worker isn't installed.
       // Don't restart the process, but tell our owner, who will probably want to do something fatal.
       qLog(Error) << "Worker failed to start";
-      emit WorkerFailedToStart();
+      Q_EMIT WorkerFailedToStart();
       break;
 
     default:

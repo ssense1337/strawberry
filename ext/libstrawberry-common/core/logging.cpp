@@ -61,6 +61,8 @@
 
 #include "logging.h"
 
+using namespace Qt::StringLiterals;
+
 namespace logging {
 
 static Level sDefaultLevel = Level_Debug;
@@ -159,13 +161,13 @@ static void MessageHandler(QtMsgType type, const QMessageLogContext&, const QStr
       break;
   }
 
-  const QStringList lines = message.split(QLatin1Char('\n'));
+  const QStringList lines = message.split(u'\n');
   for (const QString &line : lines) {
     BufferedDebug d = CreateLogger<BufferedDebug>(level, QStringLiteral("unknown"), -1, nullptr);
     d << line.toLocal8Bit().constData();
     if (d.buf_) {
       d.buf_->close();
-      fprintf(type == QtCriticalMsg || type == QtFatalMsg ? stderr : stdout, "%s\n", d.buf_->buffer().data());
+      fprintf(type == QtCriticalMsg || type == QtFatalMsg ? stderr : stdout, "%s\n", d.buf_->buffer().constData());
       fflush(type == QtCriticalMsg || type == QtFatalMsg ? stderr : stdout);
     }
   }
@@ -196,9 +198,9 @@ void SetLevels(const QString &levels) {
 
   if (!sClassLevels) return;
 
-  const QStringList items = levels.split(QLatin1Char(','));
+  const QStringList items = levels.split(u',');
   for (const QString &item : items) {
-    const QStringList class_level = item.split(QLatin1Char(':'));
+    const QStringList class_level = item.split(u':');
 
     QString class_name;
     bool ok = false;
@@ -216,7 +218,7 @@ void SetLevels(const QString &levels) {
       continue;
     }
 
-    if (class_name.isEmpty() || class_name == QLatin1Char('*')) {
+    if (class_name.isEmpty() || class_name == u'*') {
       sDefaultLevel = static_cast<Level>(level);
     }
     else {
@@ -230,9 +232,9 @@ static QString ParsePrettyFunction(const char *pretty_function) {
 
   // Get the class name out of the function name.
   QString class_name = QLatin1String(pretty_function);
-  const qint64 paren = class_name.indexOf(QLatin1Char('('));
+  const qint64 paren = class_name.indexOf(u'(');
   if (paren != -1) {
-    const qint64 colons = class_name.lastIndexOf(QLatin1String("::"), paren);
+    const qint64 colons = class_name.lastIndexOf("::"_L1, paren);
     if (colons != -1) {
       class_name = class_name.left(colons);
     }
@@ -241,7 +243,7 @@ static QString ParsePrettyFunction(const char *pretty_function) {
     }
   }
 
-  const qint64 space = class_name.lastIndexOf(QLatin1Char(' '));
+  const qint64 space = class_name.lastIndexOf(u' ');
   if (space != -1) {
     class_name = class_name.mid(space + 1);
   }
@@ -314,8 +316,8 @@ QString CXXDemangle(const QString &mangled_function) {
 QString LinuxDemangle(const QString &symbol);
 QString LinuxDemangle(const QString &symbol) {
 
-  QRegularExpression regex(QStringLiteral("\\(([^+]+)"));
-  QRegularExpressionMatch match = regex.match(symbol);
+  static const QRegularExpression regex_symbol(QStringLiteral("\\(([^+]+)"));
+  QRegularExpressionMatch match = regex_symbol.match(symbol);
   if (!match.hasMatch()) {
     return symbol;
   }
@@ -329,11 +331,7 @@ QString LinuxDemangle(const QString &symbol) {
 QString DarwinDemangle(const QString &symbol);
 QString DarwinDemangle(const QString &symbol) {
 
-#  if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-  QStringList split = symbol.split(QLatin1Char(' '), Qt::SkipEmptyParts);
-#  else
-  QStringList split = symbol.split(QLatin1Char(' '), QString::SkipEmptyParts);
-#  endif
+  const QStringList split = symbol.split(QLatin1Char(' '), Qt::SkipEmptyParts);
   QString mangled_function = split[3];
   return CXXDemangle(mangled_function);
 
@@ -374,20 +372,49 @@ void DumpStackTrace() {
 // It's okay that the LoggedDebug instance is copied to a QDebug in these. It doesn't override any behavior that should be needed after return.
 #define qCreateLogger(line, pretty_function, category, level) logging::CreateLogger<LoggedDebug>(logging::Level_##level, logging::ParsePrettyFunction(pretty_function), line, category)
 
-QDebug CreateLoggerInfo(int line, const char *pretty_function, const char *category) { return qCreateLogger(line, pretty_function, category, Info); }
-QDebug CreateLoggerFatal(int line, const char *pretty_function, const char *category) { return qCreateLogger(line, pretty_function, category, Fatal); }
-QDebug CreateLoggerError(int line, const char *pretty_function, const char *category) { return qCreateLogger(line, pretty_function, category, Error); }
+QDebug CreateLoggerFatal(const int line, const char *pretty_function, const char *category) { return qCreateLogger(line, pretty_function, category, Fatal); }
+QDebug CreateLoggerError(const int line, const char *pretty_function, const char *category) { return qCreateLogger(line, pretty_function, category, Error); }
+
+#ifdef QT_NO_INFO_OUTPUT
+QNoDebug CreateLoggerInfo(const int line, const char *pretty_function, const char *category) {
+
+  Q_UNUSED(line)
+  Q_UNUSED(pretty_function)
+  Q_UNUSED(category)
+
+  return QNoDebug();
+
+}
+#else
+QDebug CreateLoggerInfo(const int line, const char *pretty_function, const char *category) { return qCreateLogger(line, pretty_function, category, Info); }
+#endif // QT_NO_INFO_OUTPUT
 
 #ifdef QT_NO_WARNING_OUTPUT
-  QNoDebug CreateLoggerWarning(int, const char*, const char*) { return QNoDebug(); }
+QNoDebug CreateLoggerWarning(const int line, const char *pretty_function, const char *category) {
+
+  Q_UNUSED(line)
+  Q_UNUSED(pretty_function)
+  Q_UNUSED(category)
+
+  return QNoDebug();
+
+}
 #else
-  QDebug CreateLoggerWarning(int line, const char *pretty_function, const char *category) { return qCreateLogger(line, pretty_function, category, Warning); }
+QDebug CreateLoggerWarning(const int line, const char *pretty_function, const char *category) { return qCreateLogger(line, pretty_function, category, Warning); }
 #endif // QT_NO_WARNING_OUTPUT
 
 #ifdef QT_NO_DEBUG_OUTPUT
-  QNoDebug CreateLoggerDebug(int, const char*, const char*) { return QNoDebug(); }
+QNoDebug CreateLoggerDebug(const int line, const char *pretty_function, const char *category) {
+
+  Q_UNUSED(line)
+  Q_UNUSED(pretty_function)
+  Q_UNUSED(category)
+
+  return QNoDebug();
+
+}
 #else
-  QDebug CreateLoggerDebug(int line, const char *pretty_function, const char *category) { return qCreateLogger(line, pretty_function, category, Debug); }
+QDebug CreateLoggerDebug(const int line, const char *pretty_function, const char *category) { return qCreateLogger(line, pretty_function, category, Debug); }
 #endif // QT_NO_DEBUG_OUTPUT
 
 }  // namespace logging

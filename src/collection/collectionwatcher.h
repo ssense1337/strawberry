@@ -33,6 +33,7 @@
 #include <QString>
 #include <QStringList>
 #include <QUrl>
+#include <QMutex>
 
 #include "collectiondirectory.h"
 #include "core/shared_ptr.h"
@@ -45,6 +46,8 @@ class CollectionBackend;
 class FileSystemWatcherInterface;
 class TaskManager;
 class CueParser;
+
+using namespace Qt::Literals::StringLiterals;
 
 class CollectionWatcher : public QObject {
   Q_OBJECT
@@ -64,8 +67,9 @@ class CollectionWatcher : public QObject {
   void SetRescanPausedAsync(const bool pause);
   void ReloadSettingsAsync();
 
-  void Stop() { stop_requested_ = true; }
-  void Abort() { abort_requested_ = true; }
+  void Stop();
+  void CancelStop();
+  void Abort();
 
   void ExitAsync();
 
@@ -178,6 +182,9 @@ class CollectionWatcher : public QObject {
   void RescanSongs(const SongList &songs);
 
  private:
+  bool stop_requested() const;
+  bool abort_requested() const;
+  bool stop_or_abort_requested() const;
   static bool FindSongsByPath(const SongList &songs, const QString &path, SongList *out);
   bool FindSongsByFingerprint(const QString &file, const QString &fingerprint, SongList *out);
   static bool FindSongsByFingerprint(const QString &file, const SongList &songs, const QString &fingerprint, SongList *out);
@@ -231,7 +238,10 @@ class CollectionWatcher : public QObject {
   bool overwrite_playcount_;
   bool overwrite_rating_;
 
+  mutable QMutex mutex_stop_;
   bool stop_requested_;
+
+  mutable QMutex mutex_abort_;
   bool abort_requested_;
 
   QMap<int, CollectionDirectory> watched_dirs_;
@@ -245,21 +255,20 @@ class CollectionWatcher : public QObject {
   CueParser *cue_parser_;
 
   static QStringList sValidImages;
-  static const QStringList kIgnoredExtensions;
 
   qint64 last_scan_time_;
 
 };
 
 inline QString CollectionWatcher::NoExtensionPart(const QString &fileName) {
-  return fileName.contains(QLatin1Char('.')) ? fileName.section(QLatin1Char('.'), 0, -2) : QLatin1String("");
+  return fileName.contains(u'.') ? fileName.section(u'.', 0, -2) : ""_L1;
 }
 // Thanks Amarok
 inline QString CollectionWatcher::ExtensionPart(const QString &fileName) {
-  return fileName.contains(QLatin1Char('.')) ? fileName.mid(fileName.lastIndexOf(QLatin1Char('.')) + 1).toLower() : QLatin1String("");
+  return fileName.contains(u'.') ? fileName.mid(fileName.lastIndexOf(u'.') + 1).toLower() : ""_L1;
 }
 inline QString CollectionWatcher::DirectoryPart(const QString &fileName) {
-  return fileName.section(QLatin1Char('/'), 0, -2);
+  return fileName.section(u'/', 0, -2);
 }
 
 #endif  // COLLECTIONWATCHER_H

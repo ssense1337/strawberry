@@ -37,6 +37,7 @@ class QResizeEvent;
 
 class CollectionBackend;
 class Ui_SmartPlaylistSearchTermWidget;
+class SmartPlaylistSearchTermWidgetOverlay;
 
 class SmartPlaylistSearchTermWidget : public QWidget {
   Q_OBJECT
@@ -62,14 +63,10 @@ class SmartPlaylistSearchTermWidget : public QWidget {
   void Changed();
 
  protected:
-  void showEvent(QShowEvent*) override;
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-  void enterEvent(QEnterEvent*) override;
-#else
-  void enterEvent(QEvent*) override;
-#endif
-  void leaveEvent(QEvent*) override;
-  void resizeEvent(QResizeEvent*) override;
+  void showEvent(QShowEvent *e) override;
+  void enterEvent(QEnterEvent *e) override;
+  void leaveEvent(QEvent *e) override;
+  void resizeEvent(QResizeEvent *e) override;
 
  private Q_SLOTS:
   void FieldChanged(const int index);
@@ -78,13 +75,10 @@ class SmartPlaylistSearchTermWidget : public QWidget {
   void Grab();
 
  private:
-  class Overlay;
-  friend class Overlay;
-
   Ui_SmartPlaylistSearchTermWidget *ui_;
   SharedPtr<CollectionBackend> collection_backend_;
 
-  Overlay *overlay_;
+  SmartPlaylistSearchTermWidgetOverlay *overlay_;
   QPropertyAnimation *animation_;
   bool active_;
   bool initialized_;

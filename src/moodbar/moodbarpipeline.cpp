@@ -37,8 +37,9 @@
 #include "utilities/threadutils.h"
 #include "moodbar/moodbarbuilder.h"
 
-#include "ext/gstmoodbar/gstfastspectrum.h"
+#include "gstfastspectrum.h"
 
+using namespace Qt::StringLiterals;
 using std::make_unique;
 
 namespace {
@@ -73,7 +74,7 @@ GstElement *MoodbarPipeline::CreateElement(const QString &factory_name) {
 QByteArray MoodbarPipeline::ToGstUrl(const QUrl &url) {
 
   if (url.isLocalFile() && !url.host().isEmpty()) {
-    QString str = QLatin1String("file:////") + url.host() + url.path();
+    QString str = "file:////"_L1 + url.host() + url.path();
     return str.toUtf8();
   }
 
@@ -100,7 +101,7 @@ void MoodbarPipeline::Start() {
   if (!decodebin || !convert_element_ || !spectrum || !fakesink) {
     gst_object_unref(GST_OBJECT(pipeline_));
     pipeline_ = nullptr;
-    emit Finished(false);
+    Q_EMIT Finished(false);
     return;
   }
 
@@ -109,7 +110,7 @@ void MoodbarPipeline::Start() {
     qLog(Error) << "Failed to link elements";
     gst_object_unref(GST_OBJECT(pipeline_));
     pipeline_ = nullptr;
-    emit Finished(false);
+    Q_EMIT Finished(false);
     return;
   }
 
@@ -121,7 +122,7 @@ void MoodbarPipeline::Start() {
   g_object_set(decodebin, "uri", gst_url.constData(), nullptr);
   g_object_set(spectrum, "bands", kBands, nullptr);
 
-  GstFastSpectrum *fast_spectrum = reinterpret_cast<GstFastSpectrum*>(spectrum);
+  GstStrawberryFastSpectrum *fast_spectrum = reinterpret_cast<GstStrawberryFastSpectrum*>(spectrum);
   fast_spectrum->output_callback = [this](double *magnitudes, int size) { builder_->AddFrame(magnitudes, size); };
 
   // Connect signals
@@ -222,7 +223,7 @@ void MoodbarPipeline::Stop(const bool success) {
     builder_.reset();
   }
 
-  emit Finished(success);
+  Q_EMIT Finished(success);
 
 }
 

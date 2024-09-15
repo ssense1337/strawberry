@@ -45,9 +45,6 @@ class MusixmatchLyricsProvider : public JsonLyricsProvider, public MusixmatchPro
   explicit MusixmatchLyricsProvider(SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
   ~MusixmatchLyricsProvider() override;
 
-  bool StartSearch(const int id, const LyricsSearchRequest &request) override;
-  void CancelSearch(const int id) override;
-
  private:
   struct LyricsSearchContext {
     explicit LyricsSearchContext() : id(-1) {}
@@ -66,9 +63,12 @@ class MusixmatchLyricsProvider : public JsonLyricsProvider, public MusixmatchPro
   void EndSearch(LyricsSearchContextPtr search, const QUrl &url = QUrl());
   void Error(const QString &error, const QVariant &debug = QVariant()) override;
 
+ protected Q_SLOTS:
+  void StartSearch(const int id, const LyricsSearchRequest &request) override;
+
  private Q_SLOTS:
-  void HandleSearchReply(QNetworkReply *reply, LyricsSearchContextPtr search);
-  void HandleLyricsReply(QNetworkReply *reply, LyricsSearchContextPtr search, const QUrl &url);
+  void HandleSearchReply(QNetworkReply *reply, MusixmatchLyricsProvider::LyricsSearchContextPtr search);
+  void HandleLyricsReply(QNetworkReply *reply, MusixmatchLyricsProvider::LyricsSearchContextPtr search, const QUrl &url);
 
  private:
   QList<LyricsSearchContextPtr> requests_search_;

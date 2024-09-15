@@ -58,7 +58,7 @@
 #include "playlistfilter.h"
 #include "playlistparsers/playlistparser.h"
 #include "ui_playlistcontainer.h"
-#include "widgets/qsearchfield.h"
+#include "widgets/searchfield.h"
 #include "settings/appearancesettingspage.h"
 
 namespace {
@@ -123,7 +123,7 @@ PlaylistContainer::PlaylistContainer(QWidget *parent)
   QObject::connect(filter_timer_, &QTimer::timeout, this, &PlaylistContainer::UpdateFilter);
 
   // Replace playlist search filter with native search box.
-  QObject::connect(ui_->search_field, &QSearchField::textChanged, this, &PlaylistContainer::MaybeUpdateFilter);
+  QObject::connect(ui_->search_field, &SearchField::textChanged, this, &PlaylistContainer::MaybeUpdateFilter);
   QObject::connect(ui_->playlist, &PlaylistView::FocusOnFilterSignal, this, &PlaylistContainer::FocusOnFilter);
   ui_->search_field->installEventFilter(this);
 
@@ -204,7 +204,7 @@ void PlaylistContainer::SetViewModel(Playlist *playlist, const int scroll_positi
   playlist->IgnoreSorting(false);
 
   QObject::connect(view()->selectionModel(), &QItemSelectionModel::selectionChanged, this, &PlaylistContainer::SelectionChanged);
-  emit ViewSelectionModelChanged();
+  Q_EMIT ViewSelectionModelChanged();
 
   // Update filter
   ui_->search_field->setText(playlist->filter()->filter_string());
@@ -236,7 +236,7 @@ void PlaylistContainer::SetViewModel(Playlist *playlist, const int scroll_positi
   ui_->undo->setDefaultAction(undo_);
   ui_->redo->setDefaultAction(redo_);
 
-  emit UndoRedoActionsChanged(undo_, redo_);
+  Q_EMIT UndoRedoActionsChanged(undo_, redo_);
 
 }
 

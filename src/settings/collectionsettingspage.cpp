@@ -158,7 +158,7 @@ void CollectionSettingsPage::Load() {
   ui_->expire_unavailable_songs_days->setValue(s.value("expire_unavailable_songs", 60).toInt());
 
   QStringList filters = s.value("cover_art_patterns", QStringList() << QStringLiteral("front") << QStringLiteral("cover")).toStringList();
-  ui_->cover_art_patterns->setText(filters.join(QLatin1Char(',')));
+  ui_->cover_art_patterns->setText(filters.join(u','));
 
   ui_->spinbox_cache_size->setValue(s.value(kSettingsCacheSize, kSettingsCacheSizeDefault).toInt());
   ui_->combobox_cache_size->setCurrentIndex(ui_->combobox_cache_size->findData(s.value(kSettingsCacheSizeUnit, static_cast<int>(CacheSizeUnit::MB)).toInt()));
@@ -171,12 +171,7 @@ void CollectionSettingsPage::Load() {
   ui_->checkbox_overwrite_playcount->setChecked(s.value("overwrite_playcount", false).toBool());
   ui_->checkbox_overwrite_rating->setChecked(s.value("overwrite_rating", false).toBool());
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
   ui_->checkbox_delete_files->setChecked(s.value("delete_files", false).toBool());
-#else
-  ui_->checkbox_delete_files->setChecked(false);
-  ui_->checkbox_delete_files->hide();
-#endif
 
   s.endGroup();
 
@@ -208,11 +203,7 @@ void CollectionSettingsPage::Save() {
 
   QString filter_text = ui_->cover_art_patterns->text();
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-  QStringList filters = filter_text.split(QLatin1Char(','), Qt::SkipEmptyParts);
-#else
-  QStringList filters = filter_text.split(QLatin1Char(','), QString::SkipEmptyParts);
-#endif
+  const QStringList filters = filter_text.split(u',', Qt::SkipEmptyParts);
 
   s.setValue("cover_art_patterns", filters);
 

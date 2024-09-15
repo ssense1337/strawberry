@@ -49,6 +49,7 @@
 #include "settings/appearancesettingspage.h"
 
 using namespace std::chrono_literals;
+using namespace Qt::StringLiterals;
 
 namespace {
 constexpr int IconSize_LargeSidebar = 40;
@@ -209,12 +210,12 @@ void FancyTabWidget::SetMode(const Mode mode) {
   if (previous_mode == Mode::IconOnlyTabs && mode != Mode::IconOnlyTabs) {
     for (int i = 0; i < count(); ++i) {
       tabBar()->setTabText(i, tabBar()->tabData(i).value<FancyTabData*>()->label());
-      tabBar()->setTabToolTip(i, QLatin1String(""));
+      tabBar()->setTabToolTip(i, ""_L1);
     }
   }
   else if (previous_mode != Mode::IconOnlyTabs && mode == Mode::IconOnlyTabs) {
     for (int i = 0; i < count(); ++i) {
-      tabBar()->setTabText(i, QLatin1String(""));
+      tabBar()->setTabText(i, ""_L1);
       tabBar()->setTabToolTip(i, tabBar()->tabData(i).value<FancyTabData*>()->label());
     }
   }
@@ -225,7 +226,7 @@ void FancyTabWidget::SetMode(const Mode mode) {
   // There appears to be a bug in QTabBar which causes tabSizeHint to be ignored thus the need for this second shot repaint
   QTimer::singleShot(1ms, this, &FancyTabWidget::TabBarUpdateGeometry);
 
-  emit ModeChanged(mode);
+  Q_EMIT ModeChanged(mode);
 
 }
 
@@ -271,14 +272,15 @@ void FancyTabWidget::CurrentTabChangedSlot(const int idx) {
   QLayout *layout = currentPage->layout();
   if (bottom_widget_) layout->addWidget(bottom_widget_);
 
-  emit CurrentTabChanged(idx);
+  Q_EMIT CurrentTabChanged(idx);
 
 }
 
 int FancyTabWidget::IndexOfTab(QWidget *widget) {
 
   if (!tabs_.contains(widget)) return -1;
-  return QTabWidget::indexOf(tabs_[widget]->page());
+  QWidget *page = tabs_.value(widget)->page();
+  return QTabWidget::indexOf(page);
 
 }
 

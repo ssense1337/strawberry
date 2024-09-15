@@ -49,6 +49,8 @@
 #include "sqlquery.h"
 #include "scopedtransaction.h"
 
+using namespace Qt::StringLiterals;
+
 const int Database::kSchemaVersion = 20;
 
 namespace {
@@ -63,13 +65,12 @@ QMutex Database::sNextConnectionIdMutex;
 Database::Database(Application *app, QObject *parent, const QString &database_name) :
       QObject(parent),
       app_(app),
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-      mutex_(QMutex::Recursive),
-#endif
       injected_database_name_(database_name),
       query_hash_(0),
       startup_schema_version_(-1),
       original_thread_(nullptr) {
+
+  setObjectName(QLatin1String(metaObject()->className()));
 
   original_thread_ = thread();
 
@@ -105,7 +106,7 @@ void Database::Exit() {
   Q_ASSERT(QThread::currentThread() == thread());
   Close();
   moveToThread(original_thread_);
-  emit ExitFinished();
+  Q_EMIT ExitFinished();
 
 }
 
@@ -137,7 +138,7 @@ QSqlDatabase Database::Connect() {
   //qLog(Debug) << "Opened database with connection id" << connection_id;
 
   if (injected_database_name_.isNull()) {
-    db.setDatabaseName(directory_ + QLatin1Char('/') + QLatin1String(kDatabaseFilename));
+    db.setDatabaseName(directory_ + u'/' + QLatin1String(kDatabaseFilename));
   }
   else {
     db.setDatabaseName(injected_database_name_);
@@ -161,7 +162,7 @@ QSqlDatabase Database::Connect() {
   // Attach external databases
   QStringList keys = attached_databases_.keys();
   for (const QString &key : std::as_const(keys)) {
-    QString filename = attached_databases_[key].filename_;
+    QString filename = attached_databases_.value(key).filename_;
 
     if (!injected_database_name_.isNull()) filename = injected_database_name_;
 
@@ -182,7 +183,7 @@ QSqlDatabase Database::Connect() {
   // We might have to initialize the schema in some attached databases now, if they were deleted and don't match up with the main schema version.
   keys = attached_databases_.keys();
   for (const QString &key : std::as_const(keys)) {
-    if (attached_databases_[key].is_temporary_ && attached_databases_[key].schema_.isEmpty()) {
+    if (attached_databases_.value(key).is_temporary_ && attached_databases_.value(key).schema_.isEmpty()) {
       continue;
     }
     // Find out if there are any tables in this database
@@ -258,7 +259,7 @@ void Database::RecreateAttachedDb(const QString &database_name) {
     return;
   }
 
-  const QString filename = attached_databases_[database_name].filename_;
+  const QString filename = attached_databases_.value(database_name).filename_;
 
   QMutexLocker l(&mutex_);
   {
@@ -353,7 +354,7 @@ void Database::UrlEncodeFilenameColumn(const QString &table, QSqlDatabase &db) {
     const int rowid = select.value(0).toInt();
     const QString filename = select.value(1).toString();
 
-    if (filename.isEmpty() || filename.contains(QLatin1String("://"))) {
+    if (filename.isEmpty() || filename.contains("://"_L1)) {
       continue;
     }
 
@@ -377,8 +378,8 @@ void Database::ExecSchemaCommandsFromFile(QSqlDatabase &db, const QString &filen
   }
   QByteArray data = schema_file.readAll();
   QString schema = QString::fromUtf8(data);
-  if (schema.contains(QLatin1String("\r\n"))) {
-    schema = schema.replace(QLatin1String("\r\n"), QLatin1String("\n"));
+  if (schema.contains("\r\n"_L1)) {
+    schema = schema.replace("\r\n"_L1, "\n"_L1);
   }
   schema_file.close();
   ExecSchemaCommands(db, schema, schema_version, in_transaction);
@@ -388,7 +389,8 @@ void Database::ExecSchemaCommandsFromFile(QSqlDatabase &db, const QString &filen
 void Database::ExecSchemaCommands(QSqlDatabase &db, const QString &schema, int schema_version, bool in_transaction) {
 
   // Run each command
-  QStringList commands = schema.split(QRegularExpression(QStringLiteral("; *\n\n")));
+  static const QRegularExpression regex_split_commands(QStringLiteral("; *\n\n"));
+  QStringList commands = schema.split(regex_split_commands);
 
   // We don't want this list to reflect possible DB schema changes, so we initialize it before executing any statements.
   // If no outer transaction is provided the song tables need to be queried before beginning an inner transaction!
@@ -414,7 +416,7 @@ void Database::ExecSongTablesCommands(QSqlDatabase &db, const QStringList &song_
     if (command.contains(QLatin1String(kMagicAllSongsTables))) {
       for (const QString &table : song_tables) {
         // Another horrible hack: device songs tables don't have matching _fts tables, so if this command tries to touch one, ignore it.
-        if (table.startsWith(QLatin1String("device_")) && command.contains(QLatin1String(kMagicAllSongsTables) + QLatin1String("_fts"))) {
+        if (table.startsWith("device_"_L1) && command.contains(QLatin1String(kMagicAllSongsTables) + "_fts"_L1)) {
           continue;
         }
 
@@ -450,7 +452,7 @@ QStringList Database::SongsTables(QSqlDatabase &db, const int schema_version) {
   // look for the tables in the main db
   const QStringList &tables = db.tables();
   for (const QString &table : tables) {
-    if (table == QLatin1String("songs") || table.endsWith(QLatin1String("_songs"))) ret << table;
+    if (table == "songs"_L1 || table.endsWith("_songs"_L1)) ret << table;
   }
 
   // look for the tables in attached dbs
@@ -481,8 +483,8 @@ void Database::ReportErrors(const SqlQuery &query) {
   if (sql_error.isValid()) {
     qLog(Error) << "Unable to execute SQL query:" << sql_error;
     qLog(Error) << "Failed SQL query:" << query.LastQuery();
-    emit Error(tr("Unable to execute SQL query: %1").arg(sql_error.text()));
-    emit Error(tr("Failed SQL query: %1").arg(query.LastQuery()));
+    Q_EMIT Error(tr("Unable to execute SQL query: %1").arg(sql_error.text()));
+    Q_EMIT Error(tr("Failed SQL query: %1").arg(query.LastQuery()));
   }
 
 }
@@ -502,7 +504,7 @@ bool Database::IntegrityCheck(const QSqlDatabase &db) {
       QString message = q.value(0).toString();
 
       // If no errors are found, a single row with the value "ok" is returned
-      if (message == QLatin1String("ok")) {
+      if (message == "ok"_L1) {
         ok = true;
         break;
       }

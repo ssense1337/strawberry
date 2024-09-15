@@ -138,6 +138,7 @@ class Song {
   static const QStringList kArticles;
 
   static const QStringList kAcceptedExtensions;
+  static const QStringList kRejectedExtensions;
 
   Song(const Source source = Source::Unknown);
   Song(const Song &other);
@@ -481,11 +482,7 @@ Q_DECLARE_METATYPE(SongMap)
 Q_DECLARE_METATYPE(Song::Source)
 Q_DECLARE_METATYPE(Song::FileType)
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 size_t qHash(const Song &song);
-#else
-uint qHash(const Song &song);
-#endif
 // Hash function using field checked in IsSimilar function
 size_t HashSimilar(const Song &song);
 

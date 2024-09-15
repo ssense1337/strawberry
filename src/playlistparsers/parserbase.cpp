@@ -34,6 +34,8 @@
 #include "settings/playlistsettingspage.h"
 #include "parserbase.h"
 
+using namespace Qt::StringLiterals;
+
 ParserBase::ParserBase(SharedPtr<CollectionBackendInterface> collection_backend, QObject *parent)
     : QObject(parent), collection_backend_(collection_backend) {}
 
@@ -45,7 +47,8 @@ void ParserBase::LoadSong(const QString &filename_or_url, const qint64 beginning
 
   QString filename = filename_or_url;
 
-  if (filename_or_url.contains(QRegularExpression(QStringLiteral("^[a-z]{2,}:"), QRegularExpression::CaseInsensitiveOption))) {
+  static const QRegularExpression regex_url_schema(QStringLiteral("^[a-z]{2,}:"), QRegularExpression::CaseInsensitiveOption);
+  if (filename_or_url.contains(regex_url_schema)) {
     QUrl url(filename_or_url);
     song->set_source(Song::SourceFromURL(url));
     if (song->source() == Song::Source::LocalFile) {
@@ -59,7 +62,7 @@ void ParserBase::LoadSong(const QString &filename_or_url, const qint64 beginning
     }
     else {
       qLog(Error) << "Don't know how to handle" << url;
-      emit Error(tr("Don't know how to handle %1").arg(filename_or_url));
+      Q_EMIT Error(tr("Don't know how to handle %1").arg(filename_or_url));
       return;
     }
   }
@@ -127,7 +130,7 @@ QString ParserBase::URLOrFilename(const QUrl &url, const QDir &dir, const Playli
   if (path_type != PlaylistSettingsPage::PathType::Absolute && QDir::isAbsolutePath(filename)) {
     const QString relative = dir.relativeFilePath(filename);
 
-    if (!relative.startsWith(QLatin1String("../")) || path_type == PlaylistSettingsPage::PathType::Relative) {
+    if (!relative.startsWith("../"_L1) || path_type == PlaylistSettingsPage::PathType::Relative) {
       return relative;
     }
   }

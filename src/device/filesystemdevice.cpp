@@ -70,7 +70,7 @@ FilesystemDevice::FilesystemDevice(const QUrl &url, DeviceLister *lister, const 
 
 FilesystemDevice::~FilesystemDevice() {
 
-  watcher_->Stop();
+  watcher_->Abort();
   watcher_->deleteLater();
   watcher_thread_->exit();
   watcher_thread_->wait();
@@ -113,7 +113,7 @@ void FilesystemDevice::ExitFinished() {
   qLog(Debug) << obj << "successfully exited.";
   wait_for_exit_.removeAll(obj);
   if (wait_for_exit_.isEmpty()) {
-    emit DeviceCloseFinished(unique_id());
+    Q_EMIT DeviceCloseFinished(unique_id());
   }
 
 }

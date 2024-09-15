@@ -29,9 +29,7 @@
 #include <QDBusObjectPath>
 #include <QDBusPendingCallWatcher>
 #include <QKeySequence>
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-#  include <QKeyCombination>
-#endif
+#include <QKeyCombination>
 
 #include "core/logging.h"
 
@@ -178,7 +176,7 @@ QStringList GlobalShortcutsBackendKDE::GetActionId(const QString &id, const QAct
   ret << QCoreApplication::applicationName();
   ret << id;
   ret << QCoreApplication::applicationName();
-  ret << action->text().remove(QLatin1Char('&'));
+  ret << action->text().remove(u'&');
   if (ret.back().isEmpty()) ret.back() = id;
 
   return ret;
@@ -190,11 +188,7 @@ QList<int> GlobalShortcutsBackendKDE::ToIntList(const QList<QKeySequence> &seque
   QList<int> ret;
   ret.reserve(sequence_list.count());
   for (const QKeySequence &sequence : sequence_list) {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     ret.append(sequence[0].toCombined());
-#else
-    ret.append(sequence[0]);
-#endif
   }
 
   return ret;

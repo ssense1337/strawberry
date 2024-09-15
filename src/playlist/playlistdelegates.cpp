@@ -71,6 +71,8 @@
 #include "playlist/playlist.h"
 #include "playlistdelegates.h"
 
+using namespace Qt::StringLiterals;
+
 namespace {
 constexpr int kQueueBoxBorder = 1;
 constexpr int kQueueBoxCornerRadius = 3;
@@ -172,11 +174,7 @@ QString PlaylistDelegateBase::displayText(const QVariant &value, const QLocale&)
 
   QString text;
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   switch (value.metaType().id()) {
-#else
-  switch (static_cast<QMetaType::Type>(value.type())) {
-#endif
     case QMetaType::Int:{
       int v = value.toInt();
       if (v > 0) text = QString::number(v);
@@ -262,10 +260,10 @@ bool PlaylistDelegateBase::helpEvent(QHelpEvent *event, QAbstractItemView *view,
   // Special case: we want newlines in the comment tooltip
   if (idx.column() == static_cast<int>(Playlist::Column::Comment)) {
     text = idx.data(Qt::ToolTipRole).toString().toHtmlEscaped();
-    text.replace(QLatin1String("\\r\\n"), QLatin1String("<br />"));
-    text.replace(QLatin1String("\\n"), QLatin1String("<br />"));
-    text.replace(QLatin1String("\r\n"), QLatin1String("<br />"));
-    text.replace(QLatin1String("\n"), QLatin1String("<br />"));
+    text.replace("\\r\\n"_L1, "<br />"_L1);
+    text.replace("\\n"_L1, "<br />"_L1);
+    text.replace("\r\n"_L1, "<br />"_L1);
+    text.replace("\n"_L1, "<br />"_L1);
   }
 
   if (text.isEmpty() || !event) return false;
@@ -441,14 +439,10 @@ QString NativeSeparatorsDelegate::displayText(const QVariant &value, const QLoca
   const QString string_value = value.toString();
 
   QUrl url;
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   if (value.metaType().id() == QMetaType::QUrl) {
-#else
-  if (value.type() == QVariant::Url) {
-#endif
     url = value.toUrl();
   }
-  else if (string_value.contains(QLatin1String("://"))) {
+  else if (string_value.contains("://"_L1)) {
     url = QUrl::fromEncoded(string_value.toLatin1());
   }
   else {
@@ -478,11 +472,7 @@ QPixmap SongSourceDelegate::LookupPixmap(const Song::Source source, const QSize 
   }
 
   QIcon icon(Song::IconForSource(source));
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
   pixmap = icon.pixmap(size, device_pixel_ratio);
-#else
-  pixmap = icon.pixmap(size);
-#endif
   QPixmapCache::insert(pixmap_cache_key, pixmap);
 
   return pixmap;

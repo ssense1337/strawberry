@@ -95,7 +95,7 @@ FileView::FileView(QWidget *parent)
   QObject::connect(ui_->list, &FileViewList::EditTags, this, &FileView::EditTags);
 
   QString filter = QLatin1String(FileView::kFileFilter);
-  filter_list_ << filter.split(QLatin1Char(' '));
+  filter_list_ << filter.split(u' ');
 
   ReloadSettings();
 
@@ -182,7 +182,7 @@ void FileView::ChangeFilePathWithoutUndo(const QString &new_path) {
   QDir dir(new_path);
   ui_->up->setEnabled(dir.cdUp());
 
-  emit PathChanged(new_path);
+  Q_EMIT PathChanged(new_path);
 
 }
 
@@ -204,7 +204,7 @@ void FileView::ItemDoubleClick(const QModelIndex &idx) {
   mimedata->setUrls(QList<QUrl>() << QUrl::fromLocalFile(file_path));
   mimedata->name_for_new_playlist_ = file_path;
 
-  emit AddToPlaylist(mimedata);
+  Q_EMIT AddToPlaylist(mimedata);
 
 }
 
@@ -245,12 +245,7 @@ void FileView::Delete(const QStringList &filenames) {
 
   if (DeleteConfirmationDialog::warning(filenames) != QDialogButtonBox::Yes) return;
 
-  bool use_trash = false;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-  use_trash = true;
-#endif
-
-  DeleteFiles *delete_files = new DeleteFiles(task_manager_, storage_, use_trash);
+  DeleteFiles *delete_files = new DeleteFiles(task_manager_, storage_, true);
   QObject::connect(delete_files, &DeleteFiles::Finished, this, &FileView::DeleteFinished);
   delete_files->Start(filenames);
 

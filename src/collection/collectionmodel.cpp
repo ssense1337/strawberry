@@ -24,10 +24,11 @@
 #include <algorithm>
 #include <utility>
 #include <optional>
+#include <chrono>
 
 #include <QObject>
 #include <QtGlobal>
-#include <QtConcurrent>
+#include <QtConcurrentRun>
 #include <QThread>
 #include <QMutex>
 #include <QFuture>
@@ -75,6 +76,9 @@
 #include "covermanager/albumcoverloader.h"
 #include "settings/collectionsettingspage.h"
 
+using namespace std::chrono_literals;
+using namespace Qt::StringLiterals;
+
 const int CollectionModel::kPrettyCoverSize = 32;
 namespace {
 constexpr char kPixmapDiskCacheDir[] = "pixmapcache";
@@ -98,6 +102,8 @@ CollectionModel::CollectionModel(SharedPtr<CollectionBackend> backend, Applicati
       total_album_count_(0),
       loading_(false) {
 
+  setObjectName(backend_->source() == Song::Source::Collection ? QLatin1String(metaObject()->className()) : QStringLiteral("%1%2").arg(Song::DescriptionForSource(backend_->source()), QLatin1String(metaObject()->className())));
+
   filter_->setSourceModel(this);
   filter_->setSortRole(Role_SortText);
   filter_->sort(0);
@@ -114,7 +120,7 @@ CollectionModel::CollectionModel(SharedPtr<CollectionBackend> backend, Applicati
 
   if (app_ && !sIconCache) {
     sIconCache = new QNetworkDiskCache(this);
-    sIconCache->setCacheDirectory(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1Char('/') + QLatin1String(kPixmapDiskCacheDir));
+    sIconCache->setCacheDirectory(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + u'/' + QLatin1String(kPixmapDiskCacheDir));
     QObject::connect(app_, &Application::ClearPixmapDiskCache, this, &CollectionModel::ClearDiskCache);
   }
 
@@ -133,11 +139,11 @@ CollectionModel::CollectionModel(SharedPtr<CollectionBackend> backend, Applicati
   backend_->UpdateTotalAlbumCountAsync();
 
   timer_reload_->setSingleShot(true);
-  timer_reload_->setInterval(300);
+  timer_reload_->setInterval(300ms);
   QObject::connect(timer_reload_, &QTimer::timeout, this, &CollectionModel::Reload);
 
   timer_update_->setSingleShot(false);
-  timer_update_->setInterval(20);
+  timer_update_->setInterval(20ms);
   QObject::connect(timer_update_, &QTimer::timeout, this, &CollectionModel::ProcessUpdate);
 
   ReloadSettings();
@@ -146,7 +152,7 @@ CollectionModel::CollectionModel(SharedPtr<CollectionBackend> backend, Applicati
 
 CollectionModel::~CollectionModel() {
 
-  qLog(Debug) << "Collection model" << this << "for" << Song::TextForSource(backend_->source()) << "deleted";
+  qLog(Debug) << "Collection model" << this << "deleted";
 
   beginResetModel();
   Clear();
@@ -266,7 +272,7 @@ void CollectionModel::SetGroupBy(const Grouping g, const std::optional<bool> sep
 
   ScheduleReset();
 
-  emit GroupingChanged(g, options_current_.separate_albums_by_grouping);
+  Q_EMIT GroupingChanged(g, options_current_.separate_albums_by_grouping);
 
 }
 
@@ -514,7 +520,7 @@ void CollectionModel::AddReAddOrUpdateSongsInternal(const SongList &songs) {
       songs_added << new_song;
       continue;
     }
-    const Song &old_song = song_nodes_[new_song.id()]->metadata;
+    const Song old_song = song_nodes_.value(new_song.id())->metadata;
     bool container_key_changed = false;
     bool has_unique_album_identifier_1 = false;
     bool has_unique_album_identifier_2 = false;
@@ -580,7 +586,7 @@ void CollectionModel::AddSongsInternal(const SongList &songs) {
         container_key = container->container_key;
       }
       else {
-        if (!container_key.isEmpty()) container_key.append(QLatin1Char('-'));
+        if (!container_key.isEmpty()) container_key.append(u'-');
         container_key.append(ContainerKey(group_by, song, has_unique_album_identifier));
         if (container_nodes_[i].contains(container_key)) {
           container = container_nodes_[i][container_key];
@@ -606,7 +612,7 @@ void CollectionModel::UpdateSongsInternal(const SongList &songs) {
       qLog(Error) << "Song does not exist in model" << new_song.id() << new_song.PrettyTitleWithArtist();
       continue;
     }
-    CollectionItem *item = song_nodes_[new_song.id()];
+    CollectionItem *item = song_nodes_.value(new_song.id());
     const Song &old_song = item->metadata;
     const bool song_title_data_changed = IsSongTitleDataChanged(old_song, new_song);
     const bool art_changed = !old_song.IsArtEqual(new_song);
@@ -622,7 +628,7 @@ void CollectionModel::UpdateSongsInternal(const SongList &songs) {
       qLog(Debug) << "Song metadata and title for" << new_song.id() << new_song.PrettyTitleWithArtist() << "changed, informing model";
       const QModelIndex idx = ItemToIndex(item);
       if (!idx.isValid()) continue;
-      emit dataChanged(idx, idx);
+      Q_EMIT dataChanged(idx, idx);
     }
     else {
       qLog(Debug) << "Song metadata for" << new_song.id() << new_song.PrettyTitleWithArtist() << "changed";
@@ -633,7 +639,7 @@ void CollectionModel::UpdateSongsInternal(const SongList &songs) {
     ClearItemPixmapCache(item);
     const QModelIndex idx = ItemToIndex(item);
     if (idx.isValid()) {
-      emit dataChanged(idx, idx);
+      Q_EMIT dataChanged(idx, idx);
     }
   }
 
@@ -648,7 +654,7 @@ void CollectionModel::RemoveSongsInternal(const SongList &songs) {
   for (const Song &song : songs) {
 
     if (song_nodes_.contains(song.id())) {
-      CollectionItem *node = song_nodes_[song.id()];
+      CollectionItem *node = song_nodes_.value(song.id());
 
       if (node->parent != root_) parents << node->parent;
 
@@ -706,7 +712,7 @@ void CollectionModel::RemoveSongsInternal(const SongList &songs) {
     }
 
     // Remove the divider
-    int row = divider_nodes_[divider_key]->row;
+    const int row = divider_nodes_.value(divider_key)->row;
     beginRemoveRows(ItemToIndex(root_), row, row);
     root_->Delete(row);
     endRemoveRows();
@@ -753,7 +759,7 @@ void CollectionModel::CreateDividerItem(const QString &divider_key, const QStrin
   CollectionItem *divider = new CollectionItem(CollectionItem::Type::Divider, root_);
   divider->container_key = divider_key;
   divider->display_text = display_text;
-  divider->sort_text = divider_key + QLatin1String("  ");
+  divider->sort_text = divider_key + "  "_L1;
   divider_nodes_[divider_key] = divider;
 
   endInsertRows();
@@ -797,7 +803,7 @@ CollectionItem *CollectionModel::CreateCompilationArtistNode(CollectionItem *par
   if (parent != root_ && !parent->container_key.isEmpty()) parent->compilation_artist_node_->container_key.append(parent->container_key);
   parent->compilation_artist_node_->container_key.append(QLatin1String(kVariousArtists));
   parent->compilation_artist_node_->display_text = QLatin1String(kVariousArtists);
-  parent->compilation_artist_node_->sort_text = QLatin1String(" various");
+  parent->compilation_artist_node_->sort_text = " various"_L1;
   parent->compilation_artist_node_->container_level = parent->container_level + 1;
 
   endInsertRows();
@@ -808,11 +814,7 @@ CollectionItem *CollectionModel::CreateCompilationArtistNode(CollectionItem *par
 
 void CollectionModel::LoadSongsFromSqlAsync() {
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   QFuture<SongList> future = QtConcurrent::run(&CollectionModel::LoadSongsFromSql, this, options_active_.filter_options);
-#else
-  QFuture<SongList> future = QtConcurrent::run(this, &CollectionModel::LoadSongsFromSql, options_active_.filter_options);
-#endif
   QFutureWatcher<SongList> *watcher = new QFutureWatcher<SongList>();
   QObject::connect(watcher, &QFutureWatcher<void>::finished, this, &CollectionModel::LoadSongsFromSqlAsyncFinished);
   watcher->setFuture(future);
@@ -989,7 +991,7 @@ void CollectionModel::AlbumCoverLoaded(const quint64 id, const AlbumCoverLoaderR
   const QModelIndex idx = ItemToIndex(item);
   if (!idx.isValid()) return;
 
-  emit dataChanged(idx, idx);
+  Q_EMIT dataChanged(idx, idx);
 
 }
 
@@ -1055,14 +1057,14 @@ QString CollectionModel::TextOrUnknown(const QString &text) {
 QString CollectionModel::PrettyYearAlbum(const int year, const QString &album) {
 
   if (year <= 0) return TextOrUnknown(album);
-  return QString::number(year) + QLatin1String(" - ") + TextOrUnknown(album);
+  return QString::number(year) + " - "_L1 + TextOrUnknown(album);
 
 }
 
 QString CollectionModel::PrettyAlbumDisc(const QString &album, const int disc) {
 
   if (disc <= 0 || Song::AlbumContainsDisc(album)) return TextOrUnknown(album);
-  return TextOrUnknown(album) + QLatin1String(" - (Disc ") + QString::number(disc) + QLatin1String(")");
+  return TextOrUnknown(album) + " - (Disc "_L1 + QString::number(disc) + ")"_L1;
 
 }
 
@@ -1071,9 +1073,9 @@ QString CollectionModel::PrettyYearAlbumDisc(const int year, const QString &albu
   QString str;
 
   if (year <= 0) str = TextOrUnknown(album);
-  else str = QString::number(year) + QLatin1String(" - ") + TextOrUnknown(album);
+  else str = QString::number(year) + " - "_L1 + TextOrUnknown(album);
 
-  if (!Song::AlbumContainsDisc(album) && disc > 0) str += QLatin1String(" - (Disc ") + QString::number(disc) + QLatin1String(")");
+  if (!Song::AlbumContainsDisc(album) && disc > 0) str += " - (Disc "_L1 + QString::number(disc) + ")"_L1;
 
   return str;
 
@@ -1081,7 +1083,7 @@ QString CollectionModel::PrettyYearAlbumDisc(const int year, const QString &albu
 
 QString CollectionModel::PrettyDisc(const int disc) {
 
-  return QLatin1String("Disc ") + QString::number(std::max(1, disc));
+  return "Disc "_L1 + QString::number(std::max(1, disc));
 
 }
 
@@ -1158,12 +1160,13 @@ QString CollectionModel::SortText(const GroupBy group_by, const int container_le
 QString CollectionModel::SortText(QString text) {
 
   if (text.isEmpty()) {
-    text = QLatin1String(" unknown");
+    text = " unknown"_L1;
   }
   else {
     text = text.toLower();
   }
-  text = text.remove(QRegularExpression(QStringLiteral("[^\\w ]"), QRegularExpression::UseUnicodePropertiesOption));
+  static const QRegularExpression regex_not_words(QStringLiteral("[^\\w ]"), QRegularExpression::UseUnicodePropertiesOption);
+  text = text.remove(regex_not_words);
 
   return text;
 
@@ -1177,7 +1180,7 @@ QString CollectionModel::SortTextForArtist(QString artist, const bool skip_artic
     for (const auto &i : Song::kArticles) {
       if (artist.startsWith(i)) {
         qint64 ilen = i.length();
-        artist = artist.right(artist.length() - ilen) + QLatin1String(", ") + i.left(ilen - 1);
+        artist = artist.right(artist.length() - ilen) + ", "_L1 + i.left(ilen - 1);
         break;
       }
     }
@@ -1188,7 +1191,6 @@ QString CollectionModel::SortTextForArtist(QString artist, const bool skip_artic
 }
 
 QString CollectionModel::SortTextForNumber(const int number) {
-
   return QStringLiteral("%1").arg(number, 4, 10, QLatin1Char('0'));
 }
 
@@ -1316,7 +1318,7 @@ QString CollectionModel::ContainerKey(const GroupBy group_by, const Song &song, 
 
   // Make sure we distinguish albums by different artists if the parent group by is not including artist.
   if (IsAlbumGroupBy(group_by) && !has_unique_album_identifier && !song.is_compilation() && !song.effective_albumartist().isEmpty()) {
-    key.prepend(QLatin1Char('-'));
+    key.prepend(u'-');
     key.prepend(TextOrUnknown(song.effective_albumartist()));
     has_unique_album_identifier = true;
   }
@@ -1346,7 +1348,7 @@ QString CollectionModel::DividerKey(const GroupBy group_by, const Song &song, co
     case GroupBy::FileType: {
       QChar c = sort_text[0];
       if (c.isDigit()) return QStringLiteral("0");
-      if (c == QLatin1Char(' ')) return QString();
+      if (c == u' ') return QString();
       if (c.decompositionTag() != QChar::NoDecomposition) {
         QString decomposition = c.decomposition();
         return QChar(decomposition[0]);
@@ -1395,25 +1397,25 @@ QString CollectionModel::DividerDisplayText(const GroupBy group_by, const QStrin
     case GroupBy::Genre:
     case GroupBy::FileType:
     case GroupBy::Format:
-      if (key == QLatin1String("0")) return QStringLiteral("0-9");
+      if (key == "0"_L1) return QStringLiteral("0-9");
       return key.toUpper();
 
     case GroupBy::YearAlbum:
     case GroupBy::YearAlbumDisc:
     case GroupBy::OriginalYearAlbum:
     case GroupBy::OriginalYearAlbumDisc:
-      if (key == QLatin1String("0000")) return tr("Unknown");
+      if (key == "0000"_L1) return tr("Unknown");
       return key.toUpper();
 
     case GroupBy::Year:
     case GroupBy::OriginalYear:
-      if (key == QLatin1String("0000")) return tr("Unknown");
+      if (key == "0000"_L1) return tr("Unknown");
       return QString::number(key.toInt());  // To remove leading 0s
 
     case GroupBy::Samplerate:
     case GroupBy::Bitdepth:
     case GroupBy::Bitrate:
-      if (key == QLatin1String("000")) return tr("Unknown");
+      if (key == "000"_L1) return tr("Unknown");
       return QString::number(key.toInt());  // To remove leading 0s
 
     case GroupBy::None:
@@ -1429,17 +1431,15 @@ QString CollectionModel::DividerDisplayText(const GroupBy group_by, const QStrin
 
 bool CollectionModel::CompareItems(const CollectionItem *a, const CollectionItem *b) const {
 
-  QVariant left(data(a, CollectionModel::Role_SortText));
-  QVariant right(data(b, CollectionModel::Role_SortText));
+  QVariant left = data(a, CollectionModel::Role_SortText);
+  QVariant right = data(b, CollectionModel::Role_SortText);
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-  if (left.metaType().id() == QMetaType::Int)
-#else
-  if (left.type() == QVariant::Int)
-#endif
+  if (left.metaType().id() == QMetaType::Int) {
     return left.toInt() < right.toInt();
-  else
+  }
+  else {
     return left.toString() < right.toString();
+  }
 
 }
 
@@ -1531,21 +1531,21 @@ CollectionModel::GroupBy &CollectionModel::Grouping::operator[](const int i) {
 void CollectionModel::TotalSongCountUpdatedSlot(const int count) {
 
   total_song_count_ = count;
-  emit TotalSongCountUpdated(count);
+  Q_EMIT TotalSongCountUpdated(count);
 
 }
 
 void CollectionModel::TotalArtistCountUpdatedSlot(const int count) {
 
   total_artist_count_ = count;
-  emit TotalArtistCountUpdated(count);
+  Q_EMIT TotalArtistCountUpdated(count);
 
 }
 
 void CollectionModel::TotalAlbumCountUpdatedSlot(const int count) {
 
   total_album_count_ = count;
-  emit TotalAlbumCountUpdated(count);
+  Q_EMIT TotalAlbumCountUpdated(count);
 
 }
 
@@ -1565,7 +1565,7 @@ void CollectionModel::RowsInserted(const QModelIndex &parent, const int first, c
   }
 
   if (!songs.isEmpty()) {
-    emit SongsAdded(songs);
+    Q_EMIT SongsAdded(songs);
   }
 
 }
@@ -1581,7 +1581,7 @@ void CollectionModel::RowsRemoved(const QModelIndex &parent, const int first, co
     songs << item->metadata;
   }
 
-  emit SongsRemoved(songs);
+  Q_EMIT SongsRemoved(songs);
 
 }
 

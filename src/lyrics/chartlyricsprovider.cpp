@@ -19,7 +19,8 @@
 
 #include "config.h"
 
-#include <QObject>
+#include <QApplication>
+#include <QThread>
 #include <QByteArray>
 #include <QVariant>
 #include <QString>
@@ -36,6 +37,8 @@
 #include "lyricssearchrequest.h"
 #include "lyricssearchresult.h"
 #include "chartlyricsprovider.h"
+
+using namespace Qt::StringLiterals;
 
 namespace {
 constexpr char kUrlSearch[] = "http://api.chartlyrics.com/apiv1.asmx/SearchLyricDirect";
@@ -54,7 +57,9 @@ ChartLyricsProvider::~ChartLyricsProvider() {
 
 }
 
-bool ChartLyricsProvider::StartSearch(const int id, const LyricsSearchRequest &request) {
+void ChartLyricsProvider::StartSearch(const int id, const LyricsSearchRequest &request) {
+
+  Q_ASSERT(QThread::currentThread() != qApp->thread());
 
   QUrlQuery url_query;
   url_query.addQueryItem(QStringLiteral("artist"), QString::fromUtf8(QUrl::toPercentEncoding(request.artist)));
@@ -68,11 +73,7 @@ bool ChartLyricsProvider::StartSearch(const int id, const LyricsSearchRequest &r
   replies_ << reply;
   QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, id, request]() { HandleSearchReply(reply, id, request); });
 
-  return true;
-
 }
-
-void ChartLyricsProvider::CancelSearch(const int) {}
 
 void ChartLyricsProvider::HandleSearchReply(QNetworkReply *reply, const int id, const LyricsSearchRequest &request) {
 
@@ -83,13 +84,13 @@ void ChartLyricsProvider::HandleSearchReply(QNetworkReply *reply, const int id, 
 
   if (reply->error() != QNetworkReply::NoError) {
     Error(QStringLiteral("%1 (%2)").arg(reply->errorString()).arg(reply->error()));
-    emit SearchFinished(id);
+    Q_EMIT SearchFinished(id);
     return;
   }
 
   if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200) {
     Error(QStringLiteral("Received HTTP code %1").arg(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt()));
-    emit SearchFinished(id);
+    Q_EMIT SearchFinished(id);
     return;
   }
 
@@ -101,21 +102,21 @@ void ChartLyricsProvider::HandleSearchReply(QNetworkReply *reply, const int id, 
     QXmlStreamReader::TokenType type = reader.readNext();
     QString name = reader.name().toString();
     if (type == QXmlStreamReader::StartElement) {
-      if (name == QLatin1String("GetLyricResult")) {
+      if (name == "GetLyricResult"_L1) {
         result = LyricsSearchResult();
       }
-      if (name == QLatin1String("LyricArtist")) {
+      if (name == "LyricArtist"_L1) {
         result.artist = reader.readElementText();
       }
-      else if (name == QLatin1String("LyricSong")) {
+      else if (name == "LyricSong"_L1) {
         result.title = reader.readElementText();
       }
-      else if (name == QLatin1String("Lyric")) {
+      else if (name == "Lyric"_L1) {
         result.lyrics = reader.readElementText();
       }
     }
     else if (type == QXmlStreamReader::EndElement) {
-      if (name == QLatin1String("GetLyricResult")) {
+      if (name == "GetLyricResult"_L1) {
         if (!result.artist.isEmpty() && !result.title.isEmpty() && !result.lyrics.isEmpty() &&
             (result.artist.compare(request.albumartist, Qt::CaseInsensitive) == 0 ||
              result.artist.compare(request.artist, Qt::CaseInsensitive) == 0 ||
@@ -135,7 +136,7 @@ void ChartLyricsProvider::HandleSearchReply(QNetworkReply *reply, const int id, 
     qLog(Debug) << "ChartLyrics: Got lyrics for" << request.artist << request.title;
   }
 
-  emit SearchFinished(id, results);
+  Q_EMIT SearchFinished(id, results);
 
 }
 

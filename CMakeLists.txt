@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.13)
 
 project(strawberry)
 
@@ -84,6 +84,13 @@ add_compile_options(${COMPILE_OPTIONS})
 
 if(CMAKE_BUILD_TYPE MATCHES "Release")
   add_definitions(-DNDEBUG)
+  set(ENABLE_DEBUG_OUTPUT_DEFAULT OFF)
+else()
+  set(ENABLE_DEBUG_OUTPUT_DEFAULT ON)
+endif()
+
+option(ENABLE_DEBUG_OUTPUT "Enable debug output" ${ENABLE_DEBUG_OUTPUT_DEFAULT})
+if(NOT ENABLE_DEBUG_OUTPUT)
   add_definitions(-DQT_NO_DEBUG_OUTPUT)
 endif()
 
@@ -158,37 +165,13 @@ find_package(FFTW3)
 find_package(GTest)
 find_library(GMOCK_LIBRARY gmock)
 
-option(BUILD_WITH_QT5 "Build with Qt 5" OFF)
-option(BUILD_WITH_QT6 "Build with Qt 6" OFF)
-
-if(BUILD_WITH_QT6)
-  set(QT_VERSION_MAJOR 6)
-elseif(BUILD_WITH_QT5)
-  set(QT_VERSION_MAJOR 5)
-endif()
-
-if(NOT QT_VERSION_MAJOR)
-  message(STATUS "QT_VERSION_MAJOR, BUILD_WITH_QT5 or BUILD_WITH_QT6 not set, detecting Qt version...")
-  find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
-endif()
-
-if(QT_VERSION_MAJOR EQUAL 6)
-  set(QT_MIN_VERSION 6.0)
-elseif(QT_VERSION_MAJOR EQUAL 5)
-  set(QT_MIN_VERSION 5.12)
-else()
-  message(FATAL_ERROR "Invalid QT_VERSION_MAJOR.")
-endif()
-
+set(QT_VERSION_MAJOR 6)
+set(QT_MIN_VERSION 6.4.0)
 set(QT_DEFAULT_MAJOR_VERSION ${QT_VERSION_MAJOR})
-
 set(QT_COMPONENTS Core Concurrent Gui Widgets Network Sql)
 set(QT_OPTIONAL_COMPONENTS LinguistTools Test)
 if(DBUS_FOUND AND NOT WIN32)
   list(APPEND QT_COMPONENTS DBus)
-endif()
-if(X11_FOUND AND QT_VERSION_MAJOR EQUAL 5)
-  list(APPEND QT_COMPONENTS X11Extras)
 endif()
 
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MIN_VERSION} COMPONENTS ${QT_COMPONENTS} REQUIRED OPTIONAL_COMPONENTS ${QT_OPTIONAL_COMPONENTS})
@@ -198,27 +181,6 @@ if(Qt${QT_VERSION_MAJOR}DBus_FOUND)
 endif()
 if(Qt${QT_VERSION_MAJOR}LinguistTools_FOUND)
   get_target_property(QT_LCONVERT_EXECUTABLE Qt${QT_VERSION_MAJOR}::lconvert LOCATION)
-endif()
-if(Qt${QT_VERSION_MAJOR}X11Extras_FOUND)
-  set(HAVE_X11EXTRAS ON)
-endif()
-
-if(QT_VERSION_MAJOR EQUAL 5 AND Qt5Core_VERSION VERSION_LESS 5.15.0)
-  macro(qt_add_resources)
-    qt5_add_resources(${ARGN})
-  endmacro()
-  macro(qt_wrap_cpp)
-    qt5_wrap_cpp(${ARGN})
-  endmacro()
-  macro(qt_wrap_ui)
-    qt5_wrap_ui(${ARGN})
-  endmacro()
-  macro(qt_add_dbus_adaptor)
-    qt5_add_dbus_adaptor(${ARGN})
-  endmacro()
-  macro(qt_add_dbus_interface)
-    qt5_add_dbus_interface(${ARGN})
-  endmacro()
 endif()
 
 if(X11_FOUND)
@@ -244,21 +206,19 @@ if(X11_FOUND)
   endif()
 
   # Check for QX11Application (Qt 6 compiled with XCB).
-  if(QT_VERSION_MAJOR EQUAL 6 AND Qt6Gui_VERSION VERSION_GREATER_EQUAL 6.2.0)
-    set(CMAKE_REQUIRED_FLAGS "-std=c++17")
-    set(CMAKE_REQUIRED_LIBRARIES Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Gui)
-    check_cxx_source_compiles("
+  set(CMAKE_REQUIRED_FLAGS "-std=c++17")
+  set(CMAKE_REQUIRED_LIBRARIES Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Gui)
+  check_cxx_source_compiles("
     #include <QGuiApplication>
     int main() {
       (void)qApp->nativeInterface<QNativeInterface::QX11Application>();
       return 0;
     }
     "
-      HAVE_QX11APPLICATION
-      )
-    unset(CMAKE_REQUIRED_FLAGS)
-    unset(CMAKE_REQUIRED_LIBRARIES)
-  endif()
+    HAVE_QX11APPLICATION
+  )
+  unset(CMAKE_REQUIRED_FLAGS)
+  unset(CMAKE_REQUIRED_LIBRARIES)
 
 endif(X11_FOUND)
 
@@ -274,7 +234,7 @@ if(USE_TAGLIB)
     set(HAVE_TAGLIB_DSFFILE ON)
     set(HAVE_TAGLIB_DSDIFFFILE ON)
   else()
-    pkg_check_modules(TAGLIB REQUIRED taglib>=1.11.1)
+    pkg_check_modules(TAGLIB REQUIRED taglib>=1.12)
   endif()
   set(HAVE_TAGLIB ON)
 else()
@@ -296,18 +256,10 @@ if(NOT HAVE_TAGLIB AND NOT HAVE_TAGPARSER)
 endif()
 
 # SingleApplication
-if(QT_VERSION_MAJOR EQUAL 5)
-  set(KDSINGLEAPPLICATION_NAME "KDSingleApplication")
-else()
-  set(KDSINGLEAPPLICATION_NAME "KDSingleApplication-qt${QT_VERSION_MAJOR}")
-endif()
+set(KDSINGLEAPPLICATION_NAME "KDSingleApplication-qt${QT_VERSION_MAJOR}")
 find_package(${KDSINGLEAPPLICATION_NAME} 1.1.0)
 if(TARGET KDAB::kdsingleapplication)
-  if(QT_VERSION_MAJOR EQUAL 5)
-    set(KDSINGLEAPPLICATION_VERSION "${KDSingleApplication_VERSION}")
-  elseif(QT_VERSION_MAJOR EQUAL 6)
-    set(KDSINGLEAPPLICATION_VERSION "${KDSingleApplication-qt6_VERSION}")
-  endif()
+  set(KDSINGLEAPPLICATION_VERSION "${KDSingleApplication-qt6_VERSION}")
   message(STATUS "Using system KDSingleApplication (Version ${KDSINGLEAPPLICATION_VERSION})")
   set(SINGLEAPPLICATION_LIBRARIES KDAB::kdsingleapplication)
 else()
@@ -323,21 +275,14 @@ if(APPLE)
   add_subdirectory(3rdparty/SPMediaKeyTap)
   set(SPMEDIAKEYTAP_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SPMediaKeyTap)
   set(SPMEDIAKEYTAP_LIBRARIES SPMediaKeyTap)
-  add_subdirectory(ext/macdeploycheck)
 endif()
 
 if(WIN32)
+  find_package(getopt-win REQUIRED)
   pkg_check_modules(QTSPARKLE qtsparkle-qt${QT_VERSION_MAJOR})
   if(QTSPARKLE_FOUND)
     set(HAVE_QTSPARKLE ON)
   endif()
-endif()
-
-if(WIN32)
-  add_subdirectory(3rdparty/getopt)
-  set(GETOPT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/getopt)
-  set(GETOPT_LIBRARIES getopt)
-  add_definitions(-DSTATIC_GETOPT -D_UNICODE)
 endif()
 
 if(WIN32 AND NOT MSVC)
@@ -395,12 +340,9 @@ optional_component(GLOBALSHORTCUTS ON "Global shortcuts"
   DEPENDS "D-Bus, X11, Windows or macOS" HAVE_GLOBALSHORTCUTS_SUPPORT
 )
 
-if(HAVE_QX11APPLICATION OR HAVE_X11EXTRAS OR HAVE_QPA_QPLATFORMNATIVEINTERFACE_H)
-  set(X11_GLOBALSHORTCUTS_REQUIREMENT_FOUND ON)
-endif()
 optional_component(X11_GLOBALSHORTCUTS ON "X11 global shortcuts"
   DEPENDS "X11" X11_FOUND
-  DEPENDS "QX11Application, X11Extras or qpa/qplatformnativeinterface.h header" X11_GLOBALSHORTCUTS_REQUIREMENT_FOUND
+  DEPENDS "QX11Application" HAVE_QX11APPLICATION
 )
 
 optional_component(AUDIOCD ON "Devices: Audio CD support"
@@ -496,6 +438,7 @@ add_definitions(
   -DQT_NO_FOREACH
   -DQT_ASCII_CAST_WARNINGS
   -DQT_NO_CAST_FROM_ASCII
+  -DQT_NO_KEYWORDS
   -DQT_NO_SIGNALS_SLOTS_KEYWORDS
 )
 
@@ -513,7 +456,7 @@ add_subdirectory(ext/libstrawberry-common)
 add_subdirectory(ext/libstrawberry-tagreader)
 add_subdirectory(ext/strawberry-tagreader)
 if(HAVE_MOODBAR)
-  add_subdirectory(ext/gstmoodbar)
+  add_subdirectory(3rdparty/gstfastspectrum)
 endif()
 
 if(GTest_FOUND AND GMOCK_LIBRARY AND Qt${QT_VERSION_MAJOR}Test_FOUND)
@@ -537,16 +480,8 @@ elseif(NOT HAVE_GSTREAMER)
   message(WARNING "GStreamer is the only engine that is fully implemented. Using other engines is possible but not recommended.")
 endif()
 
-if(QT_VERSION_MAJOR EQUAL 5)
-  message(WARNING "It is detected that Strawberry is being built with Qt 5.  There are no bugfix releases for the latest minor LTS version of Qt 5 available to open-source users, only commercial users.  Therefore Strawberry should be built with Qt 6 when possible. Building with Qt 6 will also take advantage of improvements and new features not available in Qt 5.  To build with Qt 6 specify -DBUILD_WITH_QT6=ON to automatically detect Qt 6, or for example -DCMAKE_PREFIX_PATH=/usr/local/lib64/cmake to manually specify the Qt 6 directory.")
-endif()
-
 if(NOT CMAKE_CROSSCOMPILING)
   if(NOT QT_SQLITE_TEST)
     message(WARNING "The Qt sqlite driver test failed.")
   endif()
-endif()
-
-if(HAVE_TAGLIB AND TAGLIB_FOUND AND NOT TAGLIB_VERSION VERSION_GREATER_EQUAL 1.12)
-  message(WARNING "There is a critical bug in TagLib (1.11.1) that can result in corrupt Ogg files, see: https://github.com/taglib/taglib/issues/864, please consider updating TagLib to the newest version.")
 endif()

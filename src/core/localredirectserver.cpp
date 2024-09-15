@@ -39,6 +39,8 @@
 #include <QDateTime>
 #include <QRandomGenerator>
 
+using namespace Qt::StringLiterals;
+
 LocalRedirectServer::LocalRedirectServer(QObject *parent)
     : QTcpServer(parent),
       port_(0),
@@ -86,8 +88,8 @@ void LocalRedirectServer::incomingConnection(qintptr socket_descriptor) {
   if (!tcp_socket->setSocketDescriptor(socket_descriptor)) {
     delete tcp_socket;
     close();
-    error_ = QLatin1String("Unable to set socket descriptor");
-    emit Finished();
+    error_ = "Unable to set socket descriptor"_L1;
+    Q_EMIT Finished();
     return;
   }
   socket_ = tcp_socket;
@@ -114,7 +116,7 @@ void LocalRedirectServer::ReadyRead() {
     socket_ = nullptr;
     request_url_ = ParseUrlFromRequest(buffer_);
     close();
-    emit Finished();
+    Q_EMIT Finished();
   }
   else {
     QObject::connect(socket_, &QAbstractSocket::readyRead, this, &LocalRedirectServer::ReadyRead);
@@ -129,9 +131,9 @@ void LocalRedirectServer::WriteTemplate() const {
   QString page_data = QString::fromUtf8(page_file.readAll());
   page_file.close();
 
-  QRegularExpression tr_regexp(QStringLiteral("tr\\(\"([^\"]+)\"\\)"));
+  static const QRegularExpression tr_regexp(QStringLiteral("tr\\(\"([^\"]+)\"\\)"));
   qint64 offset = 0;
-  forever {
+  Q_FOREVER {
     QRegularExpressionMatch re_match = tr_regexp.match(page_data, offset);
     if (!re_match.hasMatch()) break;
     offset = re_match.capturedStart();
@@ -151,7 +153,7 @@ void LocalRedirectServer::WriteTemplate() const {
         .pixmap(16)
         .toImage()
         .save(&image_buffer, "PNG");
-    page_data.replace(QLatin1String("@IMAGE_DATA@"), QString::fromUtf8(image_buffer.data().toBase64()));
+    page_data.replace("@IMAGE_DATA@"_L1, QString::fromUtf8(image_buffer.data().toBase64()));
     image_buffer.close();
   }
 

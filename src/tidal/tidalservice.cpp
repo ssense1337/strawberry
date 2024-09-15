@@ -65,8 +65,9 @@
 #include "settings/settingsdialog.h"
 #include "settings/tidalsettingspage.h"
 
-using std::make_shared;
 using namespace std::chrono_literals;
+using namespace Qt::StringLiterals;
+using std::make_shared;
 
 const Song::Source TidalService::kSource = Song::Source::Tidal;
 
@@ -220,7 +221,7 @@ void TidalService::ExitReceived() {
   QObject::disconnect(obj, nullptr, this, nullptr);
   qLog(Debug) << obj << "successfully exited.";
   wait_for_exit_.removeAll(obj);
-  if (wait_for_exit_.isEmpty()) emit ExitFinished();
+  if (wait_for_exit_.isEmpty()) Q_EMIT ExitFinished();
 
 }
 
@@ -242,7 +243,7 @@ void TidalService::LoadSession() {
   s.endGroup();
 
   if (!refresh_token_.isEmpty()) {
-    qint64 time = static_cast<qint64>(expires_in_) - (QDateTime::currentDateTime().toSecsSinceEpoch() - static_cast<qint64>(login_time_));
+    qint64 time = static_cast<qint64>(expires_in_) - (QDateTime::currentSecsSinceEpoch() - static_cast<qint64>(login_time_));
     if (time <= 0) {
       timer_refresh_login_->setInterval(200ms);
     }
@@ -292,7 +293,7 @@ void TidalService::StartAuthorization(const QString &client_id) {
   code_verifier_ = Utilities::CryptographicRandomString(44);
   code_challenge_ = QString::fromLatin1(QCryptographicHash::hash(code_verifier_.toUtf8(), QCryptographicHash::Sha256).toBase64(QByteArray::Base64UrlEncoding));
 
-  if (code_challenge_.lastIndexOf(QLatin1Char('=')) == code_challenge_.length() - 1) {
+  if (code_challenge_.lastIndexOf(u'=') == code_challenge_.length() - 1) {
     code_challenge_.chop(1);
   }
 
@@ -327,7 +328,7 @@ void TidalService::AuthorizationUrlReceived(const QUrl &url) {
       refresh_token_ = url_query.queryItemValue(QStringLiteral("refresh_token"));
     }
     expires_in_ = url_query.queryItemValue(QStringLiteral("expires_in")).toInt();
-    login_time_ = QDateTime::currentDateTime().toSecsSinceEpoch();
+    login_time_ = QDateTime::currentSecsSinceEpoch();
     session_id_.clear();
 
     Settings s;
@@ -339,8 +340,8 @@ void TidalService::AuthorizationUrlReceived(const QUrl &url) {
     s.remove("session_id");
     s.endGroup();
 
-    emit LoginComplete(true);
-    emit LoginSuccess();
+    Q_EMIT LoginComplete(true);
+    Q_EMIT LoginSuccess();
   }
 
   else if (url_query.hasQueryItem(QStringLiteral("code")) && url_query.hasQueryItem(QStringLiteral("state"))) {
@@ -425,10 +426,10 @@ void TidalService::AccessTokenRequestFinished(QNetworkReply *reply) {
       QJsonDocument json_doc = QJsonDocument::fromJson(data, &json_error);
       if (json_error.error == QJsonParseError::NoError && !json_doc.isEmpty() && json_doc.isObject()) {
         QJsonObject json_obj = json_doc.object();
-        if (!json_obj.isEmpty() && json_obj.contains(QLatin1String("status")) && json_obj.contains(QLatin1String("userMessage"))) {
-          int status = json_obj[QLatin1String("status")].toInt();
-          int sub_status = json_obj[QLatin1String("subStatus")].toInt();
-          QString user_message = json_obj[QLatin1String("userMessage")].toString();
+        if (!json_obj.isEmpty() && json_obj.contains("status"_L1) && json_obj.contains("userMessage"_L1)) {
+          int status = json_obj["status"_L1].toInt();
+          int sub_status = json_obj["subStatus"_L1].toInt();
+          QString user_message = json_obj["userMessage"_L1].toString();
           login_errors_ << QStringLiteral("Authentication failure: %1 (%2) (%3)").arg(user_message).arg(status).arg(sub_status);
         }
       }
@@ -470,23 +471,23 @@ void TidalService::AccessTokenRequestFinished(QNetworkReply *reply) {
     return;
   }
 
-  if (!json_obj.contains(QLatin1String("access_token")) || !json_obj.contains(QLatin1String("expires_in"))) {
+  if (!json_obj.contains("access_token"_L1) || !json_obj.contains("expires_in"_L1)) {
     LoginError(QStringLiteral("Authentication reply from server is missing access_token or expires_in"), json_obj);
     return;
   }
 
-  access_token_ = json_obj[QLatin1String("access_token")].toString();
-  expires_in_ = json_obj[QLatin1String("expires_in")].toInt();
-  if (json_obj.contains(QLatin1String("refresh_token"))) {
-    refresh_token_ = json_obj[QLatin1String("refresh_token")].toString();
+  access_token_ = json_obj["access_token"_L1].toString();
+  expires_in_ = json_obj["expires_in"_L1].toInt();
+  if (json_obj.contains("refresh_token"_L1)) {
+    refresh_token_ = json_obj["refresh_token"_L1].toString();
   }
-  login_time_ = QDateTime::currentDateTime().toSecsSinceEpoch();
+  login_time_ = QDateTime::currentSecsSinceEpoch();
 
-  if (json_obj.contains(QLatin1String("user")) && json_obj[QLatin1String("user")].isObject()) {
-    QJsonObject obj_user = json_obj[QLatin1String("user")].toObject();
-    if (obj_user.contains(QLatin1String("countryCode")) && obj_user.contains(QLatin1String("userId"))) {
-      country_code_ = obj_user[QLatin1String("countryCode")].toString();
-      user_id_ = obj_user[QLatin1String("userId")].toInt();
+  if (json_obj.contains("user"_L1) && json_obj["user"_L1].isObject()) {
+    QJsonObject obj_user = json_obj["user"_L1].toObject();
+    if (obj_user.contains("countryCode"_L1) && obj_user.contains("userId"_L1)) {
+      country_code_ = obj_user["countryCode"_L1].toString();
+      user_id_ = obj_user["userId"_L1].toInt();
     }
   }
 
@@ -510,8 +511,8 @@ void TidalService::AccessTokenRequestFinished(QNetworkReply *reply) {
 
   qLog(Debug) << "Tidal: Login successful" << "user id" << user_id_;
 
-  emit LoginComplete(true);
-  emit LoginSuccess();
+  Q_EMIT LoginComplete(true);
+  Q_EMIT LoginSuccess();
 
 }
 
@@ -575,10 +576,10 @@ void TidalService::HandleAuthReply(QNetworkReply *reply) {
       QJsonDocument json_doc = QJsonDocument::fromJson(data, &json_error);
       if (json_error.error == QJsonParseError::NoError && !json_doc.isEmpty() && json_doc.isObject()) {
         QJsonObject json_obj = json_doc.object();
-        if (!json_obj.isEmpty() && json_obj.contains(QLatin1String("status")) && json_obj.contains(QLatin1String("userMessage"))) {
-          int status = json_obj[QLatin1String("status")].toInt();
-          int sub_status = json_obj[QLatin1String("subStatus")].toInt();
-          QString user_message = json_obj[QLatin1String("userMessage")].toString();
+        if (!json_obj.isEmpty() && json_obj.contains("status"_L1) && json_obj.contains("userMessage"_L1)) {
+          int status = json_obj["status"_L1].toInt();
+          int sub_status = json_obj["subStatus"_L1].toInt();
+          QString user_message = json_obj["userMessage"_L1].toString();
           login_errors_ << QStringLiteral("Authentication failure: %1 (%2) (%3)").arg(user_message).arg(status).arg(sub_status);
         }
       }
@@ -623,14 +624,14 @@ void TidalService::HandleAuthReply(QNetworkReply *reply) {
     return;
   }
 
-  if (!json_obj.contains(QLatin1String("userId")) || !json_obj.contains(QLatin1String("sessionId")) || !json_obj.contains(QLatin1String("countryCode"))) {
+  if (!json_obj.contains("userId"_L1) || !json_obj.contains("sessionId"_L1) || !json_obj.contains("countryCode"_L1)) {
     LoginError(QStringLiteral("Authentication reply from server is missing userId, sessionId or countryCode"), json_obj);
     return;
   }
 
-  country_code_ = json_obj[QLatin1String("countryCode")].toString();
-  session_id_ = json_obj[QLatin1String("sessionId")].toString();
-  user_id_ = json_obj[QLatin1String("userId")].toInt();
+  country_code_ = json_obj["countryCode"_L1].toString();
+  session_id_ = json_obj["sessionId"_L1].toString();
+  user_id_ = json_obj["userId"_L1].toInt();
   access_token_.clear();
   refresh_token_.clear();
 
@@ -650,8 +651,8 @@ void TidalService::HandleAuthReply(QNetworkReply *reply) {
   login_attempts_ = 0;
   timer_login_attempt_->stop();
 
-  emit LoginComplete(true);
-  emit LoginSuccess();
+  Q_EMIT LoginComplete(true);
+  Q_EMIT LoginSuccess();
 
 }
 
@@ -687,23 +688,23 @@ void TidalService::TryLogin() {
   if (authenticated() || login_sent_) return;
 
   if (api_token_.isEmpty()) {
-    emit LoginComplete(false, tr("Missing Tidal API token."));
+    Q_EMIT LoginComplete(false, tr("Missing Tidal API token."));
     return;
   }
   if (username_.isEmpty()) {
-    emit LoginComplete(false, tr("Missing Tidal username."));
+    Q_EMIT LoginComplete(false, tr("Missing Tidal username."));
     return;
   }
   if (password_.isEmpty()) {
-    emit LoginComplete(false, tr("Missing Tidal password."));
+    Q_EMIT LoginComplete(false, tr("Missing Tidal password."));
     return;
   }
   if (login_attempts_ >= kLoginAttempts) {
-    emit LoginComplete(false, tr("Not authenticated with Tidal and reached maximum number of login attempts."));
+    Q_EMIT LoginComplete(false, tr("Not authenticated with Tidal and reached maximum number of login attempts."));
     return;
   }
 
-  emit RequestLogin();
+  Q_EMIT RequestLogin();
 
 }
 
@@ -721,12 +722,12 @@ void TidalService::GetArtists() {
 
   if (!authenticated()) {
     if (oauth_) {
-      emit ArtistsResults(SongMap(), tr("Not authenticated with Tidal."));
+      Q_EMIT ArtistsResults(SongMap(), tr("Not authenticated with Tidal."));
       ShowConfig();
       return;
     }
     else if (api_token_.isEmpty() || username_.isEmpty() || password_.isEmpty()) {
-      emit ArtistsResults(SongMap(), tr("Missing Tidal API token, username or password."));
+      Q_EMIT ArtistsResults(SongMap(), tr("Missing Tidal API token, username or password."));
       ShowConfig();
       return;
     }
@@ -747,19 +748,19 @@ void TidalService::GetArtists() {
 void TidalService::ArtistsResultsReceived(const int id, const SongMap &songs, const QString &error) {
 
   Q_UNUSED(id);
-  emit ArtistsResults(songs, error);
+  Q_EMIT ArtistsResults(songs, error);
   ResetArtistsRequest();
 
 }
 
 void TidalService::ArtistsUpdateStatusReceived(const int id, const QString &text) {
   Q_UNUSED(id);
-  emit ArtistsUpdateStatus(text);
+  Q_EMIT ArtistsUpdateStatus(text);
 }
 
 void TidalService::ArtistsUpdateProgressReceived(const int id, const int progress) {
   Q_UNUSED(id);
-  emit ArtistsUpdateProgress(progress);
+  Q_EMIT ArtistsUpdateProgress(progress);
 }
 
 void TidalService::ResetAlbumsRequest() {
@@ -776,12 +777,12 @@ void TidalService::GetAlbums() {
 
   if (!authenticated()) {
     if (oauth_) {
-      emit AlbumsResults(SongMap(), tr("Not authenticated with Tidal."));
+      Q_EMIT AlbumsResults(SongMap(), tr("Not authenticated with Tidal."));
       ShowConfig();
       return;
     }
     else if (api_token_.isEmpty() || username_.isEmpty() || password_.isEmpty()) {
-      emit AlbumsResults(SongMap(), tr("Missing Tidal API token, username or password."));
+      Q_EMIT AlbumsResults(SongMap(), tr("Missing Tidal API token, username or password."));
       ShowConfig();
       return;
     }
@@ -802,19 +803,19 @@ void TidalService::GetAlbums() {
 void TidalService::AlbumsResultsReceived(const int id, const SongMap &songs, const QString &error) {
 
   Q_UNUSED(id);
-  emit AlbumsResults(songs, error);
+  Q_EMIT AlbumsResults(songs, error);
   ResetAlbumsRequest();
 
 }
 
 void TidalService::AlbumsUpdateStatusReceived(const int id, const QString &text) {
   Q_UNUSED(id);
-  emit AlbumsUpdateStatus(text);
+  Q_EMIT AlbumsUpdateStatus(text);
 }
 
 void TidalService::AlbumsUpdateProgressReceived(const int id, const int progress) {
   Q_UNUSED(id);
-  emit AlbumsUpdateProgress(progress);
+  Q_EMIT AlbumsUpdateProgress(progress);
 }
 
 void TidalService::ResetSongsRequest() {
@@ -831,12 +832,12 @@ void TidalService::GetSongs() {
 
   if (!authenticated()) {
     if (oauth_) {
-      emit SongsResults(SongMap(), tr("Not authenticated with Tidal."));
+      Q_EMIT SongsResults(SongMap(), tr("Not authenticated with Tidal."));
       ShowConfig();
       return;
     }
     else if (api_token_.isEmpty() || username_.isEmpty() || password_.isEmpty()) {
-      emit SongsResults(SongMap(), tr("Missing Tidal API token, username or password."));
+      Q_EMIT SongsResults(SongMap(), tr("Missing Tidal API token, username or password."));
       ShowConfig();
       return;
     }
@@ -857,19 +858,19 @@ void TidalService::GetSongs() {
 void TidalService::SongsResultsReceived(const int id, const SongMap &songs, const QString &error) {
 
   Q_UNUSED(id);
-  emit SongsResults(songs, error);
+  Q_EMIT SongsResults(songs, error);
   ResetSongsRequest();
 
 }
 
 void TidalService::SongsUpdateStatusReceived(const int id, const QString &text) {
   Q_UNUSED(id);
-  emit SongsUpdateStatus(text);
+  Q_EMIT SongsUpdateStatus(text);
 }
 
 void TidalService::SongsUpdateProgressReceived(const int id, const int progress) {
   Q_UNUSED(id);
-  emit SongsUpdateProgress(progress);
+  Q_EMIT SongsUpdateProgress(progress);
 }
 
 int TidalService::Search(const QString &text, StreamingSearchView::SearchType type) {
@@ -894,12 +895,12 @@ void TidalService::StartSearch() {
 
   if (!authenticated()) {
     if (oauth_) {
-      emit SearchResults(pending_search_id_, SongMap(), tr("Not authenticated with Tidal."));
+      Q_EMIT SearchResults(pending_search_id_, SongMap(), tr("Not authenticated with Tidal."));
       ShowConfig();
       return;
     }
     else if (api_token_.isEmpty() || username_.isEmpty() || password_.isEmpty()) {
-      emit SearchResults(pending_search_id_, SongMap(), tr("Missing Tidal API token, username or password."));
+      Q_EMIT SearchResults(pending_search_id_, SongMap(), tr("Missing Tidal API token, username or password."));
       ShowConfig();
       return;
     }
@@ -949,7 +950,7 @@ void TidalService::SendSearch() {
 
 void TidalService::SearchResultsReceived(const int id, const SongMap &songs, const QString &error) {
 
-  emit SearchResults(id, songs, error);
+  Q_EMIT SearchResults(id, songs, error);
   search_request_.reset();
 
 }
@@ -989,7 +990,7 @@ void TidalService::HandleStreamURLFailure(const uint id, const QUrl &media_url, 
   if (!stream_url_requests_.contains(id)) return;
   stream_url_requests_.remove(id);
 
-  emit StreamURLFailure(id, media_url, error);
+  Q_EMIT StreamURLFailure(id, media_url, error);
 
 }
 
@@ -998,7 +999,7 @@ void TidalService::HandleStreamURLSuccess(const uint id, const QUrl &media_url, 
   if (!stream_url_requests_.contains(id)) return;
   stream_url_requests_.remove(id);
 
-  emit StreamURLSuccess(id, media_url, stream_url, filetype, samplerate, bit_depth, duration);
+  Q_EMIT StreamURLSuccess(id, media_url, stream_url, filetype, samplerate, bit_depth, duration);
 
 }
 
@@ -1009,12 +1010,12 @@ void TidalService::LoginError(const QString &error, const QVariant &debug) {
   QString error_html;
   for (const QString &e : std::as_const(login_errors_)) {
     qLog(Error) << "Tidal:" << e;
-    error_html += e + QLatin1String("<br />");
+    error_html += e + "<br />"_L1;
   }
   if (debug.isValid()) qLog(Debug) << debug;
 
-  emit LoginFailure(error_html);
-  emit LoginComplete(false, error_html);
+  Q_EMIT LoginFailure(error_html);
+  Q_EMIT LoginComplete(false, error_html);
 
   login_errors_.clear();
 

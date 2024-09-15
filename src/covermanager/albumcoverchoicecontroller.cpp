@@ -79,6 +79,8 @@
 #include "coverfromurldialog.h"
 #include "currentalbumcoverloader.h"
 
+using namespace Qt::StringLiterals;
+
 const char *AlbumCoverChoiceController::kLoadImageFileFilter = QT_TR_NOOP("Images (*.png *.jpg *.jpeg *.bmp *.gif *.xpm *.pbm *.pgm *.ppm *.xbm)");
 const char *AlbumCoverChoiceController::kSaveImageFileFilter = QT_TR_NOOP("Images (*.png *.jpg *.jpeg *.bmp *.xpm *.pbm *.ppm *.xbm)");
 const char *AlbumCoverChoiceController::kAllFilesFilter = QT_TR_NOOP("All files (*)");
@@ -184,7 +186,7 @@ AlbumCoverImageResult AlbumCoverChoiceController::LoadImageFromFile(Song *song) 
   QFile file(cover_file);
   if (!file.open(QIODevice::ReadOnly)) {
     qLog(Error) << "Failed to open cover file" << cover_file << "for reading:" << file.errorString();
-    emit Error(tr("Failed to open cover file %1 for reading: %2").arg(cover_file, file.errorString()));
+    Q_EMIT Error(tr("Failed to open cover file %1 for reading: %2").arg(cover_file, file.errorString()));
     return AlbumCoverImageResult();
   }
   AlbumCoverImageResult result;
@@ -192,7 +194,7 @@ AlbumCoverImageResult AlbumCoverChoiceController::LoadImageFromFile(Song *song) 
   file.close();
   if (result.image_data.isEmpty()) {
     qLog(Error) << "Cover file" << cover_file << "is empty.";
-    emit Error(tr("Cover file %1 is empty.").arg(cover_file));
+    Q_EMIT Error(tr("Cover file %1 is empty.").arg(cover_file));
     return AlbumCoverImageResult();
   }
 
@@ -233,15 +235,17 @@ QUrl AlbumCoverChoiceController::LoadCoverFromFile(Song *song) {
 
 void AlbumCoverChoiceController::SaveCoverToFileManual(const Song &song, const AlbumCoverImageResult &result) {
 
-  QString initial_file_name = QLatin1String("/");
+  QString initial_file_name = "/"_L1;
 
   if (!song.effective_albumartist().isEmpty()) {
     initial_file_name = initial_file_name + song.effective_albumartist();
   }
-  initial_file_name = initial_file_name + QLatin1Char('-') + (song.effective_album().isEmpty() ? tr("unknown") : song.effective_album()) + QLatin1String(".jpg");
+  initial_file_name = initial_file_name + QLatin1Char('-') + (song.effective_album().isEmpty() ? tr("unknown") : song.effective_album()) + ".jpg"_L1;
   initial_file_name = initial_file_name.toLower();
-  initial_file_name.replace(QRegularExpression(QStringLiteral("\\s")), QStringLiteral("-"));
-  initial_file_name.remove(QRegularExpression(QLatin1String(kInvalidFatCharactersRegex), QRegularExpression::CaseInsensitiveOption));
+  static const QRegularExpression regex_whitespaces(QStringLiteral("\\s"));
+  initial_file_name.replace(regex_whitespaces, QStringLiteral("-"));
+  static const QRegularExpression regex_invalid_fat_characters(QLatin1String(kInvalidFatCharactersRegex), QRegularExpression::CaseInsensitiveOption);
+  initial_file_name.remove(regex_invalid_fat_characters);
 
   QString save_filename = QFileDialog::getSaveFileName(this, tr("Save album cover"), GetInitialPathForFileDialog(song, initial_file_name), tr(kSaveImageFileFilter) + QStringLiteral(";;") + tr(kAllFilesFilter));
 
@@ -249,26 +253,26 @@ void AlbumCoverChoiceController::SaveCoverToFileManual(const Song &song, const A
 
   QFileInfo fileinfo(save_filename);
   if (fileinfo.suffix().isEmpty()) {
-    save_filename.append(QLatin1String(".jpg"));
+    save_filename.append(".jpg"_L1);
     fileinfo.setFile(save_filename);
   }
 
   if (!QImageWriter::supportedImageFormats().contains(fileinfo.completeSuffix().toUtf8().toLower())) {
-    save_filename = Utilities::PathWithoutFilenameExtension(save_filename) + QLatin1String(".jpg");
+    save_filename = Utilities::PathWithoutFilenameExtension(save_filename) + ".jpg"_L1;
     fileinfo.setFile(save_filename);
   }
 
-  if (result.is_jpeg() && fileinfo.completeSuffix().compare(QLatin1String("jpg"), Qt::CaseInsensitive) == 0) {
+  if (result.is_jpeg() && fileinfo.completeSuffix().compare("jpg"_L1, Qt::CaseInsensitive) == 0) {
     QFile file(save_filename);
     if (!file.open(QIODevice::WriteOnly)) {
       qLog(Error) << "Failed to open cover file" << save_filename << "for writing:" << file.errorString();
-      emit Error(tr("Failed to open cover file %1 for writing: %2").arg(save_filename, file.errorString()));
+      Q_EMIT Error(tr("Failed to open cover file %1 for writing: %2").arg(save_filename, file.errorString()));
       file.close();
       return;
     }
     if (file.write(result.image_data) <= 0) {
       qLog(Error) << "Failed writing cover to file" << save_filename << file.errorString();
-      emit Error(tr("Failed writing cover to file %1: %2").arg(save_filename, file.errorString()));
+      Q_EMIT Error(tr("Failed writing cover to file %1: %2").arg(save_filename, file.errorString()));
       file.close();
       return;
     }
@@ -277,7 +281,7 @@ void AlbumCoverChoiceController::SaveCoverToFileManual(const Song &song, const A
   else {
     if (!result.image.save(save_filename)) {
       qLog(Error) << "Failed writing cover to file" << save_filename;
-      emit Error(tr("Failed writing cover to file %1.").arg(save_filename));
+      Q_EMIT Error(tr("Failed writing cover to file %1.").arg(save_filename));
     }
   }
 
@@ -292,8 +296,8 @@ QString AlbumCoverChoiceController::GetInitialPathForFileDialog(const Song &song
   }
 
   // If no automatic art, start in the song's folder
-  if (!song.url().isEmpty() && song.url().isValid() && song.url().isLocalFile() && song.url().toLocalFile().contains(QLatin1Char('/'))) {
-    return song.url().toLocalFile().section(QLatin1Char('/'), 0, -2) + filename;
+  if (!song.url().isEmpty() && song.url().isValid() && song.url().isLocalFile() && song.url().toLocalFile().contains(u'/')) {
+    return song.url().toLocalFile().section(u'/', 0, -2) + filename;
   }
 
   return QDir::home().absolutePath() + filename;
@@ -379,7 +383,7 @@ bool AlbumCoverChoiceController::DeleteCover(Song *song, const bool unset) {
       else {
         success = false;
         qLog(Error) << "Failed to delete cover file" << art_automatic << file.errorString();
-        emit Error(tr("Failed to delete cover file %1: %2").arg(art_automatic, file.errorString()));
+        Q_EMIT Error(tr("Failed to delete cover file %1: %2").arg(art_automatic, file.errorString()));
       }
     }
     else song->clear_art_automatic();
@@ -396,7 +400,7 @@ bool AlbumCoverChoiceController::DeleteCover(Song *song, const bool unset) {
       else {
         success = false;
         qLog(Error) << "Failed to delete cover file" << art_manual << file.errorString();
-        emit Error(tr("Failed to delete cover file %1: %2").arg(art_manual, file.errorString()));
+        Q_EMIT Error(tr("Failed to delete cover file %1: %2").arg(art_manual, file.errorString()));
       }
     }
     else song->clear_art_manual();
@@ -476,13 +480,13 @@ void AlbumCoverChoiceController::ShowCover(const Song &song, const QPixmap &pixm
 
   // Use Artist - Album as the window title
   QString title_text(song.effective_albumartist());
-  if (!song.effective_album().isEmpty()) title_text += QLatin1String(" - ") + song.effective_album();
+  if (!song.effective_album().isEmpty()) title_text += " - "_L1 + song.effective_album();
 
   QLabel *label = new QLabel(dialog);
   label->setPixmap(pixmap);
 
   // Add (WxHpx) to the title before possibly resizing
-  title_text += QLatin1String(" (") + QString::number(pixmap.width()) + QLatin1Char('x') + QString::number(pixmap.height()) + QLatin1String("px)");
+  title_text += QLatin1String(" (") + QString::number(pixmap.width()) + QLatin1Char('x') + QString::number(pixmap.height()) + "px)"_L1;
 
   // If the cover is larger than the screen, resize the window 85% seems to be enough to account for title bar and taskbar etc.
   QScreen *screen = Utilities::GetScreen(this);
@@ -505,11 +509,7 @@ void AlbumCoverChoiceController::ShowCover(const Song &song, const QPixmap &pixm
   }
 
   dialog->setWindowTitle(title_text);
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
   dialog->setFixedSize(label->pixmap(Qt::ReturnByValue).size() / pixmap.devicePixelRatioF());
-#else
-  dialog->setFixedSize(label->pixmap()->size() / pixmap.devicePixelRatioF());
-#endif
   dialog->show();
 
 }
@@ -537,7 +537,7 @@ void AlbumCoverChoiceController::AlbumCoverFetched(const quint64 id, const Album
     SaveCoverAutomatic(&song, result);
   }
 
-  emit AutomaticCoverSearchDone();
+  Q_EMIT AutomaticCoverSearchDone();
 
 }
 
@@ -660,7 +660,7 @@ QUrl AlbumCoverChoiceController::SaveCoverToFileAutomatic(const Song::Source sou
                                                           const AlbumCoverImageResult &result,
                                                           const bool force_overwrite) {
 
-  QString filepath = CoverUtils::CoverFilePath(cover_options_, source, artist, album, album_id, album_dir, result.cover_url, QLatin1String("jpg"));
+  QString filepath = CoverUtils::CoverFilePath(cover_options_, source, artist, album, album_id, album_dir, result.cover_url, QStringLiteral("jpg"));
   if (filepath.isEmpty()) return QUrl();
 
   QFile file(filepath);
@@ -668,7 +668,7 @@ QUrl AlbumCoverChoiceController::SaveCoverToFileAutomatic(const Song::Source sou
   if (source == Song::Source::Collection && !cover_options_.cover_overwrite && !force_overwrite && get_save_album_cover_type() == CoverOptions::CoverType::Album && cover_options_.cover_filename == CoverOptions::CoverFilename::Pattern && file.exists()) {
     while (file.exists()) {
       QFileInfo fileinfo(file.fileName());
-      file.setFileName(fileinfo.path() + QLatin1String("/0") + fileinfo.fileName());
+      file.setFileName(fileinfo.path() + "/0"_L1 + fileinfo.fileName());
     }
     filepath = file.fileName();
   }
@@ -681,13 +681,13 @@ QUrl AlbumCoverChoiceController::SaveCoverToFileAutomatic(const Song::Source sou
       }
       else {
         qLog(Error) << "Failed to write cover to file" << file.fileName() << file.errorString();
-        emit Error(tr("Failed to write cover to file %1: %2").arg(file.fileName(), file.errorString()));
+        Q_EMIT Error(tr("Failed to write cover to file %1: %2").arg(file.fileName(), file.errorString()));
       }
       file.close();
     }
     else {
       qLog(Error) << "Failed to open cover file" << file.fileName() << "for writing:" << file.errorString();
-      emit Error(tr("Failed to open cover file %1 for writing: %2").arg(file.fileName(), file.errorString()));
+      Q_EMIT Error(tr("Failed to open cover file %1 for writing: %2").arg(file.fileName(), file.errorString()));
     }
   }
   else {
@@ -719,11 +719,7 @@ void AlbumCoverChoiceController::SaveCoverEmbeddedToCollectionSongs(const Song &
 
 void AlbumCoverChoiceController::SaveCoverEmbeddedToCollectionSongs(const QString &effective_albumartist, const QString &effective_album, const QString &cover_filename, const QByteArray &image_data, const QString &mime_type) {
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   QFuture<SongList> future = QtConcurrent::run(&CollectionBackend::GetAlbumSongs, app_->collection_backend(), effective_albumartist, effective_album, CollectionFilterOptions());
-#else
-  QFuture<SongList> future = QtConcurrent::run(&*app_->collection_backend(), &CollectionBackend::GetAlbumSongs, effective_albumartist, effective_album, CollectionFilterOptions());
-#endif
   QFutureWatcher<SongList> *watcher = new QFutureWatcher<SongList>();
   QObject::connect(watcher, &QFutureWatcher<SongList>::finished, this, [this, watcher, cover_filename, image_data, mime_type]() {
     const SongList collection_songs = watcher->result();
@@ -828,7 +824,7 @@ void AlbumCoverChoiceController::SaveEmbeddedCoverFinished(TagReaderReply *reply
     SaveArtEmbeddedToSong(&song, art_embedded);
   }
   else {
-    emit Error(tr("Could not save cover to file %1.").arg(song.url().toLocalFile()));
+    Q_EMIT Error(tr("Could not save cover to file %1.").arg(song.url().toLocalFile()));
   }
 
 }

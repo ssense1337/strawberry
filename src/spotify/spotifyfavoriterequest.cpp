@@ -119,7 +119,7 @@ void SpotifyFavoriteRequest::AddFavorites(const FavoriteType type, const SongLis
   if (list_ids.isEmpty() || array_ids.isEmpty()) return;
 
   QByteArray json_data = QJsonDocument(array_ids).toJson();
-  QString ids_list = list_ids.join(QLatin1Char(','));
+  QString ids_list = list_ids.join(u',');
 
   AddFavoritesRequest(type, ids_list, json_data, songs);
 
@@ -171,13 +171,13 @@ void SpotifyFavoriteRequest::AddFavoritesReply(QNetworkReply *reply, const Favor
 
   switch (type) {
     case FavoriteType_Artists:
-      emit ArtistsAdded(songs);
+      Q_EMIT ArtistsAdded(songs);
       break;
     case FavoriteType_Albums:
-      emit AlbumsAdded(songs);
+      Q_EMIT AlbumsAdded(songs);
       break;
     case FavoriteType_Songs:
-      emit SongsAdded(songs);
+      Q_EMIT SongsAdded(songs);
       break;
   }
 
@@ -231,7 +231,7 @@ void SpotifyFavoriteRequest::RemoveFavorites(const FavoriteType type, const Song
   if (list_ids.isEmpty() || array_ids.isEmpty()) return;
 
   QByteArray json_data = QJsonDocument(array_ids).toJson();
-  QString ids_list = list_ids.join(QLatin1Char(','));
+  QString ids_list = list_ids.join(u',');
 
   RemoveFavoritesRequest(type, ids_list, json_data, songs);
 
@@ -249,11 +249,7 @@ void SpotifyFavoriteRequest::RemoveFavoritesRequest(const FavoriteType type, con
     url.setQuery(url_query);
   }
   QNetworkRequest req(url);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
   req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-#else
-  req.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
-#endif
   req.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/x-www-form-urlencoded"));
   if (!access_token().isEmpty()) req.setRawHeader("authorization", "Bearer " + access_token().toUtf8());
   QNetworkReply *reply = nullptr;
@@ -290,13 +286,13 @@ void SpotifyFavoriteRequest::RemoveFavoritesReply(QNetworkReply *reply, const Fa
 
   switch (type) {
     case FavoriteType_Artists:
-      emit ArtistsRemoved(songs);
+      Q_EMIT ArtistsRemoved(songs);
       break;
     case FavoriteType_Albums:
-      emit AlbumsRemoved(songs);
+      Q_EMIT AlbumsRemoved(songs);
       break;
     case FavoriteType_Songs:
-      emit SongsRemoved(songs);
+      Q_EMIT SongsRemoved(songs);
       break;
   }
 

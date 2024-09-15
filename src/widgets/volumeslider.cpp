@@ -40,11 +40,7 @@
 #include <QAction>
 #include <QLinearGradient>
 #include <QStyleOptionViewItem>
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-#  include <QEnterEvent>
-#else
-#  include <QEvent>
-#endif
+#include <QEnterEvent>
 #include <QPaintEvent>
 #include <QContextMenuEvent>
 #include <QMouseEvent>
@@ -91,7 +87,7 @@ void VolumeSlider::HandleWheel(const int delta) {
     wheeling_ = true;
 
     QSlider::setValue(SliderSlider::value() + steps);
-    emit SliderReleased(value());
+    Q_EMIT SliderReleased(value());
 
     wheeling_ = false;
   }
@@ -118,7 +114,7 @@ void VolumeSlider::paintEvent(QPaintEvent*) {
 
   p.drawPixmap(0, 0, pixmap_gradient_, 0, 0, offset + padding, 0);
   p.drawPixmap(0, 0, pixmap_inset_);
-  p.drawPixmap(offset - handle_pixmaps_[0].width() / 2 + padding, 0, handle_pixmaps_[anim_count_]);
+  p.drawPixmap(offset - handle_pixmaps_.value(0).width() / 2 + padding, 0, handle_pixmaps_[anim_count_]);
 
   // Draw percentage number
   QStyleOptionViewItem opt;
@@ -233,11 +229,7 @@ void VolumeSlider::drawVolumeSliderHandle() {
 
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 void VolumeSlider::enterEvent(QEnterEvent*) {
-#else
-void VolumeSlider::enterEvent(QEvent*) {
-#endif
 
   anim_enter_ = true;
   anim_count_ = 0;
@@ -271,7 +263,7 @@ void VolumeSlider::contextMenuEvent(QContextMenuEvent *e) {
   QAction *ret = menu.exec(mapToGlobal(e->pos()));
   if (ret) {
     QSlider::setValue(values[ret]);
-    emit SliderReleased(values[ret]);
+    Q_EMIT SliderReleased(values[ret]);
   }
 
 }

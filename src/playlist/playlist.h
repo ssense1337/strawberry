@@ -259,13 +259,11 @@ class Playlist : public QAbstractListModel {
   void sort(const int column_number, const Qt::SortOrder order) override;
   bool removeRows(const int row, const int count, const QModelIndex &parent = QModelIndex()) override;
 
-  static bool ComparePathDepths(Qt::SortOrder, PlaylistItemPtr, PlaylistItemPtr);
-
   static Columns ChangedColumns(const Song &metadata1, const Song &metadata2);
   static bool MinorMetadataChange(const Song &old_metadata, const Song &new_metadata);
   void UpdateItemMetadata(PlaylistItemPtr item, const Song &new_metadata, const bool temporary);
   void UpdateItemMetadata(const int row, PlaylistItemPtr item, const Song &new_metadata, const bool temporary);
-  void ItemChanged(const int row, const Columns columns);
+  void ItemChanged(const int row, const Columns &columns);
 
   // Changes rating of a song to the given value asynchronously
   void RateSong(const QModelIndex &idx, const float rating);

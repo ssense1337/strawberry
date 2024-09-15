@@ -97,6 +97,8 @@
 #include "core/messagehandler.h"
 #include "utilities/timeconstants.h"
 
+using namespace Qt::StringLiterals;
+
 #undef TStringToQString
 #undef QStringToTString
 
@@ -443,7 +445,7 @@ TagReaderBase::Result TagReaderTagLib::ReadFile(const QString &filename, spb::ta
   }
 
   if (!disc.isEmpty()) {
-    const qint64 i = disc.indexOf(QLatin1Char('/'));
+    const qint64 i = disc.indexOf(u'/');
     if (i != -1) {
       // disc.right( i ).toInt() is total number of discs, we don't use this at the moment
       song->set_disc(disc.left(i).toInt());
@@ -457,7 +459,7 @@ TagReaderBase::Result TagReaderTagLib::ReadFile(const QString &filename, spb::ta
     // well, it wasn't set, but if the artist is VA assume it's a compilation
     const QString albumartist = QString::fromStdString(song->albumartist());
     const QString artist = QString::fromStdString(song->artist());
-    if (artist.compare(QLatin1String("various artists")) == 0 || albumartist.compare(QLatin1String("various artists")) == 0) {
+    if (artist.compare("various artists"_L1) == 0 || albumartist.compare("various artists"_L1) == 0) {
       song->set_compilation(true);
     }
   }
@@ -529,7 +531,7 @@ void TagReaderTagLib::ParseID3v2Tags(TagLib::ID3v2::Tag *tag, QString *disc, QSt
   for (uint i = 0; i < map[kID3v2_CommercialFrame].size(); ++i) {
     const TagLib::ID3v2::CommentsFrame *frame = dynamic_cast<const TagLib::ID3v2::CommentsFrame*>(map[kID3v2_CommercialFrame][i]);
 
-    if (frame && TagLibStringToQString(frame->description()) != QLatin1String("iTunNORM")) {
+    if (frame && TagLibStringToQString(frame->description()) != "iTunNORM"_L1) {
       AssignTagLibStringToStdString(frame->text(), song->mutable_comment());
       break;
     }
@@ -798,13 +800,13 @@ void TagReaderTagLib::ParseMP4Tags(TagLib::MP4::Tag *tag, QString *disc, QString
   }
 
   if (tag->contains(kMP4_MusicBrainz_AlbumArtistId)) {
-    AssignTagLibStringToStdString(tag->item(kMP4_MusicBrainz_AlbumArtistId).toStringList().toString(), song->mutable_musicbrainz_album_artist_id());
+    AssignTagLibStringToStdString(TagLibStringListToSlashSeparatedString(tag->item(kMP4_MusicBrainz_AlbumArtistId).toStringList()), song->mutable_musicbrainz_album_artist_id());
   }
   if (tag->contains(kMP4_MusicBrainz_ArtistId)) {
-    AssignTagLibStringToStdString(tag->item(kMP4_MusicBrainz_ArtistId).toStringList().toString(), song->mutable_musicbrainz_artist_id());
+    AssignTagLibStringToStdString(TagLibStringListToSlashSeparatedString(tag->item(kMP4_MusicBrainz_ArtistId).toStringList()), song->mutable_musicbrainz_artist_id());
   }
   if (tag->contains(kMP4_MusicBrainz_OriginalArtistId)) {
-    AssignTagLibStringToStdString(tag->item(kMP4_MusicBrainz_OriginalArtistId).toStringList().toString(), song->mutable_musicbrainz_original_artist_id());
+    AssignTagLibStringToStdString(TagLibStringListToSlashSeparatedString(tag->item(kMP4_MusicBrainz_OriginalArtistId).toStringList()), song->mutable_musicbrainz_original_artist_id());
   }
   if (tag->contains(kMP4_MusicBrainz_AlbumId)) {
     AssignTagLibStringToStdString(tag->item(kMP4_MusicBrainz_AlbumId).toStringList().toString(), song->mutable_musicbrainz_album_id());
@@ -825,7 +827,7 @@ void TagReaderTagLib::ParseMP4Tags(TagLib::MP4::Tag *tag, QString *disc, QString
     AssignTagLibStringToStdString(tag->item(kMP4_MusicBrainz_ReleaseGroupId).toStringList().toString(), song->mutable_musicbrainz_release_group_id());
   }
   if (tag->contains(kMP4_MusicBrainz_WorkId)) {
-    AssignTagLibStringToStdString(tag->item(kMP4_MusicBrainz_WorkId).toStringList().toString(), song->mutable_musicbrainz_work_id());
+    AssignTagLibStringToStdString(TagLibStringListToSlashSeparatedString(tag->item(kMP4_MusicBrainz_WorkId).toStringList()), song->mutable_musicbrainz_work_id());
   }
 
 }
@@ -937,7 +939,7 @@ TagReaderBase::Result TagReaderTagLib::WriteFile(const QString &filename, const 
     save_tags_options << QStringLiteral("embedded cover");
   }
 
-  qLog(Debug) << "Saving" << save_tags_options.join(QLatin1String(", ")) << "to" << filename;
+  qLog(Debug) << "Saving" << save_tags_options.join(", "_L1) << "to" << filename;
 
   const Cover cover = LoadCoverFromRequest(filename, request);
 
@@ -1211,7 +1213,7 @@ void TagReaderTagLib::SetUnsyncLyricsFrame(const std::string &value, TagLib::ID3
   // If no frames stored create empty frame
   if (frames_buffer.isEmpty()) {
     TagLib::ID3v2::UnsynchronizedLyricsFrame frame(TagLib::String::UTF8);
-    frame.setDescription("Clementine editor");
+    frame.setDescription("Strawberry editor");
     frames_buffer.push_back(frame.render());
   }
 
@@ -1501,10 +1503,10 @@ void TagReaderTagLib::SetEmbeddedArt(TagLib::MP4::File *aac_file, TagLib::MP4::T
   }
   else {
     TagLib::MP4::CoverArt::Format cover_format = TagLib::MP4::CoverArt::Format::JPEG;
-    if (mime_type == QLatin1String("image/jpeg")) {
+    if (mime_type == "image/jpeg"_L1) {
       cover_format = TagLib::MP4::CoverArt::Format::JPEG;
     }
-    else if (mime_type == QLatin1String("image/png")) {
+    else if (mime_type == "image/png"_L1) {
       cover_format = TagLib::MP4::CoverArt::Format::PNG;
     }
     else {
@@ -1868,5 +1870,19 @@ TagReaderBase::Result TagReaderTagLib::SaveSongRatingToFile(const QString &filen
   }
 
   return success ? Result::ErrorCode::Success : Result::ErrorCode::FileSaveError;
+
+}
+
+TagLib::String TagReaderTagLib::TagLibStringListToSlashSeparatedString(const TagLib::StringList &taglib_string_list) {
+
+  TagLib::String result_string;
+  for (const TagLib::String &taglib_string : taglib_string_list) {
+    if (!result_string.isEmpty()) {
+      result_string += '/';
+    }
+    result_string += taglib_string;
+  }
+
+  return result_string;
 
 }

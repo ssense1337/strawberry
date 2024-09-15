@@ -76,11 +76,7 @@
 #include <kdsingleapplication.h>
 
 #ifdef HAVE_QTSPARKLE
-#  if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-#    include <qtsparkle-qt6/Updater>
-#  else
-#    include <qtsparkle-qt5/Updater>
-#  endif
+#  include <qtsparkle-qt6/Updater>
 #endif  // HAVE_QTSPARKLE
 
 #ifdef Q_OS_MACOS
@@ -116,6 +112,7 @@
 #  include "osd/osdbase.h"
 #endif
 
+using namespace Qt::StringLiterals;
 using std::make_shared;
 
 int main(int argc, char *argv[]) {
@@ -135,11 +132,6 @@ int main(int argc, char *argv[]) {
 #endif
   QCoreApplication::setApplicationVersion(QStringLiteral(STRAWBERRY_VERSION_DISPLAY));
   QCoreApplication::setOrganizationDomain(QStringLiteral("strawberrymusicplayer.org"));
-
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-  QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-  QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-#endif
 
   // This makes us show up nicely in gnome-volume-control
   g_set_application_name("Strawberry");
@@ -205,6 +197,8 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
+  QThread::currentThread()->setObjectName(QStringLiteral("Main"));
+
   QGuiApplication::setWindowIcon(IconLoader::Load(QStringLiteral("strawberry")));
 
 #if defined(USE_BUNDLE)
@@ -219,11 +213,11 @@ int main(int argc, char *argv[]) {
     s.beginGroup(AppearanceSettingsPage::kSettingsGroup);
     QString style = s.value(AppearanceSettingsPage::kStyle).toString();
     if (style.isEmpty()) {
-      style = QLatin1String("default");
+      style = "default"_L1;
       s.setValue(AppearanceSettingsPage::kStyle, style);
     }
     s.endGroup();
-    if (style != QLatin1String("default")) {
+    if (style != "default"_L1) {
       QApplication::setStyle(style);
     }
     if (QApplication::style()) qLog(Debug) << "Style:" << QApplication::style()->objectName();
@@ -265,17 +259,13 @@ int main(int argc, char *argv[]) {
 
   QString system_language = QLocale::system().uiLanguages().empty() ? QLocale::system().name() : QLocale::system().uiLanguages().first();
   // uiLanguages returns strings with "-" as separators for language/region; however QTranslator needs "_" separators
-  system_language.replace(QLatin1Char('-'), QLatin1Char('_'));
+  system_language.replace(u'-', u'_');
 
   const QString language = override_language.isEmpty() ? system_language : override_language;
 
   ScopedPtr<Translations> translations(new Translations);
 
-#  if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   translations->LoadTranslation(QStringLiteral("qt"), QLibraryInfo::path(QLibraryInfo::TranslationsPath), language);
-#  else
-  translations->LoadTranslation(QStringLiteral("qt"), QLibraryInfo::location(QLibraryInfo::TranslationsPath), language);
-#  endif
   translations->LoadTranslation(QStringLiteral("strawberry"), QStringLiteral(":/translations"), language);
   translations->LoadTranslation(QStringLiteral("strawberry"), QStringLiteral(TRANSLATIONS_DIR), language);
   translations->LoadTranslation(QStringLiteral("strawberry"), QCoreApplication::applicationDirPath(), language);

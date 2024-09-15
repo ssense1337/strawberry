@@ -134,7 +134,7 @@ void QobuzFavoriteRequest::AddFavoritesRequest(const FavoriteType type, const QS
 
   const ParamList params = ParamList() << Param(QStringLiteral("app_id"), app_id())
                                        << Param(QStringLiteral("user_auth_token"), user_auth_token())
-                                       << Param(FavoriteMethod(type), ids_list.join(QLatin1Char(',')));
+                                       << Param(FavoriteMethod(type), ids_list.join(u','));
 
   QUrlQuery url_query;
   for (const Param &param : params) {
@@ -167,13 +167,13 @@ void QobuzFavoriteRequest::AddFavoritesReply(QNetworkReply *reply, const Favorit
 
   switch (type) {
     case FavoriteType::Artists:
-      emit ArtistsAdded(songs);
+      Q_EMIT ArtistsAdded(songs);
       break;
     case FavoriteType::Albums:
-      emit AlbumsAdded(songs);
+      Q_EMIT AlbumsAdded(songs);
       break;
     case FavoriteType::Songs:
-      emit SongsAdded(songs);
+      Q_EMIT SongsAdded(songs);
       break;
   }
 
@@ -229,7 +229,7 @@ void QobuzFavoriteRequest::RemoveFavoritesRequest(const FavoriteType type, const
 
   const ParamList params = ParamList() << Param(QStringLiteral("app_id"), app_id())
                                        << Param(QStringLiteral("user_auth_token"), user_auth_token())
-                                       << Param(FavoriteMethod(type), ids_list.join(QLatin1Char(',')));
+                                       << Param(FavoriteMethod(type), ids_list.join(u','));
 
   QUrlQuery url_query;
   for (const Param &param : params) {
@@ -261,13 +261,13 @@ void QobuzFavoriteRequest::RemoveFavoritesReply(QNetworkReply *reply, const Favo
 
   switch (type) {
     case FavoriteType::Artists:
-      emit ArtistsRemoved(songs);
+      Q_EMIT ArtistsRemoved(songs);
       break;
     case FavoriteType::Albums:
-      emit AlbumsRemoved(songs);
+      Q_EMIT AlbumsRemoved(songs);
       break;
     case FavoriteType::Songs:
-      emit SongsRemoved(songs);
+      Q_EMIT SongsRemoved(songs);
       break;
   }
 

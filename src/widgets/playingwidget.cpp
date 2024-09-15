@@ -45,6 +45,7 @@
 #include "covermanager/albumcoverchoicecontroller.h"
 #include "playingwidget.h"
 
+using namespace Qt::StringLiterals;
 using std::make_unique;
 
 namespace {
@@ -53,10 +54,6 @@ constexpr char kSettingsGroup[] = "PlayingWidget";
 
 // Space between the cover and the details in small mode
 constexpr int kPadding = 2;
-
-// Width of the transparent to black gradient above and below the text in large mode
-constexpr int kGradientHead = 40;
-constexpr int kGradientTail = 20;
 
 // Maximum height of the cover in large mode, and offset between the bottom of the cover and bottom of the widget
 constexpr int kMaxCoverSize = 260;
@@ -261,7 +258,7 @@ void PlayingWidget::ShowAboveStatusBar(const bool above) {
   s.setValue("above_status_bar", above);
   s.endGroup();
 
-  emit ShowAboveStatusBarChanged(above);
+  Q_EMIT ShowAboveStatusBarChanged(above);
 
 }
 
@@ -411,16 +408,16 @@ void PlayingWidget::UpdateDetailsText() {
   switch (mode_) {
     case Mode::SmallSongDetails:
       details_->setTextWidth(-1);
-      html += QLatin1String("<p>");
+      html += "<p>"_L1;
       break;
     case Mode::LargeSongDetails:
       details_->setTextWidth(desired_height_);
-      html += QLatin1String("<p align=center>");
+      html += "<p align=center>"_L1;
       break;
   }
 
   html += QStringLiteral("%1<br/>%2<br/>%3").arg(song_.PrettyTitle().toHtmlEscaped(), song_.artist().toHtmlEscaped(), song_.album().toHtmlEscaped());
-  html += QLatin1String("</p>");
+  html += "</p>"_L1;
 
   details_->setHtml(html);
 

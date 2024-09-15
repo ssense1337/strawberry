@@ -175,7 +175,9 @@ SongLoader::Result SongLoader::LoadLocalPartial(const QString &filename) {
   }
 
   // Assume it's just a normal file
-  if (TagReaderClient::Instance()->IsMediaFileBlocking(filename) || Song::kAcceptedExtensions.contains(fileinfo.suffix(), Qt::CaseInsensitive)) {
+  if (!Song::kRejectedExtensions.contains(fileinfo.suffix(), Qt::CaseInsensitive) &&
+      (TagReaderClient::Instance()->IsMediaFileBlocking(filename) ||
+       Song::kAcceptedExtensions.contains(fileinfo.suffix(), Qt::CaseInsensitive))) {
     Song song(Song::Source::LocalFile);
     song.InitFromFilePartial(filename, fileinfo);
     if (song.is_valid()) {
@@ -215,7 +217,7 @@ void SongLoader::AudioCDTracksLoadFinishedSlot(const SongList &songs, const QStr
 
   songs_ = songs;
   errors_ << error;
-  emit AudioCDTracksLoadFinished();
+  Q_EMIT AudioCDTracksLoadFinished();
 
 }
 
@@ -224,7 +226,7 @@ void SongLoader::AudioCDTracksTagsLoaded(const SongList &songs) {
   CddaSongLoader *cdda_song_loader = qobject_cast<CddaSongLoader*>(sender());
   cdda_song_loader->deleteLater();
   songs_ = songs;
-  emit LoadAudioCDFinished(true);
+  Q_EMIT LoadAudioCDFinished(true);
 
 }
 #endif
@@ -305,7 +307,7 @@ SongLoader::Result SongLoader::LoadLocalAsync(const QString &filename) {
     // It's a CUE - create virtual tracks
     QFile cue(matching_cue);
     if (cue.open(QIODevice::ReadOnly)) {
-      const SongList songs = cue_parser_->Load(&cue, matching_cue, QDir(filename.section(QLatin1Char('/'), 0, -2)));
+      const SongList songs = cue_parser_->Load(&cue, matching_cue, QDir(filename.section(u'/', 0, -2)));
       cue.close();
       for (const Song &song : songs) {
         if (song.is_valid()) songs_ << song;
@@ -319,7 +321,9 @@ SongLoader::Result SongLoader::LoadLocalAsync(const QString &filename) {
   }
 
   // Assume it's just a normal file
-  if (TagReaderClient::Instance()->IsMediaFileBlocking(filename) || Song::kAcceptedExtensions.contains(fileinfo.suffix(), Qt::CaseInsensitive)) {
+  if (!Song::kRejectedExtensions.contains(fileinfo.suffix(), Qt::CaseInsensitive) &&
+      (TagReaderClient::Instance()->IsMediaFileBlocking(filename) ||
+       Song::kAcceptedExtensions.contains(fileinfo.suffix(), Qt::CaseInsensitive))) {
     Song song(Song::Source::LocalFile);
     song.InitFromFilePartial(filename, fileinfo);
     if (song.is_valid()) {
@@ -459,7 +463,7 @@ void SongLoader::StopTypefind() {
     AddAsRawStream();
   }
 
-  emit LoadRemoteFinished();
+  Q_EMIT LoadRemoteFinished();
 
 }
 
