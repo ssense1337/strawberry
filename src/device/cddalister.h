@@ -34,11 +34,11 @@
 
 #include "devicelister.h"
 
-class CddaLister : public DeviceLister {
+class CDDALister : public DeviceLister {
   Q_OBJECT
 
  public:
-  explicit CddaLister(QObject *parent = nullptr) : DeviceLister(parent) {}
+  explicit CDDALister(QObject *parent = nullptr) : DeviceLister(parent) {}
 
   QStringList DeviceUniqueIDs() override;
   QVariantList DeviceIcons(const QString &id) override;
@@ -47,11 +47,11 @@ class CddaLister : public DeviceLister {
   quint64 DeviceCapacity(const QString &id) override;
   quint64 DeviceFreeSpace(const QString &id) override;
   QVariantMap DeviceHardwareInfo(const QString &id) override;
-  bool AskForScan(const QString&) const override { return false; }
-  QString MakeFriendlyName(const QString&) override;
-  QList<QUrl> MakeDeviceUrls(const QString&) override;
-  void UnmountDevice(const QString&) override;
-  void UpdateDeviceFreeSpace(const QString&) override;
+  bool AskForScan(const QString &id) const override;
+  QString MakeFriendlyName(const QString &id) override;
+  QList<QUrl> MakeDeviceUrls(const QString &id) override;
+  void UnmountDevice(const QString &id) override;
+  void UpdateDeviceFreeSpace(const QString &id) override;
   bool Init() override;
   bool CopyMusic() override { return false; }
 

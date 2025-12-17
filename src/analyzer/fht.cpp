@@ -18,14 +18,14 @@
 
    You should have received a copy of the GNU General Public License
    along with Strawberry.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "fht.h"
 
 #include <algorithm>
 #include <cmath>
 
-#include <QVector>
+#include <QList>
 #include <QtMath>
 
 FHT::FHT(uint n) : num_((n < 3) ? 0 : 1 << n), exp2_((n < 3) ? -1 : static_cast<int>(n)) {

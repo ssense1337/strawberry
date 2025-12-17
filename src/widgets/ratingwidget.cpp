@@ -29,13 +29,15 @@
 #include <QPainter>
 #include <QMouseEvent>
 
+using namespace Qt::Literals::StringLiterals;
+
 RatingPainter::RatingPainter() {
 
   // Load the base pixmaps
-  QIcon star_on(QStringLiteral(":/pictures/star-on.png"));
+  QIcon star_on(u":/pictures/star-on.png"_s);
   QList<QSize> star_on_sizes = star_on.availableSizes();
   QPixmap on(star_on.pixmap(star_on_sizes.last()));
-  QIcon star_off(QStringLiteral(":/pictures/star-off.png"));
+  QIcon star_off(u":/pictures/star-off.png"_s);
   QList<QSize> star_off_sizes = star_off.availableSizes();
   QPixmap off(star_off.pixmap(star_off_sizes.last()));
 
@@ -111,6 +113,7 @@ RatingWidget::RatingWidget(QWidget *parent) : QWidget(parent), rating_(0.0), hov
 
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   setMouseTracking(true);
+  setFocusPolicy(Qt::StrongFocus);
 
 }
 
@@ -128,7 +131,9 @@ void RatingWidget::set_rating(const float rating) {
 
 }
 
-void RatingWidget::paintEvent(QPaintEvent*) {
+void RatingWidget::paintEvent(QPaintEvent *e) {
+
+  Q_UNUSED(e)
 
   QStylePainter p(this);
 
@@ -161,9 +166,39 @@ void RatingWidget::mouseMoveEvent(QMouseEvent *e) {
 
 }
 
-void RatingWidget::leaveEvent(QEvent*) {
+void RatingWidget::leaveEvent(QEvent *e) {
+
+  Q_UNUSED(e)
 
   hover_rating_ = -1.0;
   update();
+
+}
+
+void RatingWidget::keyPressEvent(QKeyEvent *e) {
+
+  constexpr float arrow_incr = 0.5f / RatingPainter::kStarCount;
+
+  float rating = -1.0f;
+
+  if (e->key() >= Qt::Key_0 && e->key() <= Qt::Key_9) {
+    rating = qBound(0.0f, static_cast<float>(e->key() - Qt::Key_0) / RatingPainter::kStarCount, 1.0f);
+  }
+  else if (e->key() == Qt::Key_Left) {
+    rating = qBound(0.0f, rating_ - arrow_incr, 1.0f);
+  }
+  else if (e->key() == Qt::Key_Right) {
+    rating = qBound(0.0f, rating_ + arrow_incr, 1.0f);
+  }
+
+  if (rating != -1.0f) {
+    if (rating != rating_) {
+      rating_ = rating;
+      Q_EMIT RatingChanged(rating_);
+    }
+  }
+  else {
+    QWidget::keyPressEvent(e);
+  }
 
 }

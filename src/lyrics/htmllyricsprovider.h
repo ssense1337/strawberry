@@ -22,14 +22,11 @@
 
 #include "config.h"
 
-#include <QtGlobal>
-#include <QObject>
-#include <QList>
 #include <QVariant>
 #include <QString>
 #include <QUrl>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "core/networkaccessmanager.h"
 #include "lyricsprovider.h"
 #include "lyricssearchrequest.h"
@@ -40,23 +37,20 @@ class HtmlLyricsProvider : public LyricsProvider {
   Q_OBJECT
 
  public:
-  explicit HtmlLyricsProvider(const QString &name, const bool enabled, const QString &start_tag, const QString &end_tag, const QString &lyrics_start, const bool multiple, SharedPtr<NetworkAccessManager> network, QObject *parent);
-  ~HtmlLyricsProvider();
+  explicit HtmlLyricsProvider(const QString &name, const bool enabled, const QString &start_tag, const QString &end_tag, const QString &lyrics_start, const bool multiple, const SharedPtr<NetworkAccessManager> network, QObject *parent);
 
   virtual bool StartSearchAsync(const int id, const LyricsSearchRequest &request) override;
 
-  static QString ParseLyricsFromHTML(const QString &content, const QRegularExpression &start_tag, const QRegularExpression &end_tag, const QRegularExpression &lyrics_start, const bool multiple);
+  static QString ParseLyricsFromHTML(const QString &content, const QRegularExpression &start_tag, const QRegularExpression &end_tag, const QRegularExpression &lyrics_start, const bool multiple, const QList<QRegularExpression> &regex_removes = {});
 
  protected:
   virtual QUrl Url(const LyricsSearchRequest &request) = 0;
-  void Error(const QString &error, const QVariant &debug = QVariant()) override;
 
  protected Q_SLOTS:
   virtual void StartSearch(const int id, const LyricsSearchRequest &request) override;
   virtual void HandleLyricsReply(QNetworkReply *reply, const int id, const LyricsSearchRequest &request);
 
  protected:
-  QList<QNetworkReply*> replies_;
   const QString start_tag_;
   const QString end_tag_;
   const QString lyrics_start_;

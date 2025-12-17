@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2019-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2019-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,6 @@
 
 #include "config.h"
 
-#include <memory>
-
 #include <QtGlobal>
 #include <QObject>
 #include <QPair>
@@ -36,16 +34,21 @@
 #include <QStringList>
 #include <QUrl>
 #include <QSslError>
+#include <QScopedPointer>
+#include <QSharedPointer>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "core/song.h"
 #include "streaming/streamingservice.h"
 #include "streaming/streamingsearchview.h"
 
 class QTimer;
 class QNetworkReply;
-class Application;
+class TaskManager;
+class Database;
+class UrlHandlers;
 class NetworkAccessManager;
+class AlbumCoverLoader;
 class QobuzUrlHandler;
 class QobuzRequest;
 class QobuzFavoriteRequest;
@@ -54,11 +57,19 @@ class CollectionBackend;
 class CollectionModel;
 class CollectionFilter;
 
+using QobuzRequestPtr = QScopedPointer<QobuzRequest, QScopedPointerDeleteLater>;
+
 class QobuzService : public StreamingService {
   Q_OBJECT
 
  public:
-  explicit QobuzService(Application *app, QObject *parent = nullptr);
+  explicit QobuzService(const SharedPtr<TaskManager> task_manager,
+                        const SharedPtr<Database> database,
+                        const SharedPtr<NetworkAccessManager> network,
+                        const SharedPtr<UrlHandlers> url_handlers,
+                        const SharedPtr<AlbumCoverLoader> albumcover_loader,
+                        QObject *parent = nullptr);
+
   ~QobuzService();
 
   static const Song::Source kSource;
@@ -68,13 +79,12 @@ class QobuzService : public StreamingService {
   void Exit() override;
   void ReloadSettings() override;
 
-  void Logout();
-  int Search(const QString &text, StreamingSearchView::SearchType type) override;
+  void ClearSession();
+  int Search(const QString &text, const SearchType type) override;
   void CancelSearch() override;
 
   int max_login_attempts() const { return kLoginAttempts; }
 
-  Application *app() const { return app_; }
   QString app_id() const { return app_id_; }
   QString app_secret() const { return app_secret_; }
   QString username() const { return username_; }
@@ -85,6 +95,7 @@ class QobuzService : public StreamingService {
   int albumssearchlimit() const { return albumssearchlimit_; }
   int songssearchlimit() const { return songssearchlimit_; }
   bool download_album_covers() const { return download_album_covers_; }
+  bool remove_remastered() const { return remove_remastered_; }
 
   QString user_auth_token() const { return user_auth_token_; }
   qint64 user_id() const { return user_id_; }
@@ -110,7 +121,6 @@ class QobuzService : public StreamingService {
   CollectionFilter *songs_collection_filter_model() override { return songs_collection_model_->filter(); }
 
  public Q_SLOTS:
-  void ShowConfig() override;
   void TryLogin();
   void SendLogin();
   void SendLoginWithCredentials(const QString &app_id, const QString &username, const QString &password);
@@ -148,8 +158,7 @@ class QobuzService : public StreamingService {
   void SendSearch();
   void LoginError(const QString &error = QString(), const QVariant &debug = QVariant());
 
-  Application *app_;
-  SharedPtr<NetworkAccessManager> network_;
+  const SharedPtr<NetworkAccessManager> network_;
   QobuzUrlHandler *url_handler_;
 
   SharedPtr<CollectionBackend> artists_collection_backend_;
@@ -163,10 +172,10 @@ class QobuzService : public StreamingService {
   QTimer *timer_search_delay_;
   QTimer *timer_login_attempt_;
 
-  SharedPtr<QobuzRequest> artists_request_;
-  SharedPtr<QobuzRequest> albums_request_;
-  SharedPtr<QobuzRequest> songs_request_;
-  SharedPtr<QobuzRequest> search_request_;
+  QobuzRequestPtr artists_request_;
+  QobuzRequestPtr albums_request_;
+  QobuzRequestPtr songs_request_;
+  QobuzRequestPtr search_request_;
   QobuzFavoriteRequest *favorite_request_;
 
   QString app_id_;
@@ -179,6 +188,7 @@ class QobuzService : public StreamingService {
   int albumssearchlimit_;
   int songssearchlimit_;
   bool download_album_covers_;
+  bool remove_remastered_;
 
   qint64 user_id_;
   QString user_auth_token_;
@@ -188,7 +198,7 @@ class QobuzService : public StreamingService {
   int pending_search_id_;
   int next_pending_search_id_;
   QString pending_search_text_;
-  StreamingSearchView::SearchType pending_search_type_;
+  SearchType pending_search_type_;
 
   int search_id_;
   QString search_text_;
@@ -196,9 +206,7 @@ class QobuzService : public StreamingService {
   int login_attempts_;
 
   uint next_stream_url_request_id_;
-  QMap<uint, SharedPtr<QobuzStreamURLRequest>> stream_url_requests_;
-
-  QStringList login_errors_;
+  QMap<uint, QSharedPointer<QobuzStreamURLRequest>> stream_url_requests_;
 
   QList<QObject*> wait_for_exit_;
   QList<QNetworkReply*> replies_;

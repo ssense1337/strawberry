@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2018-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,6 @@
 #ifndef QOBUZURLHANDLER_H
 #define QOBUZURLHANDLER_H
 
-#include <QtGlobal>
-#include <QObject>
 #include <QMap>
 #include <QString>
 #include <QUrl>
@@ -30,13 +28,13 @@
 #include "core/song.h"
 #include "qobuz/qobuzservice.h"
 
-class Application;
+class TaskManager;
 
 class QobuzUrlHandler : public UrlHandler {
   Q_OBJECT
 
  public:
-  explicit QobuzUrlHandler(Application *app, QobuzService *service);
+  explicit QobuzUrlHandler(const SharedPtr<TaskManager> task_manager, QobuzService *service);
 
   QString scheme() const { return service_->url_scheme(); }
   LoadResult StartLoading(const QUrl &url);
@@ -54,7 +52,7 @@ class QobuzUrlHandler : public UrlHandler {
     uint id;
     int task_id;
   };
-  Application *app_;
+  const SharedPtr<TaskManager> task_manager_;
   QobuzService *service_;
   QMap<uint, Request> requests_;
 };

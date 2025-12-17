@@ -25,7 +25,6 @@
 #include <memory>
 
 #include <QObject>
-#include <QStandardPaths>
 #include <QString>
 #include <QFile>
 #include <QIODevice>
@@ -38,18 +37,19 @@
 
 #include "core/song.h"
 #include "core/logging.h"
+#include "core/standardpaths.h"
 
 #include "scrobblercache.h"
 #include "scrobblercacheitem.h"
 
 using namespace std::chrono_literals;
-using namespace Qt::StringLiterals;
+using namespace Qt::Literals::StringLiterals;
 using std::make_shared;
 
 ScrobblerCache::ScrobblerCache(const QString &filename, QObject *parent)
     : QObject(parent),
       timer_flush_(new QTimer(this)),
-      filename_(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1Char('/') + filename),
+      filename_(StandardPaths::WritableLocation(StandardPaths::StandardLocation::CacheLocation) + QLatin1Char('/') + filename),
       loaded_(false) {
 
   ReadCache();
@@ -118,15 +118,13 @@ void ScrobblerCache::ReadCache() {
       continue;
     }
     QJsonObject json_obj_track = value.toObject();
-    if (
-        !json_obj_track.contains("timestamp"_L1) ||
+    if (!json_obj_track.contains("timestamp"_L1) ||
         !json_obj_track.contains("artist"_L1) ||
         !json_obj_track.contains("album"_L1) ||
         !json_obj_track.contains("title"_L1) ||
         !json_obj_track.contains("track"_L1) ||
         !json_obj_track.contains("albumartist"_L1) ||
-        !json_obj_track.contains("length_nanosec"_L1)
-    ) {
+        !json_obj_track.contains("length_nanosec"_L1)) {
       qLog(Error) << "Scrobbler cache JSON tracks array value is missing data.";
       qLog(Debug) << value;
       continue;
@@ -180,6 +178,18 @@ void ScrobblerCache::ReadCache() {
     if (json_obj_track.contains("musicbrainz_work_id"_L1)) {
       metadata.musicbrainz_work_id = json_obj_track["musicbrainz_work_id"_L1].toString();
     }
+    if (json_obj_track.contains("music_service"_L1)) {
+      metadata.music_service = json_obj_track["music_service"_L1].toString();
+    }
+    if (json_obj_track.contains("music_service_name"_L1)) {
+      metadata.music_service_name = json_obj_track["music_service_name"_L1].toString();
+    }
+    if (json_obj_track.contains("share_url"_L1)) {
+      metadata.share_url = json_obj_track["share_url"_L1].toString();
+    }
+    if (json_obj_track.contains("spotify_id"_L1)) {
+      metadata.spotify_id = json_obj_track["spotify_id"_L1].toString();
+    }
 
     ScrobblerCacheItemPtr cache_item = make_shared<ScrobblerCacheItem>(metadata, timestamp);
     scrobbler_cache_ << cache_item;
@@ -220,6 +230,10 @@ void ScrobblerCache::WriteCache() {
     object.insert("musicbrainz_disc_id"_L1, QJsonValue::fromVariant(cache_item->metadata.musicbrainz_disc_id));
     object.insert("musicbrainz_release_group_id"_L1, QJsonValue::fromVariant(cache_item->metadata.musicbrainz_release_group_id));
     object.insert("musicbrainz_work_id"_L1, QJsonValue::fromVariant(cache_item->metadata.musicbrainz_work_id));
+    object.insert("music_service"_L1, QJsonValue::fromVariant(cache_item->metadata.music_service));
+    object.insert("music_service_name"_L1, QJsonValue::fromVariant(cache_item->metadata.music_service_name));
+    object.insert("share_url"_L1, QJsonValue::fromVariant(cache_item->metadata.share_url));
+    object.insert("spotify_id"_L1, QJsonValue::fromVariant(cache_item->metadata.spotify_id));
     object.insert("length_nanosec"_L1, QJsonValue::fromVariant(cache_item->metadata.length_nanosec));
     array.append(QJsonValue::fromVariant(object));
   }

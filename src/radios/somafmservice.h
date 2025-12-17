@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2021-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,13 +28,15 @@
 #include "radiochannel.h"
 
 class QNetworkReply;
+
+class TaskManager;
 class NetworkAccessManager;
 
 class SomaFMService : public RadioService {
   Q_OBJECT
 
  public:
-  explicit SomaFMService(Application *app, SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
+  explicit SomaFMService(const SharedPtr<TaskManager> task_manager, const SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
   ~SomaFMService();
 
   QUrl Homepage() override;

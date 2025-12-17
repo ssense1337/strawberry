@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2019-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2019-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,25 +22,23 @@
 
 #include "config.h"
 
-#include <QObject>
-#include <QList>
 #include <QVariant>
 #include <QString>
 
 #include "qobuzbaserequest.h"
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "core/song.h"
 
 class QNetworkReply;
 class QobuzService;
 class NetworkAccessManager;
+class QobuzService;
 
 class QobuzFavoriteRequest : public QobuzBaseRequest {
   Q_OBJECT
 
  public:
   explicit QobuzFavoriteRequest(QobuzService *service, SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
-  ~QobuzFavoriteRequest();
 
  private:
   enum class FavoriteType {
@@ -79,10 +77,6 @@ class QobuzFavoriteRequest : public QobuzBaseRequest {
   void AddFavoritesRequest(const FavoriteType type, const QStringList &ids_list, const SongList &songs);
   void RemoveFavorites(const FavoriteType type, const SongList &songs);
   void RemoveFavoritesRequest(const FavoriteType type, const QStringList &ids_list, const SongList &songs);
-
-  QobuzService *service_;
-  SharedPtr<NetworkAccessManager> network_;
-  QList<QNetworkReply*> replies_;
 };
 
 #endif  // QOBUZFAVORITEREQUEST_H

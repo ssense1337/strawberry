@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2018-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #include <QVariant>
 #include <QString>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "core/song.h"
 
 #include "tidalbaserequest.h"
@@ -40,11 +40,7 @@ class TidalFavoriteRequest : public TidalBaseRequest {
   Q_OBJECT
 
  public:
-  explicit TidalFavoriteRequest(TidalService *service, SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
-  ~TidalFavoriteRequest() override;
-
-  bool need_login() const { return need_login_; }
-  void set_need_login() override { need_login_ = true; }
+  explicit TidalFavoriteRequest(TidalService *service, const SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
 
  private:
   enum class FavoriteType {
@@ -87,9 +83,7 @@ class TidalFavoriteRequest : public TidalBaseRequest {
   void RemoveFavoritesRequest(const FavoriteType type, const QString &id, const SongList &songs);
 
   TidalService *service_;
-  SharedPtr<NetworkAccessManager> network_;
-  QList <QNetworkReply*> replies_;
-  bool need_login_;
+  const SharedPtr<NetworkAccessManager> network_;
 };
 
 #endif  // TIDALFAVORITEREQUEST_H

@@ -10,12 +10,12 @@ jobs:
 
   build-windows-mingw:
     name: Build Windows MinGW
-    if: github.repository != 'strawberrymusicplayer/strawberry-private'
+    if: github.repository != 'strawberrymusicplayer/strawberry-private' && github.ref != 'refs/heads/l10n_master'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        arch: [ 'x86_64' ]
+        arch: [ 'i686', 'x86_64' ]
         buildtype: [ 'debug', 'release' ]
     container:
       image: jonaski/strawberry-mxe-${{matrix.arch}}-${{matrix.buildtype}}
@@ -26,7 +26,7 @@ jobs:
         run: echo "cmake_buildtype=$(echo ${{matrix.buildtype}} | sed 's/.*/\u&/')" >> $GITHUB_ENV
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: recursive
@@ -50,15 +50,14 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE="../cmake/Toolchain-${{matrix.arch}}-w64-mingw32-shared.cmake"
           -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}"
           -DCMAKE_PREFIX_PATH="/strawberry-mxe/usr/${{matrix.arch}}-w64-mingw32.shared/qt6"
-          -DBUILD_WERROR=OFF
+          -DBUILD_WERROR=ON
           -DARCH="${{matrix.arch}}"
           -DENABLE_WIN32_CONSOLE=$(test "${{matrix.buildtype}}" = "debug" && echo "ON" || echo "OFF")
-          -DENABLE_DBUS=OFF
-          -DENABLE_LIBGPOD=OFF
-          -DENABLE_LIBMTP=OFF
+          -DENABLE_GIO=OFF
           -DENABLE_AUDIOCD=OFF
+          -DENABLE_MTP=OFF
+          -DENABLE_GPOD=OFF
           -DENABLE_SPOTIFY=OFF
-          -DProtobuf_PROTOC_EXECUTABLE="/strawberry-mxe/usr/x86_64-pc-linux-gnu/bin/protoc"
 
       - name: Run Make
         run: cmake --build build --config "${{env.cmake_buildtype}}" --parallel $(nproc)
@@ -131,7 +130,7 @@ jobs:
 
       - name: Copy nsis files
         working-directory: build
-        run: cp ${GITHUB_WORKSPACE}/dist/windows/*.nsi ${GITHUB_WORKSPACE}/dist/windows/*.nsh ${GITHUB_WORKSPACE}/dist/windows/*.ico .
+        run: cp ${GITHUB_WORKSPACE}/dist/windows/*.nsh ${GITHUB_WORKSPACE}/dist/windows/*.ico .
 
       - name: Copy COPYING license file
         working-directory: build
@@ -173,7 +172,7 @@ jobs:
         run: makensis strawberry.nsi
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: windows-mingw-${{matrix.arch}}-${{matrix.buildtype}}
           path: build/StrawberrySetup*.exe
@@ -181,13 +180,43 @@ jobs:
 
   build-windows-msvc:
     name: Build Windows MSVC
-    if: github.repository != 'strawberrymusicplayer/strawberry-private'
-    runs-on: windows-2022
+    if: github.repository != 'strawberrymusicplayer/strawberry-private' && github.ref != 'refs/heads/l10n_master'
     strategy:
       fail-fast: false
       matrix:
-        arch: [ 'x86_64' ]
-        buildtype: [ 'release' ]
+       include:
+         - name: "x86_64 debug"
+           runner: windows-2022
+           arch: x86_64
+           buildtype: debug
+
+         - name: "x86_64 release"
+           runner: windows-2022
+           arch: x86_64
+           buildtype: release
+
+         - name: "x86 debug"
+           runner: windows-2022
+           arch: x86
+           buildtype: debug
+
+         - name: "x86 release"
+           runner: windows-2022
+           arch: x86
+           buildtype: release
+
+         - name: "arm64 debug"
+           runner: windows-11-arm
+           arch: arm64
+           buildtype: debug
+
+         - name: "arm64 release"
+           runner: windows-11-arm
+           arch: arm64
+           buildtype: release
+
+    runs-on: ${{matrix.runner}}
+
     steps:
 
       - name: Set prefix path
@@ -200,6 +229,20 @@ jobs:
       - name: Set cmake buildtype
         shell: bash
         run: echo "cmake_buildtype=$(echo ${{matrix.buildtype}} | sed 's/.*/\u&/')" >> $GITHUB_ENV
+
+      - name: Show SDK versions
+        shell: bash
+        run: ls -la "c:/Program Files (x86)/Windows Kits/10/include"
+
+      - name: Set SDK version
+        if: matrix.arch != 'arm64'
+        shell: bash
+        run: echo "sdk_version=10.0.22621.0" >> $GITHUB_ENV
+
+      - name: Set SDK version
+        if: matrix.arch == 'arm64'
+        shell: bash
+        run: echo "sdk_version=10.0.26100.0" >> $GITHUB_ENV
 
       - name: Install rsync
         shell: cmd
@@ -229,7 +272,9 @@ jobs:
 
       - name: Copy bin files
         shell: bash
-        run: cp /c/strawberry/c/bin/{patch.exe,strip.exe,strings.exe,objdump.exe} ${{env.prefix_path_unix}}/bin
+        run: |
+          cp /c/mingw64/bin/{strip.exe,strings.exe,objdump.exe} ${{env.prefix_path_unix}}/bin
+          cp /c/strawberry/c/bin/patch.exe ${{env.prefix_path_unix}}/bin
 
       - name: Delete conflicting files
         shell: bash
@@ -283,11 +328,11 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{matrix.arch}}
-          sdk: 10.0.20348.0
+          sdk: ${{env.sdk_version}}
           vsversion: 2022
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: recursive
@@ -300,15 +345,18 @@ jobs:
         shell: cmd
         run: cmake -E make_directory build
 
-      - name: Set ENABLE_WIN32_CONSOLE (debug)
-        if: matrix.buildtype == 'debug'
+      - name: Set ENABLE_WIN32_CONSOLE
         shell: bash
-        run: echo "win32_console=ON" >> $GITHUB_ENV
+        run: echo "enable_win32_console=$(test "${{matrix.buildtype}}" = "debug" && echo "ON" || echo "OFF")" >> $GITHUB_ENV
 
-      - name: Set ENABLE_WIN32_CONSOLE (release)
-        if: matrix.buildtype == 'release'
+      - name: Set ENABLE_SPOTIFY
         shell: bash
-        run: echo "win32_console=OFF" >> $GITHUB_ENV
+        run: echo "enable_spotify=$(test -f "${{env.prefix_path_unix}}/lib/gstreamer-1.0/gstspotify.dll" && echo "ON" || echo "OFF")" >> $GITHUB_ENV
+
+      - name: Remove -lm from .pc files
+        if: matrix.arch == 'arm64'
+        shell: bash
+        run: sed -i 's/\-lm$//g' ${{env.prefix_path_unix}}/lib/pkgconfig/*.pc
 
       - name: Run CMake
         shell: cmd
@@ -320,12 +368,14 @@ jobs:
           -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}"
           -DCMAKE_PREFIX_PATH="${{env.prefix_path_forwardslash}}/lib/cmake"
           -DARCH="${{matrix.arch}}"
-          -DENABLE_WIN32_CONSOLE=${{env.win32_console}}
-          -DUSE_TAGLIB=ON
+          -DENABLE_WIN32_CONSOLE=${{env.enable_win32_console}}
           -DPKG_CONFIG_EXECUTABLE="${{env.prefix_path_forwardslash}}/bin/pkg-config.exe"
           -DICU_ROOT="${{env.prefix_path_forwardslash}}"
-          -DFFTW3_DIR="${{env.prefix_path_forwardslash}}"
-          -DBoost_INCLUDE_DIR="${{env.prefix_path_forwardslash}}/include"
+          -DENABLE_GIO=OFF
+          -DENABLE_AUDIOCD=OFF
+          -DENABLE_MTP=OFF
+          -DENABLE_GPOD=OFF
+          -DENABLE_SPOTIFY=${{env.enable_spotify}}
 
       - name: Run Make
         shell: cmd
@@ -419,7 +469,6 @@ jobs:
         shell: cmd
         working-directory: build
         run: |
-          copy ..\dist\windows\*.nsi .
           copy ..\dist\windows\*.nsh .
           copy ..\dist\windows\*.ico .
 
@@ -460,13 +509,18 @@ jobs:
             exit 1
           fi
 
+      - name: Download MSVC runtime
+        shell: bash
+        working-directory: build
+        run: curl -f -O -L https://aka.ms/vs/17/release/vc_redist.$(test "${{matrix.arch}}" = "x86_64" && echo "x64" || echo "${{matrix.arch}}").exe
+
       - name: Create nsis installer
         shell: cmd
         working-directory: build
         run: makensis strawberry.nsi
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: windows-msvc-${{matrix.arch}}-${{matrix.buildtype}}
           path: build/StrawberrySetup*.exe
@@ -485,7 +539,7 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
         run: sudo apt install -y git jq gh
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Show release assets
@@ -493,7 +547,7 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: gh release view "${{github.event.release.tag_name}}" --json assets | jq -r '.assets[].name'
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: artifacts
       - name: Add artifacts to release

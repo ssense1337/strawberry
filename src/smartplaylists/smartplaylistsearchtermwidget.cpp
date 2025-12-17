@@ -31,7 +31,7 @@
 #include <QShowEvent>
 #include <QResizeEvent>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "core/iconloader.h"
 #include "utilities/colorutils.h"
 #include "playlist/playlist.h"
@@ -41,7 +41,7 @@
 #include "smartplaylistsearchtermwidgetoverlay.h"
 #include "ui_smartplaylistsearchtermwidget.h"
 
-using namespace Qt::StringLiterals;
+using namespace Qt::Literals::StringLiterals;
 
 SmartPlaylistSearchTermWidget::SmartPlaylistSearchTermWidget(SharedPtr<CollectionBackend> collection_backend, QWidget *parent)
     : QWidget(parent),
@@ -91,10 +91,10 @@ SmartPlaylistSearchTermWidget::SmartPlaylistSearchTermWidget(SharedPtr<Collectio
   }
 
   // Icons on the buttons
-  ui_->remove->setIcon(IconLoader::Load(QStringLiteral("list-remove")));
+  ui_->remove->setIcon(IconLoader::Load(u"list-remove"_s));
 
   // Set stylesheet
-  QFile stylesheet_file(QStringLiteral(":/style/smartplaylistsearchterm.css"));
+  QFile stylesheet_file(u":/style/smartplaylistsearchterm.css"_s);
   if (stylesheet_file.open(QIODevice::ReadOnly)) {
     QString stylesheet = QString::fromLatin1(stylesheet_file.readAll());
     stylesheet_file.close();
@@ -162,11 +162,30 @@ void SmartPlaylistSearchTermWidget::FieldChanged(int index) {
     case SmartPlaylistSearchTerm::Field::Artist:
       new TagCompleter(collection_backend_, Playlist::Column::Artist, ui_->value_text);
       break;
-
+    case SmartPlaylistSearchTerm::Field::ArtistSort:
+      new TagCompleter(collection_backend_, Playlist::Column::ArtistSort, ui_->value_text);
+      break;
     case SmartPlaylistSearchTerm::Field::Album:
       new TagCompleter(collection_backend_, Playlist::Column::Album, ui_->value_text);
       break;
-
+    case SmartPlaylistSearchTerm::Field::AlbumSort:
+      new TagCompleter(collection_backend_, Playlist::Column::AlbumSort, ui_->value_text);
+      break;
+    case SmartPlaylistSearchTerm::Field::AlbumArtist:
+      new TagCompleter(collection_backend_, Playlist::Column::AlbumArtist, ui_->value_text);
+      break;
+    case SmartPlaylistSearchTerm::Field::AlbumArtistSort:
+      new TagCompleter(collection_backend_, Playlist::Column::AlbumArtistSort, ui_->value_text);
+      break;
+    case SmartPlaylistSearchTerm::Field::ComposerSort:
+      new TagCompleter(collection_backend_, Playlist::Column::ComposerSort, ui_->value_text);
+      break;
+    case SmartPlaylistSearchTerm::Field::PerformerSort:
+      new TagCompleter(collection_backend_, Playlist::Column::PerformerSort, ui_->value_text);
+      break;
+    case SmartPlaylistSearchTerm::Field::TitleSort:
+      new TagCompleter(collection_backend_, Playlist::Column::TitleSort, ui_->value_text);
+      break;
     default:
       ui_->value_text->setCompleter(nullptr);
   }
@@ -389,7 +408,7 @@ void SmartPlaylistSearchTermWidget::RelativeValueChanged() {
   }
   // Explain the user why he can't proceed
   if (ui_->value_date_numeric1->value() >= ui_->value_date_numeric2->value()) {
-    QMessageBox::warning(this, QStringLiteral("Strawberry"), tr("The second value must be greater than the first one!"));
+    QMessageBox::warning(this, u"Strawberry"_s, tr("The second value must be greater than the first one!"));
   }
   // Emit the signal in any case, so the Next button will be disabled
   Q_EMIT Changed();

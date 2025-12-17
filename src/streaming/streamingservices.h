@@ -31,7 +31,7 @@
 #include <QMap>
 #include <QString>
 
-#include <core/shared_ptr.h>
+#include "includes/shared_ptr.h"
 #include "core/song.h"
 
 class StreamingService;
@@ -45,7 +45,7 @@ class StreamingServices : public QObject {
 
   SharedPtr<StreamingService> ServiceBySource(const Song::Source source) const;
 
-  template <typename T>
+  template<typename T>
   SharedPtr<T> Service() {
     return std::static_pointer_cast<T>(ServiceBySource(T::kSource));
   }

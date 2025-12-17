@@ -27,7 +27,7 @@
 #include "strutils.h"
 #include "core/song.h"
 
-using namespace Qt::StringLiterals;
+using namespace Qt::Literals::StringLiterals;
 
 namespace Utilities {
 
@@ -114,7 +114,7 @@ QString DecodeHtmlEntities(const QString &text) {
 
 QString ReplaceMessage(const QString &message, const Song &song, const QString &newline, const bool html_escaped) {
 
-  static const QRegularExpression variable_replacer(QStringLiteral("[%][a-z]+[%]"));
+  static const QRegularExpression variable_replacer(u"[%][a-z]+[%]"_s);
   QString copy(message);
 
   // Replace the first line
@@ -127,7 +127,7 @@ QString ReplaceMessage(const QString &message, const Song &song, const QString &
     pos += match.capturedLength();
   }
 
-  static const QRegularExpression regexp(QStringLiteral(" - (>|$)"));
+  static const QRegularExpression regexp(u" - (>|$)"_s);
   qint64 index_of = copy.indexOf(regexp);
   if (index_of >= 0) copy = copy.remove(index_of, 3);
 
@@ -142,14 +142,26 @@ QString ReplaceVariable(const QString &variable, const Song &song, const QString
   if (variable == "%title%"_L1) {
     value = song.PrettyTitle();
   }
+  else if (variable == "%titlesort%"_L1) {
+    value = song.titlesort();
+  }
   else if (variable == "%album%"_L1) {
     value = song.album();
+  }
+  else if (variable == "%albumsort%"_L1) {
+    value = song.albumsort();
   }
   else if (variable == "%artist%"_L1) {
     value = song.artist();
   }
+  else if (variable == "%artistsort%"_L1) {
+    value = song.artistsort();
+  }
   else if (variable == "%albumartist%"_L1) {
     value = song.effective_albumartist();
+  }
+  else if (variable == "%albumartistsort%"_L1) {
+    value = song.albumartistsort();
   }
   else if (variable == "%track%"_L1) {
     value.setNum(song.track());
@@ -169,8 +181,14 @@ QString ReplaceVariable(const QString &variable, const Song &song, const QString
   else if (variable == "%composer%"_L1) {
     value = song.composer();
   }
+  else if (variable == "%composersort%"_L1) {
+    value = song.composersort();
+  }
   else if (variable == "%performer%"_L1) {
     value = song.performer();
+  }
+  else if (variable == "%performersort%"_L1) {
+    value = song.performersort();
   }
   else if (variable == "%grouping%"_L1) {
     value = song.grouping();
@@ -201,6 +219,17 @@ QString ReplaceVariable(const QString &variable, const Song &song, const QString
     value = value.toHtmlEscaped();
   }
   return value;
+
+}
+
+QString StringListToHTML(const QStringList &string_list) {
+
+  QString html;
+  for (const QString &string : string_list) {
+    html += string + "<br />"_L1;
+  }
+
+  return html;
 
 }
 

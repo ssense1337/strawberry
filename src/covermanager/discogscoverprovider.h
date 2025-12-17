@@ -2,7 +2,7 @@
  * Strawberry Music Player
  * This file was part of Clementine.
  * Copyright 2012, Martin Björklund <mbj4668@gmail.com>
- * Copyright 2016-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2016-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,31 +24,25 @@
 
 #include "config.h"
 
-#include <QObject>
-#include <QMetaType>
-#include <QPair>
-#include <QList>
 #include <QQueue>
 #include <QMap>
 #include <QVariant>
 #include <QByteArray>
 #include <QString>
-#include <QJsonObject>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "jsoncoverprovider.h"
 #include "albumcoverfetcher.h"
 
 class NetworkAccessManager;
 class QNetworkReply;
 class QTimer;
-class Application;
 
 class DiscogsCoverProvider : public JsonCoverProvider {
   Q_OBJECT
 
  public:
-  explicit DiscogsCoverProvider(Application *app, SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
+  explicit DiscogsCoverProvider(const SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
   ~DiscogsCoverProvider() override;
 
   bool StartSearch(const QString &artist, const QString &album, const QString &title, const int id) override;
@@ -60,7 +54,7 @@ class DiscogsCoverProvider : public JsonCoverProvider {
   };
 
   struct DiscogsCoverReleaseContext {
-    explicit DiscogsCoverReleaseContext(const quint64 _search_id = 0, const quint64 _id = 0, const QUrl &_url = QUrl()) : search_id(_search_id), id(_id), url(_url) {}
+    explicit DiscogsCoverReleaseContext(const int _search_id = 0, const quint64 _id = 0, const QUrl &_url = QUrl()) : search_id(_search_id), id(_id), url(_url) {}
     int search_id;
     quint64 id;
     QUrl url;
@@ -78,9 +72,9 @@ class DiscogsCoverProvider : public JsonCoverProvider {
  private:
   void SendSearchRequest(SharedPtr<DiscogsCoverSearchContext> search);
   void SendReleaseRequest(const DiscogsCoverReleaseContext &release);
-  QNetworkReply *CreateRequest(QUrl url, const ParamList &params_provided = ParamList());
-  QByteArray GetReplyData(QNetworkReply *reply);
+  QNetworkReply *CreateRequest(const QUrl &url, const ParamList &params = ParamList());
   void StartReleaseRequest(SharedPtr<DiscogsCoverSearchContext> search, const quint64 release_id, const QUrl &url);
+  JsonObjectResult ParseJsonObject(QNetworkReply *reply);
   void EndSearch(SharedPtr<DiscogsCoverSearchContext> search, const quint64 release_id = 0);
   void Error(const QString &error, const QVariant &debug = QVariant()) override;
 
@@ -90,16 +84,10 @@ class DiscogsCoverProvider : public JsonCoverProvider {
   void HandleReleaseReply(QNetworkReply *reply, const int search_id, const quint64 release_id);
 
  private:
-  static const char *kUrlSearch;
-  static const char *kAccessKeyB64;
-  static const char *kSecretKeyB64;
-  static const int kRequestsDelay;
-
   QTimer *timer_flush_requests_;
   QQueue<SharedPtr<DiscogsCoverSearchContext>> queue_search_requests_;
   QQueue<DiscogsCoverReleaseContext> queue_release_requests_;
   QMap<int, SharedPtr<DiscogsCoverSearchContext>> requests_search_;
-  QList<QNetworkReply*> replies_;
 };
 
 Q_DECLARE_METATYPE(DiscogsCoverProvider::DiscogsCoverSearchContext)

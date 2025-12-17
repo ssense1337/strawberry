@@ -25,7 +25,7 @@
 #include <QTimer>
 #include <QString>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "core/song.h"
 #include "lyricsfetcher.h"
 #include "lyricsfetchersearch.h"
@@ -38,7 +38,7 @@ namespace {
 constexpr int kMaxConcurrentRequests = 5;
 }
 
-LyricsFetcher::LyricsFetcher(SharedPtr<LyricsProviders> lyrics_providers, QObject *parent)
+LyricsFetcher::LyricsFetcher(const SharedPtr<LyricsProviders> lyrics_providers, QObject *parent)
     : QObject(parent),
       lyrics_providers_(lyrics_providers),
       next_id_(0),
@@ -49,13 +49,14 @@ LyricsFetcher::LyricsFetcher(SharedPtr<LyricsProviders> lyrics_providers, QObjec
 
 }
 
-quint64 LyricsFetcher::Search(const QString &effective_albumartist, const QString &artist, const QString &album, const QString &title) {
+quint64 LyricsFetcher::Search(const QString &effective_albumartist, const QString &artist, const QString &album, const QString &title, const qint64 duration) {
 
   LyricsSearchRequest search_request;
   search_request.albumartist = effective_albumartist;
   search_request.artist = artist;
   search_request.album = Song::AlbumRemoveDiscMisc(album);
   search_request.title = Song::TitleRemoveMisc(title);
+  search_request.duration = duration;
 
   Request request;
   request.id = ++next_id_;

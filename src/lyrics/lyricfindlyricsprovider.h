@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2024, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2024-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,6 @@
 
 #include "config.h"
 
-#include <QObject>
-#include <QList>
 #include <QVariant>
 #include <QString>
 #include <QUrl>
@@ -39,21 +37,16 @@ class LyricFindLyricsProvider : public JsonLyricsProvider {
   Q_OBJECT
 
  public:
-  explicit LyricFindLyricsProvider(SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
-  ~LyricFindLyricsProvider() override;
+  explicit LyricFindLyricsProvider(const SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
 
  private:
   static QUrl Url(const LyricsSearchRequest &request);
   static QString StringFixup(const QString &text);
   void StartSearch(const int id, const LyricsSearchRequest &request) override;
-  void EndSearch(const int id, const LyricsSearchRequest &request, const LyricsSearchResults &lyrics = LyricsSearchResults());
-  void Error(const QString &error, const QVariant &debug = QVariant()) override;
+  void EndSearch(const int id, const LyricsSearchRequest &request, const LyricsSearchResults &results = LyricsSearchResults());
 
  private Q_SLOTS:
   void HandleSearchReply(QNetworkReply *reply, const int id, const LyricsSearchRequest &request);
-
- private:
-  QList<QNetworkReply*> replies_;
 };
 
 #endif  // LYRICFINDLYRICSPROVIDER_H

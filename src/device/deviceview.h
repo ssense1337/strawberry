@@ -30,7 +30,8 @@
 #include <QAbstractItemModel>
 #include <QString>
 
-#include "core/scoped_ptr.h"
+#include "includes/scoped_ptr.h"
+#include "includes/shared_ptr.h"
 #include "core/song.h"
 #include "collection/collectionitemdelegate.h"
 #include "widgets/autoexpandingtreeview.h"
@@ -43,8 +44,11 @@ class QAction;
 class QMouseEvent;
 class QContextMenuEvent;
 
-class Application;
+class TaskManager;
+class TagReaderClient;
+class DeviceManager;
 class DeviceProperties;
+class CollectionDirectoryModel;
 class MergedProxyModel;
 class OrganizeDialog;
 
@@ -57,7 +61,6 @@ class DeviceItemDelegate : public CollectionItemDelegate {
   static const int kIconPadding;
 
   void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &idx) const override;
-
 };
 
 class DeviceView : public AutoExpandingTreeView {
@@ -67,13 +70,16 @@ class DeviceView : public AutoExpandingTreeView {
   explicit DeviceView(QWidget *parent = nullptr);
   ~DeviceView() override;
 
-  void SetApplication(Application *app);
+  void Init(const SharedPtr<TaskManager> task_manager,
+            const SharedPtr<TagReaderClient> tagreader_client,
+            const SharedPtr<DeviceManager> device_manager,
+            CollectionDirectoryModel *collection_directory_model);
 
   // AutoExpandingTreeView
   bool CanRecursivelyExpand(const QModelIndex &idx) const override;
 
  protected:
-  void contextMenuEvent(QContextMenuEvent*) override;
+  void contextMenuEvent(QContextMenuEvent *e) override;
   void mouseDoubleClickEvent(QMouseEvent *e) override;
 
  private Q_SLOTS:
@@ -102,7 +108,9 @@ class DeviceView : public AutoExpandingTreeView {
   SongList GetSelectedSongs() const;
 
  private:
-  Application *app_;
+  SharedPtr<TaskManager> task_manager_;
+  SharedPtr<TagReaderClient> tagreader_client_;
+  SharedPtr<DeviceManager> device_manager_;
   MergedProxyModel *merged_model_;
   QSortFilterProxyModel *sort_model_;
 

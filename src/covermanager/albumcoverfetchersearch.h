@@ -35,7 +35,7 @@
 #include <QUrl>
 #include <QImage>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "albumcoverfetcher.h"
 #include "coversearchstatistics.h"
 #include "albumcoverimageresult.h"
@@ -113,7 +113,6 @@ class AlbumCoverFetcherSearch : public QObject {
   SharedPtr<NetworkAccessManager> network_;
 
   bool cancel_requested_;
-
 };
 
 #endif  // ALBUMCOVERFETCHERSEARCH_H

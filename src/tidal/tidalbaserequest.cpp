@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2018-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,189 +19,110 @@
 
 #include "config.h"
 
-#include <QObject>
 #include <QByteArray>
-#include <QPair>
-#include <QList>
 #include <QString>
 #include <QUrl>
-#include <QUrlQuery>
-#include <QNetworkRequest>
-#include <QNetworkReply>
-#include <QSslError>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
 #include <QJsonValue>
+#include <QJsonObject>
 
+#include "includes/shared_ptr.h"
 #include "core/logging.h"
-#include "core/shared_ptr.h"
 #include "core/networkaccessmanager.h"
 #include "tidalservice.h"
 #include "tidalbaserequest.h"
 
-using namespace Qt::StringLiterals;
+using namespace Qt::Literals::StringLiterals;
 
-TidalBaseRequest::TidalBaseRequest(TidalService *service, SharedPtr<NetworkAccessManager> network, QObject *parent)
-    : QObject(parent),
+TidalBaseRequest::TidalBaseRequest(TidalService *service, const SharedPtr<NetworkAccessManager> network, QObject *parent)
+    : JsonBaseRequest(network, parent),
       service_(service),
       network_(network) {}
+
+QString TidalBaseRequest::service_name() const {
+
+  return service_->name();
+
+}
+
+bool TidalBaseRequest::authentication_required() const {
+
+  return true;
+
+}
+
+bool TidalBaseRequest::authenticated() const {
+
+  return service_->authenticated();
+
+}
+
+bool TidalBaseRequest::use_authorization_header() const {
+
+  return true;
+
+}
+
+QByteArray TidalBaseRequest::authorization_header() const {
+
+  return service_->authorization_header();
+
+}
 
 QNetworkReply *TidalBaseRequest::CreateRequest(const QString &ressource_name, const ParamList &params_provided) {
 
   const ParamList params = ParamList() << params_provided
-                                       << Param(QStringLiteral("countryCode"), country_code());
-
-  QUrlQuery url_query;
-  for (const Param &param : params) {
-    url_query.addQueryItem(QString::fromLatin1(QUrl::toPercentEncoding(param.first)), QString::fromLatin1(QUrl::toPercentEncoding(param.second)));
-  }
-
-  QUrl url(QLatin1String(TidalService::kApiUrl) + QLatin1Char('/') + ressource_name);
-  url.setQuery(url_query);
-  QNetworkRequest req(url);
-  req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-  req.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/x-www-form-urlencoded"));
-  if (oauth() && !access_token().isEmpty()) req.setRawHeader("authorization", "Bearer " + access_token().toUtf8());
-  else if (!session_id().isEmpty()) req.setRawHeader("X-Tidal-SessionId", session_id().toUtf8());
-
-  QNetworkReply *reply = network_->get(req);
-  QObject::connect(reply, &QNetworkReply::sslErrors, this, &TidalBaseRequest::HandleSSLErrors);
-
-  //qLog(Debug) << "Tidal: Sending request" << url;
-
-  return reply;
+                                       << Param(u"countryCode"_s, service_->country_code());
+  return CreateGetRequest(QUrl(QLatin1String(TidalService::kApiUrl) + QLatin1Char('/') + ressource_name), params);
 
 }
 
-void TidalBaseRequest::HandleSSLErrors(const QList<QSslError> &ssl_errors) {
+JsonBaseRequest::JsonObjectResult TidalBaseRequest::ParseJsonObject(QNetworkReply *reply) {
 
-  for (const QSslError &ssl_error : ssl_errors) {
-    Error(ssl_error.errorString());
+  if (reply->error() != QNetworkReply::NoError && reply->error() < 200) {
+    return ReplyDataResult(ErrorCode::NetworkError, QStringLiteral("%1 (%2)").arg(reply->errorString()).arg(reply->error()));
   }
 
-}
-
-QByteArray TidalBaseRequest::GetReplyData(QNetworkReply *reply, const bool send_login) {
-
-  QByteArray data;
-
-  if (reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 200) {
-    data = reply->readAll();
+  JsonObjectResult result(ErrorCode::Success);
+  result.network_error = reply->error();
+  if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).isValid()) {
+    result.http_status_code = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
   }
-  else {
-    if (reply->error() != QNetworkReply::NoError && reply->error() < 200) {
-      // This is a network error, there is nothing more to do.
-      Error(QStringLiteral("%1 (%2)").arg(reply->errorString()).arg(reply->error()));
-    }
-    else {
-      // See if there is Json data containing "status" and "userMessage" - then use that instead.
-      data = reply->readAll();
-      QString error;
-      QJsonParseError json_error;
-      QJsonDocument json_doc = QJsonDocument::fromJson(data, &json_error);
-      int status = 0;
-      int sub_status = 0;
-      if (json_error.error == QJsonParseError::NoError && !json_doc.isEmpty() && json_doc.isObject()) {
-        QJsonObject json_obj = json_doc.object();
-        if (!json_obj.isEmpty() && json_obj.contains("status"_L1) && json_obj.contains("userMessage"_L1)) {
-          status = json_obj["status"_L1].toInt();
-          sub_status = json_obj["subStatus"_L1].toInt();
-          QString user_message = json_obj["userMessage"_L1].toString();
-          error = QStringLiteral("%1 (%2) (%3)").arg(user_message).arg(status).arg(sub_status);
-        }
-      }
-      if (error.isEmpty()) {
-        if (reply->error() != QNetworkReply::NoError) {
-          error = QStringLiteral("%1 (%2)").arg(reply->errorString()).arg(reply->error());
-        }
-        else {
-          error = QStringLiteral("Received HTTP code %1").arg(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt());
-        }
-      }
-      if (status == 401 && sub_status == 6001) {  // User does not have a valid session
-        service_->Logout();
-        if (!oauth() && send_login && login_attempts() < max_login_attempts() && !api_token().isEmpty() && !username().isEmpty() && !password().isEmpty()) {
-          qLog(Error) << "Tidal:" << error;
-          set_need_login();
-          if (login_sent()) {
-            qLog(Info) << "Tidal:" << "Waiting for login.";
-          }
-          else {
-            qLog(Info) << "Tidal:" << "Attempting to login.";
-            Q_EMIT RequestLogin();
-          }
-        }
-        else {
-          Error(error);
-        }
+
+  const QByteArray data = reply->readAll();
+  if (!data.isEmpty()) {
+    QJsonParseError json_parse_error;
+    const QJsonDocument json_document = QJsonDocument::fromJson(data, &json_parse_error);
+    if (json_parse_error.error == QJsonParseError::NoError) {
+      const QJsonObject json_object = json_document.object();
+      if (json_object.contains("status"_L1) && json_object.contains("subStatus"_L1) && json_object.contains("userMessage"_L1)) {
+        const int status = json_object["status"_L1].toInt();
+        const int sub_status = json_object["subStatus"_L1].toInt();
+        const QString user_message = json_object["userMessage"_L1].toString();
+        result.error_code = ErrorCode::APIError;
+        result.api_error = status;
+        result.error_message = QStringLiteral("%1 (%2) (%3)").arg(user_message).arg(status).arg(sub_status);
       }
       else {
-        Error(error);
+        result.json_object = json_document.object();
       }
     }
-    return QByteArray();
+    else {
+      result.error_code = ErrorCode::ParseError;
+      result.error_message = json_parse_error.errorString();
+    }
   }
 
-  return data;
-
-}
-
-QJsonObject TidalBaseRequest::ExtractJsonObj(const QByteArray &data) {
-
-  QJsonParseError json_error;
-  QJsonDocument json_doc = QJsonDocument::fromJson(data, &json_error);
-
-  if (json_error.error != QJsonParseError::NoError) {
-    Error(QStringLiteral("Reply from server missing Json data."), data);
-    return QJsonObject();
+  if (result.error_code != ErrorCode::APIError) {
+    if (reply->error() != QNetworkReply::NoError) {
+      result.error_code = ErrorCode::NetworkError;
+      result.error_message = QStringLiteral("%1 (%2)").arg(reply->errorString()).arg(reply->error());
+    }
+    else if (result.http_status_code != 200) {
+      result.error_code = ErrorCode::HttpError;
+      result.error_message = QStringLiteral("Received HTTP code %1").arg(result.http_status_code);
+    }
   }
 
-  if (json_doc.isEmpty()) {
-    Error(QStringLiteral("Received empty Json document."), data);
-    return QJsonObject();
-  }
-
-  if (!json_doc.isObject()) {
-    Error(QStringLiteral("Json document is not an object."), json_doc);
-    return QJsonObject();
-  }
-
-  QJsonObject json_obj = json_doc.object();
-  if (json_obj.isEmpty()) {
-    Error(QStringLiteral("Received empty Json object."), json_doc);
-    return QJsonObject();
-  }
-
-  return json_obj;
-
-}
-
-QJsonValue TidalBaseRequest::ExtractItems(const QByteArray &data) {
-
-  QJsonObject json_obj = ExtractJsonObj(data);
-  if (json_obj.isEmpty()) return QJsonValue();
-  return ExtractItems(json_obj);
-
-}
-
-QJsonValue TidalBaseRequest::ExtractItems(const QJsonObject &json_obj) {
-
-  if (!json_obj.contains("items"_L1)) {
-    Error(QStringLiteral("Json reply is missing items."), json_obj);
-    return QJsonArray();
-  }
-  QJsonValue json_items = json_obj["items"_L1];
-  return json_items;
-
-}
-
-QString TidalBaseRequest::ErrorsToHTML(const QStringList &errors) {
-
-  QString error_html;
-  for (const QString &error : errors) {
-    error_html += error + "<br />"_L1;
-  }
-  return error_html;
+  return result;
 
 }

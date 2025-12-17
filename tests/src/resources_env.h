@@ -23,7 +23,7 @@
 
 #include "config.h"
 
-#include <gtest/gtest.h>
+#include "gtest_include.h"
 
 #include <QResource>
 
@@ -32,11 +32,10 @@ class ResourcesEnvironment : public ::testing::Environment {
   ResourcesEnvironment() = default;
   void SetUp() override {
     Q_INIT_RESOURCE(data);
+    Q_INIT_RESOURCE(icons);
     Q_INIT_RESOURCE(testdata);
-#ifdef HAVE_TRANSLATIONS
-    Q_INIT_RESOURCE(translations);
-#endif
   }
+
  private:
   Q_DISABLE_COPY(ResourcesEnvironment)
 };

@@ -37,8 +37,8 @@
 #include <QUrl>
 #include <QIcon>
 
-#include "core/scoped_ptr.h"
-#include "core/shared_ptr.h"
+#include "includes/scoped_ptr.h"
+#include "includes/shared_ptr.h"
 #include "core/song.h"
 #include "core/musicstorage.h"
 #include "core/simpletreemodel.h"
@@ -49,7 +49,10 @@
 class QModelIndex;
 class QPersistentModelIndex;
 
-class Application;
+class TaskManager;
+class Database;
+class TagReaderClient;
+class AlbumCoverLoader;
 class ConnectedDevice;
 class DeviceLister;
 class DeviceStateFilterModel;
@@ -58,7 +61,12 @@ class DeviceManager : public SimpleTreeModel<DeviceInfo> {
   Q_OBJECT
 
  public:
-  explicit DeviceManager(Application *app, QObject *parent = nullptr);
+  explicit DeviceManager(const SharedPtr<TaskManager> task_manager,
+                         const SharedPtr<Database> database,
+                         const SharedPtr<TagReaderClient> tagreader_client,
+                         const SharedPtr<AlbumCoverLoader> albumcover_loader,
+                         QObject *parent = nullptr);
+
   ~DeviceManager() override;
 
   enum Role {
@@ -77,11 +85,11 @@ class DeviceManager : public SimpleTreeModel<DeviceInfo> {
     LastRole,
   };
 
-  enum State {
-    State_Remembered,
-    State_NotMounted,
-    State_NotConnected,
-    State_Connected,
+  enum class State {
+    Remembered,
+    NotMounted,
+    NotConnected,
+    Connected,
   };
 
   static const int kDeviceIconSize;
@@ -96,17 +104,17 @@ class DeviceManager : public SimpleTreeModel<DeviceInfo> {
   DeviceLister *GetLister(const QModelIndex &idx) const;
   DeviceInfo *GetDevice(const QModelIndex &idx) const;
   SharedPtr<ConnectedDevice> GetConnectedDevice(const QModelIndex &idx) const;
-  SharedPtr<ConnectedDevice> GetConnectedDevice(DeviceInfo *info) const;
+  SharedPtr<ConnectedDevice> GetConnectedDevice(DeviceInfo *device_info) const;
 
   DeviceInfo *FindDeviceById(const QString &id) const;
   DeviceInfo *FindDeviceByUrl(const QList<QUrl> &url) const;
   QString DeviceNameByID(const QString &unique_id);
-  DeviceInfo *FindEquivalentDevice(DeviceInfo *info) const;
+  DeviceInfo *FindEquivalentDevice(const QStringList &unique_ids) const;
 
   // Actions on devices
-  SharedPtr<ConnectedDevice> Connect(DeviceInfo *info);
+  SharedPtr<ConnectedDevice> Connect(DeviceInfo *device_info);
   SharedPtr<ConnectedDevice> Connect(const QModelIndex &idx);
-  void Disconnect(DeviceInfo *info, const QModelIndex &idx);
+  void Disconnect(DeviceInfo *device_info, const QModelIndex &idx);
   void Forget(const QModelIndex &idx);
   void UnmountAsync(const QModelIndex &idx);
 
@@ -120,9 +128,11 @@ class DeviceManager : public SimpleTreeModel<DeviceInfo> {
 
  Q_SIGNALS:
   void ExitFinished();
+  void DevicesLoaded(const DeviceDatabaseBackend::DeviceList &devices);
   void DeviceConnected(const QModelIndex idx);
   void DeviceDisconnected(const QModelIndex idx);
-  void DeviceCreatedFromDB(DeviceInfo *info);
+  void DeviceCreatedFromDB(DeviceInfo *device_info);
+  void DeviceError(const QString &error);
 
  private Q_SLOTS:
   void PhysicalDeviceAdded(const QString &id);
@@ -134,7 +144,7 @@ class DeviceManager : public SimpleTreeModel<DeviceInfo> {
   void LoadAllDevices();
   void DeviceConnectFinished(const QString &id, bool success);
   void DeviceCloseFinished(const QString &id);
-  void AddDeviceFromDB(DeviceInfo *info);
+  void AddDevicesFromDB(const DeviceDatabaseBackend::DeviceList &devices);
   void BackendClosed();
   void ListerClosed();
   void DeviceDestroyed();
@@ -145,14 +155,18 @@ class DeviceManager : public SimpleTreeModel<DeviceInfo> {
 
   DeviceDatabaseBackend::Device InfoToDatabaseDevice(const DeviceInfo &info) const;
 
-  void RemoveFromDB(DeviceInfo *info, const QModelIndex &idx);
+  void RemoveFromDB(DeviceInfo *device_info, const QModelIndex &idx);
 
   void CloseDevices();
   void CloseListers();
   void CloseBackend();
 
  private:
-  Application *app_;
+  const SharedPtr<TaskManager> task_manager_;
+  const SharedPtr<Database> database_;
+  const SharedPtr<TagReaderClient> tagreader_client_;
+  const SharedPtr<AlbumCoverLoader> albumcover_loader_;
+
   ScopedPtr<DeviceDatabaseBackend> backend_;
 
   DeviceStateFilterModel *connected_devices_model_;

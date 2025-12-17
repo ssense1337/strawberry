@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2022-2024, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2022-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,10 +25,11 @@
 #include <QObject>
 #include <QString>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "settings/settingspage.h"
 
 class QEvent;
+class QShowEvent;
 class SpotifyService;
 class SettingsDialog;
 class Ui_SpotifySettingsPage;
@@ -37,15 +38,16 @@ class SpotifySettingsPage : public SettingsPage {
   Q_OBJECT
 
  public:
-  explicit SpotifySettingsPage(SettingsDialog *dialog, QWidget *parent = nullptr);
+  explicit SpotifySettingsPage(SettingsDialog *dialog, const SharedPtr<SpotifyService> service, QWidget *parent = nullptr);
   ~SpotifySettingsPage() override;
-
-  static const char *kSettingsGroup;
 
   void Load() override;
   void Save() override;
 
   bool eventFilter(QObject *object, QEvent *event) override;
+
+ protected:
+  void showEvent(QShowEvent *e) override;
 
  Q_SIGNALS:
   void Authorize();
@@ -58,7 +60,7 @@ class SpotifySettingsPage : public SettingsPage {
 
  private:
   Ui_SpotifySettingsPage *ui_;
-  SharedPtr<SpotifyService> service_;
+  const SharedPtr<SpotifyService> service_;
 };
 
 #endif  // SPOTIFYSETTINGSPAGE_H

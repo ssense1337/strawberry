@@ -33,7 +33,6 @@
 #include <QLocale>
 #include <QPainter>
 #include <QPalette>
-#include <QVector>
 #include <QRect>
 #include <QPen>
 #include <QPoint>
@@ -46,6 +45,8 @@
 
 #include "core/multisortfilterproxy.h"
 #include "groupediconview.h"
+
+using namespace Qt::Literals::StringLiterals;
 
 namespace {
 constexpr int kBarThickness = 2;
@@ -60,7 +61,7 @@ GroupedIconView::GroupedIconView(QWidget *parent)
       header_spacing_(10),
       header_indent_(5),
       item_indent_(10),
-      header_text_(QStringLiteral("%1")) {
+      header_text_(u"%1"_s) {
 
   setFlow(LeftToRight);
   setViewMode(IconMode);
@@ -133,9 +134,13 @@ void GroupedIconView::rowsInserted(const QModelIndex &parent, int start, int end
   LayoutItems();
 }
 
-void GroupedIconView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int>&) {
-  QListView::dataChanged(topLeft, bottomRight);
+void GroupedIconView::dataChanged(const QModelIndex &top_left, const QModelIndex &bottom_right, const QList<int> &roles) {
+
+  Q_UNUSED(roles)
+
+  QListView::dataChanged(top_left, bottom_right);
   LayoutItems();
+
 }
 
 void GroupedIconView::LayoutItems() {
@@ -228,7 +233,7 @@ QModelIndex GroupedIconView::indexAt(const QPoint &p) const {
   const QPoint viewport_p = p + QPoint(horizontalOffset(), verticalOffset());
 
   const int count = static_cast<int>(visual_rects_.count());
-  for (int i = 0; i<count; ++i) {
+  for (int i = 0; i < count; ++i) {
     if (visual_rects_[i].contains(viewport_p)) {
       return model()->index(i, 0);
     }
@@ -253,20 +258,19 @@ void GroupedIconView::paintEvent(QPaintEvent *e) {
   QPainter painter(viewport());
 
   const QRect viewport_rect(e->rect().translated(horizontalOffset(), verticalOffset()));
-  QVector<QModelIndex> toBeRendered = IntersectingItems(viewport_rect);
+  QList<QModelIndex> toBeRendered = IntersectingItems(viewport_rect);
 
   const QModelIndex current = currentIndex();
   const QAbstractItemModel *itemModel = model();
   const QItemSelectionModel *selections = selectionModel();
   const bool focus = (hasFocus() || viewport()->hasFocus()) && current.isValid();
   const QStyle::State opt_state = option.state;
-  const QAbstractItemView::State viewState = state();
   const bool enabled = (opt_state & QStyle::State_Enabled) != 0;
 
   int maxSize = (flow() == TopToBottom) ? viewport()->size().width() - 2 * spacing() : viewport()->size().height() - 2 * spacing();
 
-  QVector<QModelIndex>::const_iterator end = toBeRendered.constEnd();
-  for (QVector<QModelIndex>::const_iterator it = toBeRendered.constBegin(); it != end; ++it) {
+  QList<QModelIndex>::const_iterator end = toBeRendered.constEnd();
+  for (QList<QModelIndex>::const_iterator it = toBeRendered.constBegin(); it != end; ++it) {
     if (!it->isValid()) {
       continue;
     }
@@ -296,9 +300,6 @@ void GroupedIconView::paintEvent(QPaintEvent *e) {
     }
     if (focus && current == *it) {
       option.state |= QStyle::State_HasFocus;
-      if (viewState == EditingState) {
-        option.state |= QStyle::State_Editing;
-      }
     }
 
     itemDelegate()->paint(&painter, option, *it);
@@ -325,7 +326,7 @@ void GroupedIconView::paintEvent(QPaintEvent *e) {
 
 void GroupedIconView::setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command) {
 
-  const QVector<QModelIndex> indexes(IntersectingItems(rect.translated(horizontalOffset(), verticalOffset())));
+  const QList<QModelIndex> indexes(IntersectingItems(rect.translated(horizontalOffset(), verticalOffset())));
 
   QItemSelection selection;
   selection.reserve(indexes.count());
@@ -338,9 +339,9 @@ void GroupedIconView::setSelection(const QRect &rect, QItemSelectionModel::Selec
 
 }
 
-QVector<QModelIndex> GroupedIconView::IntersectingItems(const QRect rect) const {
+QList<QModelIndex> GroupedIconView::IntersectingItems(const QRect rect) const {
 
-  QVector<QModelIndex> ret;
+  QList<QModelIndex> ret;
 
   const int count = static_cast<int>(visual_rects_.count());
   for (int i = 0; i < count; ++i) {
@@ -364,7 +365,9 @@ QRegion GroupedIconView::visualRegionForSelection(const QItemSelection &selectio
 
 }
 
-QModelIndex GroupedIconView::moveCursor(CursorAction action, Qt::KeyboardModifiers) {
+QModelIndex GroupedIconView::moveCursor(CursorAction action, const Qt::KeyboardModifiers keyboard_modifiers) {
+
+  Q_UNUSED(keyboard_modifiers)
 
   if (model()->rowCount() == 0) {
     return QModelIndex();
@@ -378,10 +381,10 @@ QModelIndex GroupedIconView::moveCursor(CursorAction action, Qt::KeyboardModifie
   switch (action) {
     case MoveUp:    ret = IndexAboveOrBelow(ret, -1); break;
     case MovePrevious:
-    case MoveLeft:  ret --; break;
+    case MoveLeft:  ret--; break;
     case MoveDown:  ret = IndexAboveOrBelow(ret, +1); break;
     case MoveNext:
-    case MoveRight: ret ++; break;
+    case MoveRight: ret++; break;
     case MovePageUp:
     case MoveHome:  ret = 0; break;
     case MovePageDown:

@@ -26,7 +26,7 @@
 #include <QObject>
 #include <QString>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 
 #include "playlist/playlist.h"
 #include "playlist/playlistitem.h"
@@ -66,7 +66,6 @@ class PlaylistGeneratorInserter : public QObject {
   bool enqueue_;
   bool enqueue_next_;
   bool is_dynamic_;
-
 };
 
 #endif  // PLAYLISTGENERATORINSERTER_H

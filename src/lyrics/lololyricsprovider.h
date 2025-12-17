@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2019-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2019-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,13 +22,10 @@
 
 #include "config.h"
 
-#include <QtGlobal>
-#include <QObject>
-#include <QList>
 #include <QVariant>
 #include <QString>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "lyricsprovider.h"
 #include "lyricssearchrequest.h"
 
@@ -39,18 +36,11 @@ class LoloLyricsProvider : public LyricsProvider {
   Q_OBJECT
 
  public:
-  explicit LoloLyricsProvider(SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
-  ~LoloLyricsProvider() override;
-
- private:
-  void Error(const QString &error, const QVariant &debug = QVariant()) override;
+  explicit LoloLyricsProvider(const SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
 
  private Q_SLOTS:
   void StartSearch(const int id, const LyricsSearchRequest &request) override;
   void HandleSearchReply(QNetworkReply *reply, const int id, const LyricsSearchRequest &request);
-
- private:
-  QList<QNetworkReply*> replies_;
 };
 
 #endif  // LOLOLYRICSPROVIDER_H

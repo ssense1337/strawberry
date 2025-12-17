@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2018-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,28 +22,22 @@
 
 #include "config.h"
 
-#include <QObject>
-#include <QList>
 #include <QQueue>
-#include <QByteArray>
 #include <QVariant>
 #include <QString>
-#include <QJsonObject>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "jsoncoverprovider.h"
 
 class QNetworkReply;
 class QTimer;
-class Application;
 class NetworkAccessManager;
 
 class MusicbrainzCoverProvider : public JsonCoverProvider {
   Q_OBJECT
 
  public:
-  explicit MusicbrainzCoverProvider(Application *app, SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
-  ~MusicbrainzCoverProvider() override;
+  explicit MusicbrainzCoverProvider(const SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
 
   bool StartSearch(const QString &artist, const QString &album, const QString &title, const int id) override;
 
@@ -60,13 +54,12 @@ class MusicbrainzCoverProvider : public JsonCoverProvider {
   };
 
   void SendSearchRequest(const SearchRequest &request);
-  QByteArray GetReplyData(QNetworkReply *reply);
+  JsonObjectResult ParseJsonObject(QNetworkReply *reply);
   void Error(const QString &error, const QVariant &debug = QVariant()) override;
 
  private:
   QTimer *timer_flush_requests_;
   QQueue<SearchRequest> queue_search_requests_;
-  QList<QNetworkReply*> replies_;
 };
 
 #endif  // MUSICBRAINZCOVERPROVIDER_H

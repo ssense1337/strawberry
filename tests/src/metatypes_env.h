@@ -21,7 +21,7 @@
 #ifndef METATYPES_ENV_H
 #define METATYPES_ENV_H
 
-#include <gtest/gtest.h>
+#include "gtest_include.h"
 
 #include <QMetaType>
 #include <QModelIndex>
@@ -42,6 +42,7 @@ class MetatypesEnvironment : public ::testing::Environment {
     qRegisterMetaType<QModelIndex>("QModelIndex");
     qRegisterMetaType<SongLoader::Result>("SongLoader::Result");
   }
+
  private:
   Q_DISABLE_COPY(MetatypesEnvironment)
 };

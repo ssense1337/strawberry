@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2018-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,29 +22,23 @@
 
 #include "config.h"
 
-#include <QtGlobal>
-#include <QObject>
-#include <QPair>
-#include <QSet>
-#include <QList>
 #include <QHash>
 #include <QMap>
 #include <QMultiMap>
 #include <QQueue>
 #include <QVariant>
 #include <QString>
-#include <QStringList>
 #include <QUrl>
 #include <QJsonObject>
+#include <QScopedPointer>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "core/song.h"
 
 #include "tidalbaserequest.h"
 
 class QNetworkReply;
 class QTimer;
-class Application;
 class NetworkAccessManager;
 class TidalService;
 class TidalUrlHandler;
@@ -53,13 +47,11 @@ class TidalRequest : public TidalBaseRequest {
   Q_OBJECT
 
  public:
-  explicit TidalRequest(TidalService *service, TidalUrlHandler *url_handler, Application *app, SharedPtr<NetworkAccessManager> network, Type query_type, QObject *parent);
-  ~TidalRequest() override;
+  explicit TidalRequest(TidalService *service, TidalUrlHandler *url_handler, const SharedPtr<NetworkAccessManager> network, const Type query_type, QObject *parent);
 
   void ReloadSettings();
 
   void Process();
-  void set_need_login() override { need_login_ = true; }
   void Search(const int query_id, const QString &search_text);
 
  private:
@@ -111,17 +103,14 @@ class TidalRequest : public TidalBaseRequest {
   void ArtistsReplyReceived(QNetworkReply *reply, const int limit_requested, const int offset_requested);
 
   void AlbumsReplyReceived(QNetworkReply *reply, const int limit_requested, const int offset_requested);
-  void AlbumsReceived(QNetworkReply *reply, const TidalRequest::Artist &artist_requested, const int limit_requested, const int offset_requested, const bool auto_login);
+  void AlbumsReceived(QNetworkReply *reply, const TidalRequest::Artist &artist_requested, const int limit_requested, const int offset_requested);
 
   void SongsReplyReceived(QNetworkReply *reply, const int limit_requested, const int offset_requested);
-  void SongsReceived(QNetworkReply *reply, const TidalRequest::Artist &artist, const TidalRequest::Album &album, const int limit_requested, const int offset_requested, const bool auto_login = false);
+  void SongsReceived(QNetworkReply *reply, const TidalRequest::Artist &artist, const TidalRequest::Album &album, const int limit_requested, const int offset_requested);
 
   void ArtistAlbumsReplyReceived(QNetworkReply *reply, const TidalRequest::Artist &artist, const int offset_requested);
   void AlbumSongsReplyReceived(QNetworkReply *reply, const TidalRequest::Artist &artist, const TidalRequest::Album &album, const int offset_requested);
   void AlbumCoverReceived(QNetworkReply *reply, const QString &album_id, const QUrl &url, const QString &filename);
-
- public Q_SLOTS:
-  void LoginComplete(const bool success, const QString &error = QString());
 
  private:
   bool IsQuery() const { return (query_type_ == Type::FavouriteArtists || query_type_ == Type::FavouriteAlbums || query_type_ == Type::FavouriteSongs); }
@@ -169,12 +158,11 @@ class TidalRequest : public TidalBaseRequest {
   int GetProgress(const int count, const int total);
 
   void FinishCheck();
-  static void Warn(const QString &error, const QVariant &debug = QVariant());
-  void Error(const QString &error, const QVariant &debug = QVariant()) override;
+  static void Warn(const QString &error_message, const QVariant &debug_output = QVariant());
+  void Error(const QString &error_message, const QVariant &debug_output = QVariant()) override;
 
   TidalService *service_;
   TidalUrlHandler *url_handler_;
-  Application *app_;
   SharedPtr<NetworkAccessManager> network_;
   QTimer *timer_flush_requests_;
 
@@ -186,6 +174,7 @@ class TidalRequest : public TidalBaseRequest {
   QString search_text_;
 
   bool finished_;
+  QString error_;
 
   QQueue<Request> artists_requests_queue_;
   QQueue<Request> albums_requests_queue_;
@@ -234,10 +223,8 @@ class TidalRequest : public TidalBaseRequest {
   int album_covers_requests_received_;
 
   SongMap songs_;
-  QStringList errors_;
-  bool need_login_;
-  QList<QNetworkReply*> replies_;
-  QList<QNetworkReply*> album_cover_replies_;
 };
+
+using TidalRequestPtr = QScopedPointer<TidalRequest, QScopedPointerDeleteLater>;
 
 #endif  // TIDALREQUEST_H

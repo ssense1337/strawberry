@@ -32,7 +32,7 @@
 #include "core/settings.h"
 #include "networkproxyfactory.h"
 
-using namespace Qt::StringLiterals;
+using namespace Qt::Literals::StringLiterals;
 
 NetworkProxyFactory *NetworkProxyFactory::sInstance = nullptr;
 const char *NetworkProxyFactory::kSettingsGroup = "NetworkProxy";
@@ -86,7 +86,7 @@ void NetworkProxyFactory::ReloadSettings() {
   mode_ = static_cast<Mode>(s.value("mode", static_cast<int>(Mode::System)).toInt());
   type_ = QNetworkProxy::ProxyType(s.value("type", QNetworkProxy::HttpProxy).toInt());
   hostname_ = s.value("hostname").toString();
-  port_ = s.value("port", 8080).toInt();
+  port_ = s.value("port", 8080).toULongLong();
   use_authentication_ = s.value("use_authentication", false).toBool();
   username_ = s.value("username").toString();
   password_ = s.value("password").toString();

@@ -43,8 +43,8 @@
 #include <QtEvents>
 #include <QSettings>
 
+#include "includes/shared_ptr.h"
 #include "core/logging.h"
-#include "core/shared_ptr.h"
 #include "core/iconloader.h"
 #include "core/mimedata.h"
 #include "core/settings.h"
@@ -54,7 +54,7 @@
 #include "playlistmanager.h"
 #include "playlisttabbar.h"
 
-using namespace Qt::StringLiterals;
+using namespace Qt::Literals::StringLiterals;
 
 namespace {
 constexpr char kSettingsGroup[] = "PlaylistTabBar";
@@ -81,10 +81,10 @@ PlaylistTabBar::PlaylistTabBar(QWidget *parent)
   setUsesScrollButtons(true);
   setTabsClosable(true);
 
-  action_star_ = menu_->addAction(IconLoader::Load(QStringLiteral("star")), tr("Star playlist"), this, &PlaylistTabBar::StarSlot);
-  action_close_ = menu_->addAction(IconLoader::Load(QStringLiteral("list-remove")), tr("Close playlist"), this, &PlaylistTabBar::CloseSlot);
-  action_rename_ = menu_->addAction(IconLoader::Load(QStringLiteral("edit-rename")), tr("Rename playlist..."), this, &PlaylistTabBar::RenameSlot);
-  action_save_ = menu_->addAction(IconLoader::Load(QStringLiteral("document-save")), tr("Save playlist..."), this, &PlaylistTabBar::SaveSlot);
+  action_star_ = menu_->addAction(IconLoader::Load(u"star"_s), tr("Star playlist"), this, &PlaylistTabBar::StarSlot);
+  action_close_ = menu_->addAction(IconLoader::Load(u"list-remove"_s), tr("Close playlist"), this, &PlaylistTabBar::CloseSlot);
+  action_rename_ = menu_->addAction(IconLoader::Load(u"edit-rename"_s), tr("Rename playlist..."), this, &PlaylistTabBar::RenameSlot);
+  action_save_ = menu_->addAction(IconLoader::Load(u"document-save"_s), tr("Save playlist..."), this, &PlaylistTabBar::SaveSlot);
   menu_->addSeparator();
 
   rename_editor_->setVisible(false);
@@ -127,7 +127,7 @@ void PlaylistTabBar::contextMenuEvent(QContextMenuEvent *e) {
 
   // We need to finish the renaming action before showing context menu
   if (rename_editor_->isVisible()) {
-    //discard any change
+    // discard any change
     HideEditor();
   }
 
@@ -228,14 +228,13 @@ void PlaylistTabBar::CloseSlot() {
 
   if (ask_for_delete && !manager_->IsPlaylistFavorite(playlist_id) && !manager_->playlist(playlist_id)->GetAllSongs().empty()) {
     QMessageBox confirmation_box;
-    confirmation_box.setWindowIcon(QIcon(QStringLiteral(":/icons/64x64/strawberry.png")));
+    confirmation_box.setWindowIcon(QIcon(u":/icons/64x64/strawberry.png"_s));
     confirmation_box.setWindowTitle(tr("Remove playlist"));
     confirmation_box.setIcon(QMessageBox::Question);
-    confirmation_box.setText(
-        tr("You are about to remove a playlist which is not part of your "
-           "favorite playlists: "
-           "the playlist will be deleted (this action cannot be undone). \n"
-           "Are you sure you want to continue?"));
+    confirmation_box.setText(tr("You are about to remove a playlist which is not part of your "
+                                "favorite playlists: "
+                                "the playlist will be deleted (this action cannot be undone). \n"
+                                "Are you sure you want to continue?"));
     confirmation_box.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
 
     QCheckBox dont_prompt_again(tr("Warn me when closing a playlist tab"), &confirmation_box);
@@ -408,7 +407,8 @@ void PlaylistTabBar::dragMoveEvent(QDragMoveEvent *e) {
 
 }
 
-void PlaylistTabBar::dragLeaveEvent(QDragLeaveEvent*) {
+void PlaylistTabBar::dragLeaveEvent(QDragLeaveEvent *e) {
+  Q_UNUSED(e)
   drag_hover_timer_.stop();
 }
 

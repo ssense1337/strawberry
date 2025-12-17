@@ -27,12 +27,12 @@
 #include "playlist/playlist.h"
 #include "playlist/playlistitem.h"
 #include "filterparser/filterparser.h"
-#include "filterparser/filtertree.h"
+#include "filterparser/filtertreenop.h"
 #include "playlistfilter.h"
 
 PlaylistFilter::PlaylistFilter(QObject *parent)
     : QSortFilterProxyModel(parent),
-      filter_tree_(new NopFilter),
+      filter_tree_(new FilterTreeNop),
       query_hash_(0) {
 
   setDynamicSortFilter(true);
@@ -64,7 +64,7 @@ bool PlaylistFilter::filterAcceptsRow(const int source_row, const QModelIndex &s
     query_hash_ = hash;
   }
 
-  return filter_tree_->accept(item->Metadata());
+  return filter_tree_->accept(item->EffectiveMetadata());
 
 }
 

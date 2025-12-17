@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2019-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2019-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,13 +22,7 @@
 
 #include "config.h"
 
-#include <QtGlobal>
-#include <QObject>
-#include <QList>
-#include <QVariant>
-#include <QString>
-
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "jsonlyricsprovider.h"
 #include "lyricssearchrequest.h"
 
@@ -39,20 +33,16 @@ class OVHLyricsProvider : public JsonLyricsProvider {
   Q_OBJECT
 
  public:
-  explicit OVHLyricsProvider(SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
-  ~OVHLyricsProvider() override;
-
- private:
-  void Error(const QString &error, const QVariant &debug = QVariant()) override;
+  explicit OVHLyricsProvider(const SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
 
  protected Q_SLOTS:
   void StartSearch(const int id, const LyricsSearchRequest &request) override;
 
+ private:
+  OVHLyricsProvider::JsonObjectResult ParseJsonObject(QNetworkReply *reply);
+
  private Q_SLOTS:
   void HandleSearchReply(QNetworkReply *reply, const int id, const LyricsSearchRequest &request);
-
- private:
-  QList<QNetworkReply*> replies_;
 };
 
 #endif  // OVHLYRICSPROVIDER_H

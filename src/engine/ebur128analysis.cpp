@@ -32,6 +32,7 @@
 #include <gst/gst.h>
 #include <gst/audio/audio-channels.h>
 #include <gst/app/gstappsink.h>
+#include <gst/pbutils/pbutils.h>
 #include <ebur128.h>
 
 #include <QCoreApplication>
@@ -45,7 +46,7 @@
 
 #include "ebur128analysis.h"
 
-using namespace Qt::StringLiterals;
+using namespace Qt::Literals::StringLiterals;
 using std::unique_ptr;
 
 namespace {
@@ -70,7 +71,7 @@ struct GstSampleDeleter {
 // * and 60deg <= |Azimuth (theta)| <= 120° (i.e. +-90deg +- 30deg)
 // ... then the channel is weighted at +1.5 dB.
 //
-// ITU R-REC-BS 1770-4 uppper and bottom position channels are at +-45deg,
+// ITU R-REC-BS 1770-4 upper and bottom position channels are at +-45deg,
 // So only the middle-position channels are affected.
 channel gst_channel_to_ebur_channel(GstAudioChannelPosition pos) {
 
@@ -88,6 +89,13 @@ channel gst_channel_to_ebur_channel(GstAudioChannelPosition pos) {
       return EBUR128_LEFT_SURROUND;
     case GST_AUDIO_CHANNEL_POSITION_SURROUND_RIGHT:
       return EBUR128_RIGHT_SURROUND;
+
+#if (GST_PLUGINS_BASE_VERSION_MAJOR > 1 || (GST_PLUGINS_BASE_VERSION_MAJOR == 1 && GST_PLUGINS_BASE_VERSION_MINOR >= 25))
+    case GST_AUDIO_CHANNEL_POSITION_TOP_SURROUND_LEFT:
+      return EBUR128_LEFT_SURROUND;
+    case GST_AUDIO_CHANNEL_POSITION_TOP_SURROUND_RIGHT:
+      return EBUR128_RIGHT_SURROUND;
+#endif
 
     case GST_AUDIO_CHANNEL_POSITION_BOTTOM_FRONT_CENTER:
       return EBUR128_Bp000;
@@ -249,17 +257,17 @@ bool operator!=(const FrameFormat &lhs, const FrameFormat &rhs) {
 
 EBUR128State::EBUR128State(const FrameFormat &_dsc) : dsc(_dsc) {
 
-  st.reset(ebur128_init(dsc.channels, dsc.samplerate, EBUR128_MODE_I | EBUR128_MODE_LRA));
+  st.reset(ebur128_init(static_cast<uint>(dsc.channels), static_cast<ulong>(dsc.samplerate), EBUR128_MODE_I | EBUR128_MODE_LRA));
   Q_ASSERT(st);
 
-  std::vector<GstAudioChannelPosition> positions(dsc.channels, GST_AUDIO_CHANNEL_POSITION_INVALID);
+  std::vector<GstAudioChannelPosition> positions(static_cast<uint>(dsc.channels), GST_AUDIO_CHANNEL_POSITION_INVALID);
   gboolean success = gst_audio_channel_positions_from_mask(dsc.channels, dsc.channel_mask, positions.data());
   Q_ASSERT(success);
 
   // Propagate our knowledge of audio channel mapping to libebur128, doing so
   // is important because loudness measurement is channel-position dependent.
   for (int channel_number = 0; channel_number != dsc.channels; ++channel_number) {
-    ebur128_set_channel(&*st, channel_number, gst_channel_to_ebur_channel(positions[channel_number]));
+    ebur128_set_channel(&*st, static_cast<uint>(channel_number), gst_channel_to_ebur_channel(positions[static_cast<uint>(channel_number)]));
   }
 
 }
@@ -307,7 +315,7 @@ void EBUR128State::AddFrames(const char *data, size_t size) {
 
 }
 
-std::optional<EBUR128Measures> EBUR128State::Finalize(EBUR128State&& state)  {
+std::optional<EBUR128Measures> EBUR128State::Finalize(EBUR128State &&state) {
 
   ebur128_state *ebur128 = &*state.st;
 
@@ -363,7 +371,7 @@ GstFlowReturn EBUR128AnalysisImpl::NewBufferCallback(GstAppSink *app_sink, gpoin
   if (buffer) {
     GstMapInfo map;
     if (gst_buffer_map(buffer, &map, GST_MAP_READ)) {
-      me->state->AddFrames(reinterpret_cast<const char*>(map.data), static_cast<qint64>(map.size));
+      me->state->AddFrames(reinterpret_cast<const char*>(map.data), static_cast<size_t>(map.size));
       gst_buffer_unmap(buffer, &map);
     }
   }
@@ -395,11 +403,11 @@ std::optional<EBUR128Measures> EBUR128AnalysisImpl::Compute(const Song &song) {
     return std::nullopt;
   }
 
-  GstElement *src = CreateElement(QStringLiteral("filesrc"), pipeline);
-  GstElement *decode = CreateElement(QStringLiteral("decodebin"), pipeline);
-  GstElement *convert = CreateElement(QStringLiteral("audioconvert"), pipeline);
-  GstElement *queue = CreateElement(QStringLiteral("queue2"), pipeline);
-  GstElement *sink = CreateElement(QStringLiteral("appsink"), pipeline);
+  GstElement *src = CreateElement(u"filesrc"_s, pipeline);
+  GstElement *decode = CreateElement(u"decodebin"_s, pipeline);
+  GstElement *convert = CreateElement(u"audioconvert"_s, pipeline);
+  GstElement *queue = CreateElement(u"queue2"_s, pipeline);
+  GstElement *sink = CreateElement(u"appsink"_s, pipeline);
 
   if (!src || !decode || !convert || !queue || !sink) {
     gst_object_unref(pipeline);
@@ -411,10 +419,9 @@ std::optional<EBUR128Measures> EBUR128AnalysisImpl::Compute(const Song &song) {
   // Connect the elements
   gst_element_link_many(src, decode, nullptr);
 
-  GstStaticCaps static_caps = GST_STATIC_CAPS(
-    "audio/x-raw,"
-    "format = (string) { S16LE, S32LE, F32LE, F64LE },"
-    "layout = (string) interleaved");
+  GstStaticCaps static_caps = GST_STATIC_CAPS("audio/x-raw,"
+                                              "format = (string) { S16LE, S32LE, F32LE, F64LE },"
+                                              "layout = (string) interleaved");
 
   GstCaps *caps = gst_static_caps_get(&static_caps);
   // Place a queue before the sink. It really does matter for performance.

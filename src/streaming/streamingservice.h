@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2018-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,20 +20,14 @@
 #ifndef STREAMINGSERVICE_H
 #define STREAMINGSERVICE_H
 
-#include <QtGlobal>
 #include <QObject>
-#include <QMetaType>
-#include <QMap>
 #include <QString>
 #include <QUrl>
 #include <QIcon>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "core/song.h"
-#include "settings/settingsdialog.h"
-#include "streamingsearchview.h"
 
-class Application;
 class CollectionBackend;
 class CollectionModel;
 class CollectionFilter;
@@ -42,24 +36,31 @@ class StreamingService : public QObject {
   Q_OBJECT
 
  public:
-  explicit StreamingService(const Song::Source source, const QString &name, const QString &url_scheme, const QString &settings_group, const SettingsDialog::Page settings_page, Application *app, QObject *parent = nullptr);
-
+  explicit StreamingService(const Song::Source source, const QString &name, const QString &url_scheme, const QString &settings_group, QObject *parent = nullptr);
   ~StreamingService() override {}
-  virtual void Exit() {}
+
+  enum class SearchType {
+    Artists = 1,
+    Albums = 2,
+    Songs = 3
+  };
+
+  virtual void Exit() = 0;
 
   virtual Song::Source source() const { return source_; }
   virtual QString name() const { return name_; }
   virtual QString url_scheme() const { return url_scheme_; }
   virtual QString settings_group() const { return settings_group_; }
-  virtual SettingsDialog::Page settings_page() const { return settings_page_; }
   virtual bool has_initial_load_settings() const { return false; }
   virtual void InitialLoadSettings() {}
   virtual void ReloadSettings() {}
   virtual QIcon Icon() const { return Song::IconForSource(source_); }
   virtual bool oauth() const { return false; }
   virtual bool authenticated() const { return false; }
-  virtual int Search(const QString &query, StreamingSearchView::SearchType type) { Q_UNUSED(query); Q_UNUSED(type); return 0; }
+  virtual int Search(const QString &query, const SearchType type) { Q_UNUSED(query); Q_UNUSED(type); return 0; }
   virtual void CancelSearch() {}
+  virtual bool show_progress() const { return true; }
+  virtual bool enable_refresh_button() const { return true; }
 
   virtual SharedPtr<CollectionBackend> artists_collection_backend() { return nullptr; }
   virtual SharedPtr<CollectionBackend> albums_collection_backend() { return nullptr; }
@@ -74,7 +75,7 @@ class StreamingService : public QObject {
   virtual CollectionFilter *songs_collection_filter_model() { return nullptr; }
 
  public Q_SLOTS:
-  virtual void ShowConfig() {}
+  virtual void Configure() {}
   virtual void GetArtists() {}
   virtual void GetAlbums() {}
   virtual void GetSongs() {}
@@ -88,14 +89,14 @@ class StreamingService : public QObject {
   void RequestLogout();
   void LoginWithCredentials(const QString &api_token, const QString &username, const QString &password);
   void LoginSuccess();
-  void LoginFailure(const QString &failure_reason);
-  void LoginComplete(const bool success, const QString &error = QString());
+  void LoginFailure(const QString &error);
+  void LoginFinished(const bool success, const QString &error = QString());
 
   void TestSuccess();
-  void TestFailure(const QString &failure_reason);
+  void TestFailure(const QString &error);
   void TestComplete(const bool success, const QString &error = QString());
 
-  void Error(const QString &error);
+  void ShowErrorDialog(const QString &error);
   void Results(const SongMap &songs, const QString &error);
   void UpdateStatus(const QString &text);
   void ProgressSetMaximum(const int max);
@@ -132,16 +133,15 @@ class StreamingService : public QObject {
 
   void StreamURLFailure(const uint id, const QUrl &media_url, const QString &error);
   void StreamURLSuccess(const uint id, const QUrl &media_url, const QUrl &stream_url, const Song::FileType filetype, const int samplerate, const int bit_depth, const qint64 duration);
+  void StreamURLRequestFinished(const uint id, const QUrl &media_url, const bool success, const QUrl &stream_url, const QString &error = QString());
 
- protected:
-  Application *app_;
+  void OpenSettingsDialog(const Song::Source source);
 
  private:
   Song::Source source_;
   QString name_;
   QString url_scheme_;
   QString settings_group_;
-  SettingsDialog::Page settings_page_;
 };
 
 using StreamingServicePtr = SharedPtr<StreamingService>;

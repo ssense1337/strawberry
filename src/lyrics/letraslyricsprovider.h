@@ -20,12 +20,10 @@
 #ifndef LETRASLYRICSPROVIDER_H
 #define LETRASLYRICSPROVIDER_H
 
-#include <QtGlobal>
-#include <QObject>
 #include <QString>
 #include <QUrl>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "core/networkaccessmanager.h"
 #include "htmllyricsprovider.h"
 #include "lyricssearchrequest.h"
@@ -34,7 +32,7 @@ class LetrasLyricsProvider : public HtmlLyricsProvider {
   Q_OBJECT
 
  public:
-  explicit LetrasLyricsProvider(SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
+  explicit LetrasLyricsProvider(const SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
 
  protected:
   QUrl Url(const LyricsSearchRequest &request) override;

@@ -1,8 +1,6 @@
 /*
  * Strawberry Music Player
- * This file was part of Clementine.
- * Copyright 2010, David Sansome <me@davidsansome.com>
- * Copyright 2018, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2024, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +56,6 @@ class UrlHandler : public QObject {
     };
 
     explicit LoadResult(const QUrl &media_url = QUrl(), const Type type = Type::NoMoreTracks, const QUrl &stream_url = QUrl(), const Song::FileType filetype = Song::FileType::Stream, const int samplerate = -1, const int bit_depth = -1, const qint64 length_nanosec = -1, const QString &error = QString());
-
     explicit LoadResult(const QUrl &media_url, const Type type, const QString &error);
 
     // The url that the playlist item has in Url().
@@ -92,7 +89,6 @@ class UrlHandler : public QObject {
 
  Q_SIGNALS:
   void AsyncLoadComplete(const UrlHandler::LoadResult &result);
-
 };
 
 #endif  // URLHANDLER_H

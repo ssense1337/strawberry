@@ -21,6 +21,8 @@
 #ifndef MOCK_NETWORKACCESSMANAGER_H
 #define MOCK_NETWORKACCESSMANAGER_H
 
+#include "gmock_include.h"
+
 #include <QtGlobal>
 #include <QMap>
 #include <QByteArray>
@@ -29,7 +31,6 @@
 #include <QNetworkReply>
 
 #include "test_utils.h"
-#include "gmock/gmock.h"
 
 // Usage:
 // Create a MockNetworkAccessManager.
@@ -52,8 +53,8 @@ class MockNetworkReply : public QNetworkReply {
 
  protected:
   MOCK_METHOD0(abort, void());  // clazy:exclude=returning-void-expression,function-args-by-value
-  qint64 readData(char* data, qint64) override;
-  qint64 writeData(const char* data, qint64) override;
+  qint64 readData(char *data, qint64) override;
+  qint64 writeData(const char *data, qint64) override;
 
   QByteArray data_;
   qint64 pos_;
@@ -67,7 +68,7 @@ class MockNetworkAccessManager : public QNetworkAccessManager {
       const QString& contains,  // A string that should be present in the URL.
       const QMap<QString, QString>& params,  // Required URL parameters.
       int status,  // Returned HTTP status code.
-      const QByteArray& ret_data);  // Returned data.
+      const QByteArray &ret_data);  // Returned data.
  protected:
   MOCK_METHOD3(createRequest, QNetworkReply*(Operation, const QNetworkRequest&, QIODevice*));  // clazy:exclude=function-args-by-value
 };

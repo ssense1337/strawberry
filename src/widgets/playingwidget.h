@@ -32,7 +32,7 @@
 #include <QAction>
 #include <QMovie>
 
-#include "core/scoped_ptr.h"
+#include "includes/scoped_ptr.h"
 #include "core/song.h"
 
 class QTimeLine;
@@ -48,7 +48,6 @@ class QPaintEvent;
 class QResizeEvent;
 
 class AlbumCoverChoiceController;
-class Application;
 
 class PlayingWidget : public QWidget {
   Q_OBJECT
@@ -56,7 +55,7 @@ class PlayingWidget : public QWidget {
  public:
   explicit PlayingWidget(QWidget *parent = nullptr);
 
-  void Init(Application *app, AlbumCoverChoiceController *album_cover_choice_controller);
+  void Init(AlbumCoverChoiceController *album_cover_choice_controller);
   bool IsEnabled() { return enabled_; }
   void SetEnabled(const bool enabled);
   void SetEnabled();
@@ -78,9 +77,9 @@ class PlayingWidget : public QWidget {
 
  protected:
   void paintEvent(QPaintEvent *e) override;
-  void resizeEvent(QResizeEvent*) override;
+  void resizeEvent(QResizeEvent *e) override;
   void contextMenuEvent(QContextMenuEvent *e) override;
-  void mouseDoubleClickEvent(QMouseEvent*) override;
+  void mouseDoubleClickEvent(QMouseEvent *e) override;
   void dragEnterEvent(QDragEnterEvent *e) override;
   void dropEvent(QDropEvent *e) override;
 
@@ -102,7 +101,6 @@ class PlayingWidget : public QWidget {
   void FadePreviousTrack(const qreal value);
 
  private:
-  Application *app_;
   AlbumCoverChoiceController *album_cover_choice_controller_;
   Mode mode_;
   QMenu *menu_;
@@ -138,7 +136,6 @@ class PlayingWidget : public QWidget {
   void DrawContents(QPainter *p);
   void ScaleCover();
   void GetCoverAutomatically();
-
 };
 
 #endif  // PLAYINGWIDGET_H

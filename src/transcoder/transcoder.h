@@ -36,10 +36,8 @@
 #include <QString>
 #include <QEvent>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "core/song.h"
-
-using namespace Qt::Literals::StringLiterals;
 
 struct TranscoderPreset {
   explicit TranscoderPreset() : filetype_(Song::FileType::Unknown) {}
@@ -57,7 +55,7 @@ class Transcoder : public QObject {
   Q_OBJECT
 
  public:
-  explicit Transcoder(QObject *parent = nullptr, const QString &settings_postfix = ""_L1);
+  explicit Transcoder(QObject *parent = nullptr, const QString &settings_postfix = QLatin1String(""));
 
   static TranscoderPreset PresetForFileType(const Song::FileType filetype);
   static QList<TranscoderPreset> GetAllPresets();
@@ -108,6 +106,7 @@ class Transcoder : public QObject {
     Transcoder *parent_;
     GstElement *pipeline_;
     GstElement *convert_element_;
+
    private:
     Q_DISABLE_COPY(JobState)
   };
@@ -120,6 +119,7 @@ class Transcoder : public QObject {
 
     JobState *state_;
     bool success_;
+
    private:
     Q_DISABLE_COPY(JobFinishedEvent)
   };
@@ -138,8 +138,8 @@ class Transcoder : public QObject {
   GstElement *CreateElementForMimeType(GstElementFactoryListType element_type, const QString &mime_type, GstElement *bin = nullptr);
   void SetElementProperties(const QString &name, GObject *object);
 
-  static void NewPadCallback(GstElement*, GstPad *pad, gpointer data);
-  static GstBusSyncReply BusCallbackSync(GstBus*, GstMessage *msg, gpointer data);
+  static void NewPadCallback(GstElement *element, GstPad *pad, gpointer data);
+  static GstBusSyncReply BusCallbackSync(GstBus *bus, GstMessage *msg, gpointer data);
 
  private:
   using JobStateList = QList<SharedPtr<JobState>>;

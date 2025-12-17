@@ -2,7 +2,7 @@
  * Strawberry Music Player
  * This file was part of Clementine.
  * Copyright 2010, David Sansome <me@davidsansome.com>
- * Copyright 2018-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,10 @@
 
 #include <QUrl>
 
-#include "core/tagreaderclient.h"
+#include "core/logging.h"
 #include "core/song.h"
 #include "core/sqlrow.h"
+#include "tagreader/tagreaderclient.h"
 #include "playlistitem.h"
 #include "songplaylistitem.h"
 
@@ -37,29 +38,22 @@ bool SongPlaylistItem::InitFromQuery(const SqlRow &query) {
   return true;
 }
 
-QUrl SongPlaylistItem::Url() const { return song_.url(); }
-
 void SongPlaylistItem::Reload() {
 
   if (!song_.url().isLocalFile()) return;
 
-  const TagReaderClient::Result result = TagReaderClient::Instance()->ReadFileBlocking(song_.url().toLocalFile(), &song_);
+  const TagReaderResult result = TagReaderClient::Instance()->ReadFileBlocking(song_.url().toLocalFile(), &song_);
   if (!result.success()) {
-    qLog(Error) << "Could not reload file" << song_.url() << result.error;
+    qLog(Error) << "Could not reload file" << song_.url() << result.error_string();
   }
 
-  UpdateTemporaryMetadata(song_);
+  UpdateStreamMetadata(song_);
 
-}
-
-Song SongPlaylistItem::Metadata() const {
-  if (HasTemporaryMetadata()) return temp_metadata_;
-  return song_;
 }
 
 void SongPlaylistItem::SetArtManual(const QUrl &cover_url) {
 
   song_.set_art_manual(cover_url);
-  if (HasTemporaryMetadata()) temp_metadata_.set_art_manual(cover_url);
+  if (HasStreamMetadata()) stream_song_.set_art_manual(cover_url);
 
 }

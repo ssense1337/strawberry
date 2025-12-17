@@ -36,11 +36,13 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
+#include "includes/shared_ptr.h"
+#include "core/logging.h"
 #include "core/networkaccessmanager.h"
 #include "core/song.h"
-#include "core/tagreaderclient.h"
 #include "utilities/mimeutils.h"
 #include "utilities/imageutils.h"
+#include "tagreader/tagreaderclient.h"
 #include "albumcoverloader.h"
 #include "albumcoverloaderoptions.h"
 #include "albumcoverloaderresult.h"
@@ -53,15 +55,16 @@ namespace {
 constexpr int kMaxRedirects = 3;
 }
 
-AlbumCoverLoader::AlbumCoverLoader(QObject *parent)
+AlbumCoverLoader::AlbumCoverLoader(const SharedPtr<TagReaderClient> tagreader_client, QObject *parent)
     : QObject(parent),
+      tagreader_client_(tagreader_client),
       network_(new NetworkAccessManager(this)),
       timer_process_tasks_(new QTimer(this)),
       stop_requested_(false),
       load_image_async_id_(1),
       original_thread_(nullptr) {
 
-  setObjectName(QLatin1String(metaObject()->className()));
+  setObjectName(QLatin1String(QObject::metaObject()->className()));
 
   original_thread_ = thread();
 
@@ -317,7 +320,7 @@ AlbumCoverLoader::LoadImageResult AlbumCoverLoader::LoadImage(TaskPtr task, cons
 AlbumCoverLoader::LoadImageResult AlbumCoverLoader::LoadEmbeddedImage(TaskPtr task) {
 
   if (task->art_embedded && task->song_url.isValid() && task->song_url.isLocalFile()) {
-    const TagReaderClient::Result result = TagReaderClient::Instance()->LoadEmbeddedArtBlocking(task->song_url.toLocalFile(), task->album_cover.image_data);
+    const TagReaderResult result = tagreader_client_->LoadCoverDataBlocking(task->song_url.toLocalFile(), task->album_cover.image_data);
     if (result.success() && !task->album_cover.image_data.isEmpty() && task->album_cover.image.loadFromData(task->album_cover.image_data)) {
       return LoadImageResult(AlbumCoverLoaderResult::Type::Embedded, LoadImageResult::Status::Success);
     }
@@ -394,9 +397,9 @@ AlbumCoverLoader::LoadImageResult AlbumCoverLoader::LoadRemoteUrlImage(TaskPtr t
 
   qLog(Debug) << "Loading remote cover from URL" << cover_url;
 
-  QNetworkRequest request(cover_url);
-  request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-  QNetworkReply *reply = network_->get(request);
+  QNetworkRequest network_request(cover_url);
+  network_request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+  QNetworkReply *reply = network_->get(network_request);
   QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, task, result_type, cover_url]() { LoadRemoteImageFinished(reply, task, result_type, cover_url); });
 
   return LoadImageResult(result_type, LoadImageResult::Status::Async);
@@ -415,10 +418,10 @@ void AlbumCoverLoader::LoadRemoteImageFinished(QNetworkReply *reply, TaskPtr tas
     }
     const QUrl redirect_url = redirect.toUrl();
     qLog(Debug) << "Loading remote cover from redirected URL" << redirect_url;
-    QNetworkRequest request = reply->request();
-    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-    request.setUrl(redirect_url);
-    QNetworkReply *redirected_reply = network_->get(request);
+    QNetworkRequest network_request = reply->request();
+    network_request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    network_request.setUrl(redirect_url);
+    QNetworkReply *redirected_reply = network_->get(network_request);
     QObject::connect(redirected_reply, &QNetworkReply::finished, this, [this, reply, task, result_type, redirect_url]() { LoadRemoteImageFinished(reply, task, result_type, redirect_url); });
     return;
   }

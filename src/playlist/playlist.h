@@ -2,7 +2,7 @@
  * Strawberry Music Player
  * This file was part of Clementine.
  * Copyright 2010, David Sansome <me@davidsansome.com>
- * Copyright 2018-2024, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,9 +41,9 @@
 #include <QColor>
 #include <QRgb>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "core/song.h"
-#include "core/tagreaderclient.h"
+#include "tagreader/tagreaderclient.h"
 #include "covermanager/albumcoverloaderresult.h"
 #include "playlistitem.h"
 #include "playlistsequence.h"
@@ -54,11 +54,12 @@ class QMimeData;
 class QUndoStack;
 class QTimer;
 
+class TaskManager;
+class UrlHandlers;
 class CollectionBackend;
 class PlaylistBackend;
 class PlaylistFilter;
 class Queue;
-class TaskManager;
 class RadioService;
 
 namespace PlaylistUndoCommands {
@@ -77,13 +78,22 @@ Q_DECLARE_METATYPE(ColumnAlignmentMap)
 class Playlist : public QAbstractListModel {
   Q_OBJECT
 
-  friend class PlaylistUndoCommands::InsertItems;
-  friend class PlaylistUndoCommands::RemoveItems;
-  friend class PlaylistUndoCommands::MoveItems;
-  friend class PlaylistUndoCommands::ReOrderItems;
+  friend class PlaylistUndoCommandInsertItems;
+  friend class PlaylistUndoCommandRemoveItems;
+  friend class PlaylistUndoCommandMoveItems;
+  friend class PlaylistUndoCommandReOrderItems;
 
  public:
-  explicit Playlist(SharedPtr<PlaylistBackend> playlist_backend, SharedPtr<TaskManager> task_manager, SharedPtr<CollectionBackend> collection_backend, const int id, const QString &special_type = QString(), const bool favorite = false, QObject *parent = nullptr);
+  explicit Playlist(const SharedPtr<TaskManager> task_manager,
+                    const SharedPtr<UrlHandlers> url_handlers,
+                    const SharedPtr<PlaylistBackend> playlist_backend,
+                    const SharedPtr<CollectionBackend> collection_backend,
+                    const SharedPtr<TagReaderClient> tagreader_client,
+                    const int id,
+                    const QString &special_type = QString(),
+                    const bool favorite = false,
+                    QObject *parent = nullptr);
+
   ~Playlist() override;
 
   void SkipTracks(const QModelIndexList &source_indexes);
@@ -91,11 +101,17 @@ class Playlist : public QAbstractListModel {
   // Always add new columns to the end of this enum - the values are persisted
   enum class Column {
     Title = 0,
+    TitleSort,
     Artist,
+    ArtistSort,
     Album,
+    AlbumSort,
     AlbumArtist,
+    AlbumArtistSort,
     Performer,
+    PerformerSort,
     Composer,
+    ComposerSort,
     Year,
     OriginalYear,
     Track,
@@ -105,7 +121,7 @@ class Playlist : public QAbstractListModel {
     Samplerate,
     Bitdepth,
     Bitrate,
-    Filename,
+    URL,
     BaseFilename,
     Filesize,
     Filetype,
@@ -117,11 +133,14 @@ class Playlist : public QAbstractListModel {
     Comment,
     Grouping,
     Source,
-    Mood,
+    Moodbar,
     Rating,
     HasCUE,
     EBUR128IntegratedLoudness,
     EBUR128LoudnessRange,
+    BPM,
+    Mood,
+    InitialKey,
     ColumnCount
   };
   using Columns = QList<Column>;
@@ -141,7 +160,6 @@ class Playlist : public QAbstractListModel {
     Always
   };
 
-  static const char *kSettingsGroup;
   static const char *kCddaMimeType;
   static const char *kRowsMimetype;
   static const char *kPlayNowMimetype;
@@ -194,7 +212,7 @@ class Playlist : public QAbstractListModel {
   PlaylistItem::Options current_item_options() const;
   Song current_item_metadata() const;
 
-  PlaylistItemPtrList collection_items_by_id(const int id) const;
+  PlaylistItemPtrList collection_items(const Song::Source source, const int song_id) const;
 
   SongList GetAllSongs() const;
   PlaylistItemPtrList GetAllItems() const;
@@ -217,7 +235,7 @@ class Playlist : public QAbstractListModel {
   void InsertItems(const PlaylistItemPtrList &itemsIn, const int pos = -1, const bool play_now = false, const bool enqueue = false, const bool enqueue_next = false);
   void InsertCollectionItems(const SongList &songs, const int pos = -1, const bool play_now = false, const bool enqueue = false, const bool enqueue_next = false);
   void InsertSongs(const SongList &songs, const int pos = -1, const bool play_now = false, const bool enqueue = false, const bool enqueue_next = false);
-  void InsertSongsOrCollectionItems(const SongList &songs, const int pos = -1, const bool play_now = false, const bool enqueue = false, const bool enqueue_next = false);
+  void InsertSongsOrCollectionItems(const SongList &songs, const QString &playlist_name = QString(), const int pos = -1, const bool play_now = false, const bool enqueue = false, const bool enqueue_next = false);
   void InsertSmartPlaylist(PlaylistGeneratorPtr gen, const int pos = -1, const bool play_now = false, const bool enqueue = false, const bool enqueue_next = false);
   void InsertStreamingItems(StreamingServicePtr service, const SongList &songs, const int pos = -1, const bool play_now = false, const bool enqueue = false, const bool enqueue_next = false);
   void InsertRadioItems(const SongList &songs, const int pos = -1, const bool play_now = false, const bool enqueue = false, const bool enqueue_next = false);
@@ -230,14 +248,12 @@ class Playlist : public QAbstractListModel {
   // song will be reloaded to even out the situation because obviously something has changed.
   // This returns true if this playlist had current item when the method was invoked.
   bool ApplyValidityOnCurrentSong(const QUrl &url, bool valid);
-  // Grays out and reloads all deleted songs in all playlists. Also, "ungreys" those songs which were once deleted but now got restored somehow.
-  void InvalidateDeletedSongs();
+
   // Removes from the playlist all local files that don't exist anymore.
   void RemoveDeletedSongs();
 
   void StopAfter(const int row);
   void ReloadItems(const QList<int> &rows);
-  void ReloadItemsBlocking(const QList<int> &rows);
   void InformOfCurrentSongChange(const bool minor);
 
   // Just emits the dataChanged() signal so the mood column is repainted.
@@ -255,15 +271,15 @@ class Playlist : public QAbstractListModel {
   QStringList mimeTypes() const override;
   Qt::DropActions supportedDropActions() const override;
   QMimeData *mimeData(const QModelIndexList &indexes) const override;
-  bool dropMimeData(const QMimeData *data, Qt::DropAction action, const int row, const int column, const QModelIndex &parent) override;
+  bool dropMimeData(const QMimeData *data, Qt::DropAction action, const int row, const int column, const QModelIndex &parent_index) override;
   void sort(const int column_number, const Qt::SortOrder order) override;
   bool removeRows(const int row, const int count, const QModelIndex &parent = QModelIndex()) override;
 
   static Columns ChangedColumns(const Song &metadata1, const Song &metadata2);
   static bool MinorMetadataChange(const Song &old_metadata, const Song &new_metadata);
-  void UpdateItemMetadata(PlaylistItemPtr item, const Song &new_metadata, const bool temporary);
-  void UpdateItemMetadata(const int row, PlaylistItemPtr item, const Song &new_metadata, const bool temporary);
-  void ItemChanged(const int row, const Columns &columns);
+  void UpdateItemMetadata(PlaylistItemPtr item, const Song &new_metadata, const bool stream_metadata_update);
+  void UpdateItemMetadata(const int row, PlaylistItemPtr item, const Song &new_metadata, const bool stream_metadata_update);
+  void RowDataChanged(const int row, const Columns &columns);
 
   // Changes rating of a song to the given value asynchronously
   void RateSong(const QModelIndex &idx, const float rating);
@@ -288,7 +304,7 @@ class Playlist : public QAbstractListModel {
   void RemoveUnavailableSongs();
   void Shuffle();
 
-  void ShuffleModeChanged(const PlaylistSequence::ShuffleMode);
+  void ShuffleModeChanged(const PlaylistSequence::ShuffleMode shuffle_mode);
 
   void SetColumnAlignment(const ColumnAlignmentMap &alignment);
 
@@ -320,6 +336,8 @@ class Playlist : public QAbstractListModel {
   // Signals that the queue has changed, meaning that the remaining queued items should update their position.
   void QueueChanged();
 
+  void Rename(const int id, const QString &name);
+
  private:
   void SetCurrentIsPaused(const bool paused);
   int NextVirtualIndex(int i, const bool ignore_repeat_track) const;
@@ -345,12 +363,17 @@ class Playlist : public QAbstractListModel {
   void TurnOnDynamicPlaylist(PlaylistGeneratorPtr gen);
   void InsertDynamicItems(const int count);
 
+  // Grays out and reloads all deleted songs in all playlists. Also, "ungreys" those songs which were once deleted but now got restored somehow.
+  void InvalidateDeletedSongs();
+
+  void ClearCollectionItems();
+
  private Q_SLOTS:
   void TracksAboutToBeDequeued(const QModelIndex&, const int begin, const int end);
   void TracksDequeued();
-  void TracksEnqueued(const QModelIndex&, const int begin, const int end);
+  void TracksEnqueued(const QModelIndex &parent_idx, const int begin, const int end);
   void QueueLayoutChanged();
-  void SongSaveComplete(TagReaderReply *reply, const QPersistentModelIndex &idx, const Song &old_metadata);
+  void SongSaveComplete(TagReaderReplyPtr reply, const QPersistentModelIndex &idx, const Song &old_metadata);
   void ItemReloadComplete(const QPersistentModelIndex &idx, const Song &old_metadata, const bool metadata_edit);
   void ItemsLoaded();
   void ScheduleSave();
@@ -364,9 +387,12 @@ class Playlist : public QAbstractListModel {
 
   QList<QModelIndex> temp_dequeue_change_indexes_;
 
-  SharedPtr<PlaylistBackend> backend_;
-  SharedPtr<TaskManager> task_manager_;
-  SharedPtr<CollectionBackend> collection_backend_;
+  const SharedPtr<TaskManager> task_manager_;
+  const SharedPtr<UrlHandlers> url_handlers_;
+  const SharedPtr<PlaylistBackend> playlist_backend_;
+  const SharedPtr<CollectionBackend> collection_backend_;
+  const SharedPtr<TagReaderClient> tagreader_client_;
+
   int id_;
   QString ui_path_;
   bool favorite_;
@@ -378,8 +404,7 @@ class Playlist : public QAbstractListModel {
 
   QList<QPersistentModelIndex> played_indexes_;
 
-  // A map of collection ID to playlist item - for fast lookups when collection items change.
-  QMultiMap<int, PlaylistItemPtr> collection_items_by_id_;
+  QMultiMap<int, PlaylistItemPtr> collection_items_[Song::kSourceCount];
 
   QPersistentModelIndex current_item_index_;
   QPersistentModelIndex last_played_item_index_;

@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2013-2022, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2013-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,9 +46,9 @@ class QDragEnterEvent;
 class QDropEvent;
 
 class ResizableTextEdit;
-class Application;
 class CollectionView;
 class AlbumCoverChoiceController;
+class LyricsProviders;
 class LyricsFetcher;
 
 class ContextView : public QWidget {
@@ -57,7 +57,7 @@ class ContextView : public QWidget {
  public:
   explicit ContextView(QWidget *parent = nullptr);
 
-  void Init(Application *app, CollectionView *collectionview, AlbumCoverChoiceController *album_cover_choice_controller);
+  void Init(CollectionView *collectionview, AlbumCoverChoiceController *album_cover_choice_controller, SharedPtr<LyricsProviders> lyrics_providers);
 
   ContextAlbum *album_widget() const { return widget_album_; }
   bool album_enabled() const { return action_show_album_->isChecked(); }
@@ -65,9 +65,9 @@ class ContextView : public QWidget {
 
  protected:
   void resizeEvent(QResizeEvent *e) override;
-  void contextMenuEvent(QContextMenuEvent*) override;
-  void dragEnterEvent(QDragEnterEvent*) override;
-  void dropEvent(QDropEvent*) override;
+  void contextMenuEvent(QContextMenuEvent *e) override;
+  void dragEnterEvent(QDragEnterEvent *e) override;
+  void dropEvent(QDropEvent *e) override;
 
  private:
   void AddActions();
@@ -101,7 +101,6 @@ class ContextView : public QWidget {
   void AlbumCoverLoaded(const Song &song, const QImage &image);
 
  private:
-  Application *app_;
   CollectionView *collectionview_;
   AlbumCoverChoiceController *album_cover_choice_controller_;
   LyricsFetcher *lyrics_fetcher_;
@@ -136,17 +135,11 @@ class ContextView : public QWidget {
   QLabel *label_bitdepth_title_;
   QLabel *label_bitrate_title_;
 
-  QLabel *label_ebur128_integrated_loudness_title_;
-  QLabel *label_ebur128_loudness_range_title_;
-
   QLabel *label_filetype_;
   QLabel *label_length_;
   QLabel *label_samplerate_;
   QLabel *label_bitdepth_;
   QLabel *label_bitrate_;
-
-  QLabel *label_ebur128_integrated_loudness_;
-  QLabel *label_ebur128_loudness_range_;
 
   Song song_playing_;
   Song song_prev_;

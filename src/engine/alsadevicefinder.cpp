@@ -31,7 +31,9 @@
 #include "alsadevicefinder.h"
 #include "enginedevice.h"
 
-AlsaDeviceFinder::AlsaDeviceFinder() : DeviceFinder(QStringLiteral("alsa"), { QStringLiteral("alsa"), QStringLiteral("alsasink") }) {}
+using namespace Qt::Literals::StringLiterals;
+
+AlsaDeviceFinder::AlsaDeviceFinder() : DeviceFinder(u"alsa"_s, { u"alsa"_s, u"alsasink"_s }) {}
 
 EngineDeviceList AlsaDeviceFinder::ListDevices() {
 
@@ -96,9 +98,9 @@ EngineDeviceList AlsaDeviceFinder::ListDevices() {
       device.card = card;
       device.device = dev;
 
-      device.value = QStringLiteral("hw:%1,%2").arg(card).arg(dev);
+      device.value = QStringLiteral("hw:%1,%2").arg(QString::fromUtf8(snd_ctl_card_info_get_id(cardinfo))).arg(dev);
       devices.append(device);
-      device.value = QStringLiteral("plughw:%1,%2").arg(card).arg(dev);
+      device.value = QStringLiteral("plughw:%1,%2").arg(QString::fromUtf8(snd_ctl_card_info_get_id(cardinfo))).arg(dev);
       devices.append(device);
 
     }

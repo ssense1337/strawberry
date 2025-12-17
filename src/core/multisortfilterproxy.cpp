@@ -21,14 +21,12 @@
 #include "config.h"
 
 #include <QtGlobal>
-#include <QObject>
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
 #include <QMetaType>
 #include <QDateTime>
 #include <QVariant>
 #include <QString>
-#include <QChar>
 
 #include "multisortfilterproxy.h"
 
@@ -89,7 +87,5 @@ int MultiSortFilterProxy::Compare(const QVariant &left, const QVariant &right) c
         return left.toString().compare(right.toString(), sortCaseSensitivity());
       }
   }
-
-  return 0;
 
 }

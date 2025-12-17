@@ -21,7 +21,7 @@
 
    You should have received a copy of the GNU General Public License
    along with Strawberry.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "rainbowanalyzer.h"
 
@@ -40,6 +40,8 @@
 
 #include "fht.h"
 #include "analyzerbase.h"
+
+using namespace Qt::Literals::StringLiterals;
 
 const char *NyanCatAnalyzer::kName = "Nyanalyzer Cat";
 const char *RainbowDashAnalyzer::kName = "Rainbow Dash";
@@ -68,8 +70,8 @@ RainbowAnalyzer::RainbowAnalyzer(const RainbowType rbtype, QWidget *parent)
       background_brush_(QColor(0x0f, 0x43, 0x73)) {
 
   rainbowtype = rbtype;
-  cat_dash_[0] = QPixmap(QStringLiteral(":/pictures/nyancat.png"));
-  cat_dash_[1] = QPixmap(QStringLiteral(":/pictures/rainbowdash.png"));
+  cat_dash_[0] = QPixmap(u":/pictures/nyancat.png"_s);
+  cat_dash_[1] = QPixmap(u":/pictures/rainbowdash.png"_s);
   memset(history_, 0, sizeof(history_));
 
   for (int i = 0; i < kRainbowBands; ++i) {
@@ -127,7 +129,7 @@ void RainbowAnalyzer::analyze(QPainter &p, const Scope &s, const bool new_frame)
     // of band pass filters for this, so bands can leak into neighbouring bands,
     // but for now it's a series of separate square filters.
     const int samples_per_band = scope_size / kRainbowBands;
-    int sample = 0;
+    size_t sample = 0;
     for (int band = 0; band < kRainbowBands; ++band) {
       float accumulator = 0.0;
       for (int i = 0; i < samples_per_band; ++i) {

@@ -19,7 +19,7 @@
    You should have received a copy of the GNU General Public License
    along with Strawberry.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #include "blockanalyzer.h"
 
@@ -61,11 +61,12 @@ BlockAnalyzer::BlockAnalyzer(QWidget *parent)
       fade_intensity_(1 << 8, 32),
       step_(0) {
 
-  setMinimumSize(kMinColumns * (kWidth + 1) - 1, kMinRows * (kHeight + 1) - 1);  //-1 is padding, no drawing takes place there
+  setMinimumSize(kMinColumns * (kWidth + 1) - 1, kMinRows * (kHeight + 1) - 1);  // -1 is padding, no drawing takes place there
   setMaximumWidth(kMaxColumns * (kWidth + 1) - 1);
 
   // mxcl says null pixmaps cause crashes, so let's play it safe
   std::fill(fade_bars_.begin(), fade_bars_.end(), QPixmap(1, 1));
+
 }
 
 void BlockAnalyzer::resizeEvent(QResizeEvent *e) {
@@ -85,7 +86,7 @@ void BlockAnalyzer::resizeEvent(QResizeEvent *e) {
   // this is the y-offset for drawing from the top of the widget
   y_ = (height() - (rows_ * (kHeight + 1)) + 2) / 2;
 
-  scope_.resize(columns_);
+  scope_.resize(static_cast<size_t>(columns_));
 
   if (rows_ != oldRows) {
     barpixmap_ = QPixmap(kWidth, rows_ * (kHeight + 1));
@@ -165,9 +166,9 @@ void BlockAnalyzer::analyze(QPainter &p, const Scope &s, const bool new_frame) {
   // Paint the background
   canvas_painter.drawPixmap(0, 0, background_);
 
-  for (int x = 0, y = 0; x < static_cast<int>(scope_.size()); ++x) {
+  for (qint64 x = 0, y = 0; x < static_cast<qint64>(scope_.size()); ++x) {
     // determine y
-    for (y = 0; scope_[x] < yscale_.at(y); ++y);
+    for (y = 0; scope_[static_cast<quint64>(x)] < yscale_.at(y); ++y);
 
     // This is opposite to what you'd think, higher than y means the bar is lower than y (physically)
     if (static_cast<double>(y) > store_.at(x)) {
@@ -175,13 +176,13 @@ void BlockAnalyzer::analyze(QPainter &p, const Scope &s, const bool new_frame) {
       y = static_cast<int>(store_.value(x));
     }
     else {
-      store_[x] = y;
+      store_[x] = static_cast<double>(y);
     }
 
     // If y is lower than fade_pos_, then the bar has exceeded the height of the fadeout
     // if the fadeout is quite faded now, then display the new one
     if (y <= fade_pos_.at(x) /*|| fade_intensity_[x] < kFadeSize / 3*/) {
-      fade_pos_[x] = y;
+      fade_pos_[x] = static_cast<int>(y);
       fade_intensity_[x] = kFadeSize;
     }
 
@@ -189,13 +190,13 @@ void BlockAnalyzer::analyze(QPainter &p, const Scope &s, const bool new_frame) {
       --fade_intensity_[x];
       const int offset = fade_intensity_.value(x);
       const int y2 = y_ + (fade_pos_.value(x) * (kHeight + 1));
-      canvas_painter.drawPixmap(x * (kWidth + 1), y2, fade_bars_[offset], 0, 0, kWidth, height() - y2);
+      canvas_painter.drawPixmap(static_cast<int>(x) * (kWidth + 1), y2, fade_bars_[offset], 0, 0, kWidth, height() - y2);
     }
 
     if (fade_intensity_.at(x) == 0) fade_pos_[x] = rows_;
 
     // REMEMBER: y is a number from 0 to rows_, 0 means all blocks are glowing, rows_ means none are
-    canvas_painter.drawPixmap(x * (kWidth + 1), y * (kHeight + 1) + y_, *bar(), 0, y * (kHeight + 1), bar()->width(), bar()->height());
+    canvas_painter.drawPixmap(static_cast<int>(x) * (kWidth + 1), static_cast<int>(y) * (kHeight + 1) + y_, *bar(), 0, static_cast<int>(y) * (kHeight + 1), bar()->width(), bar()->height());
   }
 
   for (int x = 0; x < store_.size(); ++x) {
@@ -237,7 +238,7 @@ static inline void adjustToLimits(const int b, int &f, int &amount) {
  * Clever contrast function
  *
  * It will try to adjust the foreground color such that it contrasts well with
- *the background
+ * the background
  * It won't modify the hue of fg unless absolutely necessary
  * @return the adjusted form of fg
  */
@@ -340,7 +341,9 @@ QColor ensureContrast(const QColor &bg, const QColor &fg, int amount) {
 
 }
 
-void BlockAnalyzer::paletteChange(const QPalette&) {
+void BlockAnalyzer::paletteChange(const QPalette &_palette) {
+
+  Q_UNUSED(_palette)
 
   const QColor bg = palette().color(QPalette::Window);
   const QColor fg = ensureContrast(bg, palette().color(QPalette::Highlight));

@@ -29,7 +29,7 @@
 #include "smartplaylistsearchterm.h"
 #include "playlist/playlist.h"
 
-using namespace Qt::StringLiterals;
+using namespace Qt::Literals::StringLiterals;
 
 SmartPlaylistSearchTerm::SmartPlaylistSearchTerm() : field_(Field::Title), operator_(Operator::Equals), datetype_(DateType::Hour) {}
 
@@ -214,6 +214,7 @@ SmartPlaylistSearchTerm::Type SmartPlaylistSearchTerm::TypeOf(const Field field)
     case Field::Samplerate:
     case Field::Bitdepth:
     case Field::Bitrate:
+    case Field::BPM:
       return Type::Number;
 
     case Field::LastPlayed:
@@ -296,68 +297,85 @@ QString SmartPlaylistSearchTerm::OperatorText(const Type type, const Operator op
       return QString();
   }
 
-  return QString();
-
 }
 
 QString SmartPlaylistSearchTerm::FieldColumnName(const Field field) {
 
   switch (field) {
     case Field::AlbumArtist:
-      return QStringLiteral("albumartist");
+      return u"albumartist"_s;
     case Field::Artist:
-      return QStringLiteral("artist");
+      return u"artist"_s;
     case Field::Album:
-      return QStringLiteral("album");
+      return u"album"_s;
     case Field::Title:
-      return QStringLiteral("title");
+      return u"title"_s;
     case Field::Track:
-      return QStringLiteral("track");
+      return u"track"_s;
     case Field::Disc:
-      return QStringLiteral("disc");
+      return u"disc"_s;
     case Field::Year:
-      return QStringLiteral("year");
+      return u"year"_s;
     case Field::OriginalYear:
-      return QStringLiteral("originalyear");
+      return u"originalyear"_s;
     case Field::Genre:
-      return QStringLiteral("genre");
+      return u"genre"_s;
     case Field::Composer:
-      return QStringLiteral("composer");
+      return u"composer"_s;
     case Field::Performer:
-      return QStringLiteral("performer");
+      return u"performer"_s;
     case Field::Grouping:
-      return QStringLiteral("grouping");
+      return u"grouping"_s;
     case Field::Comment:
-      return QStringLiteral("comment");
+      return u"comment"_s;
     case Field::Length:
-      return QStringLiteral("length");
+      return u"length"_s;
     case Field::Filepath:
-      return QStringLiteral("url");
+      return u"url"_s;
     case Field::Filetype:
-      return QStringLiteral("filetype");
+      return u"filetype"_s;
     case Field::Filesize:
-      return QStringLiteral("filesize");
+      return u"filesize"_s;
     case Field::DateCreated:
-      return QStringLiteral("ctime");
+      return u"ctime"_s;
     case Field::DateModified:
-      return QStringLiteral("mtime");
+      return u"mtime"_s;
     case Field::PlayCount:
-      return QStringLiteral("playcount");
+      return u"playcount"_s;
     case Field::SkipCount:
-      return QStringLiteral("skipcount");
+      return u"skipcount"_s;
     case Field::LastPlayed:
-      return QStringLiteral("lastplayed");
+      return u"lastplayed"_s;
     case Field::Rating:
-      return QStringLiteral("rating");
+      return u"rating"_s;
     case Field::Samplerate:
-      return QStringLiteral("samplerate");
+      return u"samplerate"_s;
     case Field::Bitdepth:
-      return QStringLiteral("bitdepth");
+      return u"bitdepth"_s;
     case Field::Bitrate:
-      return QStringLiteral("bitrate");
+      return u"bitrate"_s;
+    case Field::ArtistSort:
+      return u"artistsort"_s;
+    case Field::AlbumArtistSort:
+      return u"albumartistsort"_s;
+    case Field::AlbumSort:
+      return u"albumsort"_s;
+    case Field::ComposerSort:
+      return u"composersort"_s;
+    case Field::PerformerSort:
+      return u"performersort"_s;
+    case Field::TitleSort:
+      return u"titlesort"_s;
+    case Field::BPM:
+      return u"bpm"_s;
+    case Field::Mood:
+      return u"mood"_s;
+    case Field::InitialKey:
+      return u"initial_key"_s;
     case Field::FieldCount:
       Q_ASSERT(0);
   }
+
   return QString();
 
 }
@@ -394,7 +412,7 @@ QString SmartPlaylistSearchTerm::FieldName(const Field field) {
     case Field::Length:
       return Playlist::column_name(Playlist::Column::Length);
     case Field::Filepath:
-      return Playlist::column_name(Playlist::Column::Filename);
+      return Playlist::column_name(Playlist::Column::URL);
     case Field::Filetype:
       return Playlist::column_name(Playlist::Column::Filetype);
     case Field::Filesize:
@@ -417,6 +435,24 @@ QString SmartPlaylistSearchTerm::FieldName(const Field field) {
       return Playlist::column_name(Playlist::Column::Bitdepth);
     case Field::Bitrate:
       return Playlist::column_name(Playlist::Column::Bitrate);
+    case Field::ArtistSort:
+      return Playlist::column_name(Playlist::Column::ArtistSort);
+    case Field::AlbumArtistSort:
+      return Playlist::column_name(Playlist::Column::AlbumArtistSort);
+    case Field::AlbumSort:
+      return Playlist::column_name(Playlist::Column::AlbumSort);
+    case Field::ComposerSort:
+      return Playlist::column_name(Playlist::Column::ComposerSort);
+    case Field::PerformerSort:
+      return Playlist::column_name(Playlist::Column::PerformerSort);
+    case Field::TitleSort:
+      return Playlist::column_name(Playlist::Column::TitleSort);
+    case Field::BPM:
+      return Playlist::column_name(Playlist::Column::BPM);
+    case Field::Mood:
+      return Playlist::column_name(Playlist::Column::Mood);
+    case Field::InitialKey:
+      return Playlist::column_name(Playlist::Column::InitialKey);
     case Field::FieldCount:
       Q_ASSERT(0);
   }
@@ -450,15 +486,15 @@ QString SmartPlaylistSearchTerm::DateName(const DateType datetype, const bool fo
   // If forQuery is true, untranslated keywords are returned
   switch (datetype) {
     case DateType::Hour:
-      return (forQuery ? QStringLiteral("hours") : QObject::tr("Hours"));
+      return (forQuery ? u"hours"_s : QObject::tr("Hours"));
     case DateType::Day:
-      return (forQuery ? QStringLiteral("days") : QObject::tr("Days"));
+      return (forQuery ? u"days"_s : QObject::tr("Days"));
     case DateType::Week:
-      return (forQuery ? QStringLiteral("weeks") : QObject::tr("Weeks"));
+      return (forQuery ? u"weeks"_s : QObject::tr("Weeks"));
     case DateType::Month:
-      return (forQuery ? QStringLiteral("months") : QObject::tr("Months"));
+      return (forQuery ? u"months"_s : QObject::tr("Months"));
     case DateType::Year:
-      return (forQuery ? QStringLiteral("years") : QObject::tr("Years"));
+      return (forQuery ? u"years"_s : QObject::tr("Years"));
   }
 
   return QString();

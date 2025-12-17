@@ -18,15 +18,19 @@
  *
  */
 
-#include <gmock/gmock.h>
+#include "gmock_include.h"
 
-#include <QApplication>
+#ifdef GUI
+#  include <QApplication>
+#else
+#  include <QCoreApplication>
+#endif
 
 #include "logging_env.h"
 #include "metatypes_env.h"
 #include "resources_env.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 
   testing::InitGoogleMock(&argc, argv);
 

@@ -30,6 +30,7 @@
 #include <QByteArray>
 #include <QString>
 #include <QStringList>
+#include <QUrl>
 #include <QIODevice>
 #include <QDataStream>
 #include <QKeySequence>
@@ -39,12 +40,12 @@
 #include "core/logging.h"
 #include "core/iconloader.h"
 #include "core/settings.h"
-#include "settings/collectionsettingspage.h"
+#include "constants/collectionsettings.h"
 #include "collectionmodel.h"
 #include "savedgroupingmanager.h"
 #include "ui_savedgroupingmanager.h"
 
-using namespace Qt::StringLiterals;
+using namespace Qt::Literals::StringLiterals;
 
 const char *SavedGroupingManager::kSavedGroupingsSettingsGroup = "SavedGroupings";
 
@@ -61,7 +62,7 @@ SavedGroupingManager::SavedGroupingManager(const QString &saved_groupings_settin
   model_->setHorizontalHeaderItem(2, new QStandardItem(tr("Second Level")));
   model_->setHorizontalHeaderItem(3, new QStandardItem(tr("Third Level")));
   ui_->list->setModel(model_);
-  ui_->remove->setIcon(IconLoader::Load(QStringLiteral("edit-delete")));
+  ui_->remove->setIcon(IconLoader::Load(u"edit-delete"_s));
   ui_->remove->setEnabled(false);
 
   ui_->remove->setShortcut(QKeySequence::Delete);
@@ -77,7 +78,7 @@ SavedGroupingManager::~SavedGroupingManager() {
 
 QString SavedGroupingManager::GetSavedGroupingsSettingsGroup(const QString &settings_group) {
 
-  if (settings_group.isEmpty() || settings_group == QLatin1String(CollectionSettingsPage::kSettingsGroup)) {
+  if (settings_group.isEmpty() || settings_group == QLatin1String(CollectionSettings::kSettingsGroup)) {
     return QLatin1String(kSavedGroupingsSettingsGroup);
   }
 
@@ -167,14 +168,20 @@ void SavedGroupingManager::UpdateModel() {
   if (version == 1) {
     QStringList saved = s.childKeys();
     for (int i = 0; i < saved.size(); ++i) {
-      if (saved.at(i) == "version"_L1) continue;
-      QByteArray bytes = s.value(saved.at(i)).toByteArray();
+      const QString &name = saved.at(i);
+      if (name == "version"_L1) continue;
+      QByteArray bytes = s.value(name).toByteArray();
       QDataStream ds(&bytes, QIODevice::ReadOnly);
       CollectionModel::Grouping g;
       ds >> g;
 
       QList<QStandardItem*> list;
-      list << new QStandardItem(saved.at(i))
+
+      QStandardItem *item = new QStandardItem();
+      item->setText(QUrl::fromPercentEncoding(name.toUtf8()));
+      item->setData(name);
+
+      list << item
            << new QStandardItem(GroupByToString(g.first))
            << new QStandardItem(GroupByToString(g.second))
            << new QStandardItem(GroupByToString(g.third));
@@ -185,8 +192,9 @@ void SavedGroupingManager::UpdateModel() {
   else {
     QStringList saved = s.childKeys();
     for (int i = 0; i < saved.size(); ++i) {
-      if (saved.at(i) == "version"_L1) continue;
-      s.remove(saved.at(i));
+      const QString &name = saved.at(i);
+      if (name == "version"_L1) continue;
+      s.remove(name);
     }
   }
   s.endGroup();
@@ -202,7 +210,7 @@ void SavedGroupingManager::Remove() {
     for (const QModelIndex &idx : indexes) {
       if (idx.isValid()) {
         qLog(Debug) << "Remove saved grouping: " << model_->item(idx.row(), 0)->text();
-        s.remove(model_->item(idx.row(), 0)->text());
+        s.remove(model_->item(idx.row(), 0)->data().toString());
       }
     }
     s.endGroup();

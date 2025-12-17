@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2018-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
  * Copyright 2020, Pascal Below <spezifisch@below.fr>
  *
  * Strawberry is free software: you can redistribute it and/or modify
@@ -23,31 +23,31 @@
 
 #include "config.h"
 
-#include <QtGlobal>
-#include <QObject>
 #include <QDateTime>
 #include <QVariant>
 #include <QString>
 #include <QTimer>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "core/song.h"
 #include "scrobblerservice.h"
 
-class Application;
-class ScrobblerSettings;
+class ScrobblerSettingsService;
 class SubsonicService;
 
 class SubsonicScrobbler : public ScrobblerService {
   Q_OBJECT
 
  public:
-  explicit SubsonicScrobbler(SharedPtr<ScrobblerSettings> settings, Application *app, QObject *parent = nullptr);
+  explicit SubsonicScrobbler(const SharedPtr<ScrobblerSettingsService> settings, const SharedPtr<NetworkAccessManager> network, const SharedPtr<SubsonicService> service, QObject *parent = nullptr);
 
   void ReloadSettings() override;
 
   bool enabled() const override { return enabled_; }
+  bool authentication_required() const override { return true; }
   bool authenticated() const override { return true; }
+  bool use_authorization_header() const override { return false; }
+  QByteArray authorization_header() const override { return QByteArray(); }
 
   void UpdateNowPlaying(const Song &song) override;
   void ClearPlaying() override;
@@ -56,15 +56,14 @@ class SubsonicScrobbler : public ScrobblerService {
   void StartSubmit(const bool initial = false) override { Q_UNUSED(initial) }
   bool submitted() const override { return submitted_; }
 
-  SharedPtr<SubsonicService> service();
+  SharedPtr<SubsonicService> service() const;
 
  public Q_SLOTS:
   void WriteCache() override {}
   void Submit() override;
 
  private:
-  Application *app_;
-  SharedPtr<SubsonicService> service_;
+  const SharedPtr<SubsonicService> service_;
   bool enabled_;
   bool submitted_;
   Song song_playing_;

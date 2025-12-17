@@ -29,7 +29,7 @@
 #include <QAbstractNativeEventFilter>
 #include <QKeySequence>
 #include <QPair>
-#include <QVector>
+#include <QList>
 #include <QHash>
 #include <QByteArray>
 #include <QString>
@@ -54,7 +54,6 @@ class GlobalShortcut : public QObject, QAbstractNativeEventFilter {
   void activated();
 
  private:
-
   static void activateShortcut(const quint32 native_key, const quint32 native_mods);
 
   static int nativeModifiers(const Qt::KeyboardModifiers qt_mods);
@@ -68,7 +67,7 @@ class GlobalShortcut : public QObject, QAbstractNativeEventFilter {
 
   static GlobalShortcut *initialized_;
   static QHash<QPair<quint32, quint32>, GlobalShortcut*> internal_shortcuts_;
-  static const QVector<quint32> mask_modifiers_;
+  static const QList<quint32> mask_modifiers_;
 
   GlobalShortcutsBackend *backend_;
   QKeySequence shortcut_;

@@ -2,7 +2,7 @@
  * Strawberry Music Player
  * This file was part of Clementine.
  * Copyright 2010, David Sansome <me@davidsansome.com>
- * Copyright 2018-2024, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
 #include <QUrl>
 #include <QSqlDatabase>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "core/song.h"
 #include "collectionfilteroptions.h"
 #include "collectionquery.h"
@@ -45,7 +45,6 @@
 class QThread;
 class TaskManager;
 class Database;
-class SmartPlaylistSearch;
 
 class CollectionBackendInterface : public QObject {
   Q_OBJECT
@@ -141,7 +140,6 @@ class CollectionBackend : public CollectionBackendInterface {
   Q_OBJECT
 
  public:
-
   Q_INVOKABLE explicit CollectionBackend(QObject *parent = nullptr);
 
   ~CollectionBackend();
@@ -227,14 +225,16 @@ class CollectionBackend : public CollectionBackendInterface {
 
   SongList GetSongsByFingerprint(const QString &fingerprint) override;
 
-  SongList SmartPlaylistsGetAllSongs();
-  SongList SmartPlaylistsFindSongs(const SmartPlaylistSearch &search);
+  SongList ExecuteQuery(const QString &sql);
 
   void AddOrUpdateSongsAsync(const SongList &songs);
   void UpdateSongsBySongIDAsync(const SongMap &new_songs);
 
   void UpdateSongRatingAsync(const int id, const float rating, const bool save_tags = false);
   void UpdateSongsRatingAsync(const QList<int> &ids, const float rating, const bool save_tags = false);
+
+  void DeleteSongsAsync(const SongList &songs);
+  void DeleteSongsByUrlsAsync(const QList<QUrl> &url);
 
  public Q_SLOTS:
   void Exit();
@@ -249,6 +249,7 @@ class CollectionBackend : public CollectionBackendInterface {
   void UpdateSongsBySongID(const SongMap &new_songs);
   void UpdateMTimesOnly(const SongList &songs);
   void DeleteSongs(const SongList &songs);
+  void DeleteSongsByUrls(const QList<QUrl> &url);
   void MarkSongsUnavailable(const SongList &songs, const bool unavailable = true);
   void AddOrUpdateSubdirs(const CollectionSubdirectoryList &subdirs);
   void CompilationsNeedUpdating();
@@ -329,4 +330,3 @@ class CollectionBackend : public CollectionBackendInterface {
 };
 
 #endif  // COLLECTIONBACKEND_H
-

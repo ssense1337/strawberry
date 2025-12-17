@@ -2,7 +2,7 @@
  * Strawberry Music Player
  * This file was part of Clementine.
  * Copyright 2010, David Sansome <me@davidsansome.com>
- * Copyright 2019-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2019-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,14 +48,15 @@
 
 #include "core/iconloader.h"
 #include "core/logging.h"
-#include "core/tagreaderclient.h"
+#include "tagreader/tagreaderclient.h"
 #include "widgets/busyindicator.h"
 #include "trackselectiondialog.h"
 #include "ui_trackselectiondialog.h"
 
-TrackSelectionDialog::TrackSelectionDialog(QWidget *parent)
+TrackSelectionDialog::TrackSelectionDialog(const SharedPtr<TagReaderClient> tagreader_client, QWidget *parent)
     : QDialog(parent),
       ui_(new Ui_TrackSelectionDialog),
+      tagreader_client_(tagreader_client),
       save_on_close_(false) {
 
   // Setup dialog window
@@ -88,6 +89,7 @@ TrackSelectionDialog::TrackSelectionDialog(QWidget *parent)
   ui_->results->setColumnWidth(2, 160);  // Title column
   ui_->results->setColumnWidth(3, 160);  // Artist column
   ui_->results->setColumnWidth(4, 160);  // Album column
+  ui_->results->setColumnWidth(5, 160);  // Album artist column
 
 }
 
@@ -227,10 +229,15 @@ void TrackSelectionDialog::AddDivider(const QString &text, QTreeWidget *parent) 
 
 }
 
-void TrackSelectionDialog::AddSong(const Song &song, int result_index, QTreeWidget *parent) {
+void TrackSelectionDialog::AddSong(const Song &song, const int result_index, QTreeWidget *parent) {
 
   QStringList values;
-  values << ((song.track() > 0) ? QString::number(song.track()) : QString()) << ((song.year() > 0) ? QString::number(song.year()) : QString()) << song.title() << song.artist() << song.album();
+  values << ((song.track() > 0) ? QString::number(song.track()) : QString())
+         << ((song.year() > 0) ? QString::number(song.year()) : QString())
+         << song.title()
+         << song.artist()
+         << song.album()
+         << song.albumartist();
 
   QTreeWidgetItem *item = new QTreeWidgetItem(parent, values);
   item->setData(0, Qt::UserRole, result_index);
@@ -261,10 +268,10 @@ void TrackSelectionDialog::SetLoading(const QString &message) {
 
 }
 
-void TrackSelectionDialog::SaveData(const QList<Data> &data) {
+void TrackSelectionDialog::SaveData(const QList<Data> &_data) const {
 
-  for (int i = 0; i < data.count(); ++i) {
-    const Data &ref = data[i];
+  for (int i = 0; i < _data.count(); ++i) {
+    const Data &ref = _data[i];
     if (ref.pending_ || ref.results_.isEmpty() || ref.selected_result_ == -1) {
       continue;
     }
@@ -274,13 +281,16 @@ void TrackSelectionDialog::SaveData(const QList<Data> &data) {
     Song copy(ref.original_song_);
     copy.set_title(new_metadata.title());
     copy.set_artist(new_metadata.artist());
+    copy.set_artistsort(new_metadata.artistsort());
+    copy.set_albumartist(new_metadata.albumartist());
+    copy.set_albumartistsort(new_metadata.albumartistsort());
     copy.set_album(new_metadata.album());
     copy.set_track(new_metadata.track());
     copy.set_year(new_metadata.year());
 
-    const TagReaderClient::Result result = TagReaderClient::Instance()->WriteFileBlocking(copy.url().toLocalFile(), copy, TagReaderClient::SaveType::Tags, TagReaderClient::SaveCoverOptions());
+    const TagReaderResult result = tagreader_client_->WriteFileBlocking(copy.url().toLocalFile(), copy, TagReaderClient::SaveOption::Tags, SaveTagCoverData());
     if (!result.success()) {
-      qLog(Error) << "Failed to write new auto-tags to" << copy.url().toLocalFile() << result.error;
+      qLog(Error) << "Failed to write new auto-tags to" << copy.url().toLocalFile() << result.error_string();
     }
   }
 
@@ -292,7 +302,7 @@ void TrackSelectionDialog::accept() {
     SetLoading(tr("Saving tracks") + QStringLiteral("..."));
 
     // Save tags in the background
-    QFuture<void> future = QtConcurrent::run(&TrackSelectionDialog::SaveData, data_);
+    QFuture<void> future = QtConcurrent::run(&TrackSelectionDialog::SaveData, this, data_);
     QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
     QObject::connect(watcher, &QFutureWatcher<void>::finished, this, &TrackSelectionDialog::AcceptFinished);
     watcher->setFuture(future);

@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2019-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2019-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,18 +39,18 @@
 #include <QJsonArray>
 #include <QJsonValue>
 
-#include "core/application.h"
 #include "core/logging.h"
 #include "core/song.h"
 #include "core/networktimeouts.h"
+#include "utilities/strutils.h"
 #include "utilities/imageutils.h"
-#include "utilities/timeconstants.h"
+#include "constants/timeconstants.h"
 #include "subsonicservice.h"
 #include "subsonicurlhandler.h"
 #include "subsonicbaserequest.h"
 #include "subsonicrequest.h"
 
-using namespace Qt::StringLiterals;
+using namespace Qt::Literals::StringLiterals;
 
 namespace {
 constexpr int kMaxConcurrentAlbumsRequests = 3;
@@ -58,11 +58,10 @@ constexpr int kMaxConcurrentAlbumSongsRequests = 3;
 constexpr int kMaxConcurrentAlbumCoverRequests = 1;
 }  // namespace
 
-SubsonicRequest::SubsonicRequest(SubsonicService *service, SubsonicUrlHandler *url_handler, Application *app, QObject *parent)
+SubsonicRequest::SubsonicRequest(SubsonicService *service, SubsonicUrlHandler *url_handler, QObject *parent)
     : SubsonicBaseRequest(service, parent),
       service_(service),
       url_handler_(url_handler),
-      app_(app),
       network_(new QNetworkAccessManager(this)),
       timeouts_(new NetworkTimeouts(30000, this)),
       finished_(false),
@@ -146,14 +145,14 @@ void SubsonicRequest::FlushAlbumsRequests() {
 
   while (!albums_requests_queue_.isEmpty() && albums_requests_active_ < kMaxConcurrentAlbumsRequests) {
 
-    Request request = albums_requests_queue_.dequeue();
+    const Request request = albums_requests_queue_.dequeue();
     ++albums_requests_active_;
 
-    ParamList params = ParamList() << Param(QStringLiteral("type"), QStringLiteral("alphabeticalByName"));
-    if (request.size > 0) params << Param(QStringLiteral("size"), QString::number(request.size));
-    if (request.offset > 0) params << Param(QStringLiteral("offset"), QString::number(request.offset));
+    ParamList params = ParamList() << Param(u"type"_s, u"alphabeticalByName"_s);
+    if (request.size > 0) params << Param(u"size"_s, QString::number(request.size));
+    if (request.offset > 0) params << Param(u"offset"_s, QString::number(request.offset));
 
-    QNetworkReply *reply = CreateGetRequest(QStringLiteral("getAlbumList2"), params);
+    QNetworkReply *reply = CreateGetRequest(u"getAlbumList2"_s, params);
     replies_ << reply;
     QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, request]() { AlbumsReplyReceived(reply, request.offset, request.size); });
     timeouts_->AddReply(reply);
@@ -171,114 +170,86 @@ void SubsonicRequest::AlbumsReplyReceived(QNetworkReply *reply, const int offset
 
   --albums_requests_active_;
 
-  QByteArray data = GetReplyData(reply);
+  int albums_received = 0;
+  const QScopeGuard finish_check = qScopeGuard([this, offset_requested, size_requested, &albums_received]() { AlbumsFinishCheck(offset_requested, size_requested, albums_received); });
 
   if (finished_) return;
 
-  if (data.isEmpty()) {
-    AlbumsFinishCheck(offset_requested, size_requested);
+  const JsonObjectResult json_object_result = ParseJsonObject(reply);
+  if (!json_object_result.success()) {
+    Error(json_object_result.error_message);
     return;
   }
 
-  QJsonObject json_obj = ExtractJsonObj(data);
-  if (json_obj.isEmpty()) {
-    AlbumsFinishCheck(offset_requested, size_requested);
+  QJsonObject json_object = json_object_result.json_object;
+  if (json_object.isEmpty()) {
     return;
   }
 
-  if (json_obj.contains("error"_L1)) {
-    QJsonValue json_error = json_obj["error"_L1];
-    if (!json_error.isObject()) {
-      Error(QStringLiteral("Json error is not an object."), json_obj);
-      AlbumsFinishCheck(offset_requested, size_requested);
-      return;
-    }
-    json_obj = json_error.toObject();
-    if (!json_obj.isEmpty() && json_obj.contains("code"_L1) && json_obj.contains("message"_L1)) {
-      int code = json_obj["code"_L1].toInt();
-      QString message = json_obj["message"_L1].toString();
-      Error(QStringLiteral("%1 (%2)").arg(message).arg(code));
-      AlbumsFinishCheck(offset_requested, size_requested);
-    }
-    else {
-      Error(QStringLiteral("Json error object is missing code or message."), json_obj);
-      AlbumsFinishCheck(offset_requested, size_requested);
-    }
-    return;
-  }
-
-  if (!json_obj.contains("albumList"_L1) && !json_obj.contains("albumList2"_L1)) {
-    Error(QStringLiteral("Json reply is missing albumList."), json_obj);
-    AlbumsFinishCheck(offset_requested, size_requested);
+  if (!json_object.contains("albumList"_L1) && !json_object.contains("albumList2"_L1)) {
+    Error(u"Json reply is missing albumList."_s, json_object);
     return;
   }
   QJsonValue value_albumlist;
-  if (json_obj.contains("albumList"_L1)) value_albumlist = json_obj["albumList"_L1];
-  else if (json_obj.contains("albumList2"_L1)) value_albumlist = json_obj["albumList2"_L1];
+  if (json_object.contains("albumList"_L1)) value_albumlist = json_object["albumList"_L1];
+  else if (json_object.contains("albumList2"_L1)) value_albumlist = json_object["albumList2"_L1];
 
   if (!value_albumlist.isObject()) {
-    Error(QStringLiteral("Json album list is not an object."), value_albumlist);
-    AlbumsFinishCheck(offset_requested, size_requested);
+    Error(u"Json album list is not an object."_s, value_albumlist);
   }
-  json_obj = value_albumlist.toObject();
-  if (json_obj.isEmpty()) {
+  json_object = value_albumlist.toObject();
+  if (json_object.isEmpty()) {
     if (offset_requested == 0) no_results_ = true;
-    AlbumsFinishCheck(offset_requested, size_requested);
     return;
   }
 
-  if (!json_obj.contains("album"_L1)) {
-    Error(QStringLiteral("Json album list does not contain album array."), json_obj);
-    AlbumsFinishCheck(offset_requested, size_requested);
+  if (!json_object.contains("album"_L1)) {
+    Error(u"Json album list does not contain album array."_s, json_object);
   }
-  QJsonValue json_album = json_obj["album"_L1];
+  const QJsonValue json_album = json_object["album"_L1];
   if (json_album.isNull()) {
     if (offset_requested == 0) no_results_ = true;
-    AlbumsFinishCheck(offset_requested, size_requested);
     return;
   }
   if (!json_album.isArray()) {
-    Error(QStringLiteral("Json album is not an array."), json_album);
-    AlbumsFinishCheck(offset_requested, size_requested);
+    Error(u"Json album is not an array."_s, json_album);
   }
   const QJsonArray array_albums = json_album.toArray();
 
   if (array_albums.isEmpty()) {
     if (offset_requested == 0) no_results_ = true;
-    AlbumsFinishCheck(offset_requested, size_requested);
     return;
   }
 
-  int albums_received = 0;
   for (const QJsonValue &value_album : array_albums) {
 
     ++albums_received;
 
     if (!value_album.isObject()) {
-      Error(QStringLiteral("Invalid Json reply, album is not an object."));
+      Error(u"Invalid Json reply, album is not an object."_s);
       continue;
     }
-    QJsonObject obj_album = value_album.toObject();
+    const QJsonObject object_album = value_album.toObject();
 
-    if (!obj_album.contains("id"_L1) || !obj_album.contains("artist"_L1)) {
-      Error(QStringLiteral("Invalid Json reply, album object in array is missing ID or artist."), obj_album);
-      continue;
-    }
-
-    if (!obj_album.contains("album"_L1) && !obj_album.contains("name"_L1)) {
-      Error(QStringLiteral("Invalid Json reply, album object in array is missing album or name."), obj_album);
+    if (!object_album.contains("id"_L1) || !object_album.contains("artist"_L1)) {
+      Error(u"Invalid Json reply, album object in array is missing ID or artist."_s, object_album);
       continue;
     }
 
-    QString album_id = obj_album["id"_L1].toString();
+    if (!object_album.contains("album"_L1) && !object_album.contains("name"_L1)) {
+      Error(u"Invalid Json reply, album object in array is missing album or name."_s, object_album);
+      continue;
+    }
+
+    QString album_id = object_album["id"_L1].toString();
     if (album_id.isEmpty()) {
-      album_id = QString::number(obj_album["id"_L1].toInt());
+      album_id = QString::number(object_album["id"_L1].toInt());
     }
 
-    QString artist = obj_album["artist"_L1].toString();
+    const QString artist = object_album["artist"_L1].toString();
     QString album;
-    if (obj_album.contains("album"_L1)) album = obj_album["album"_L1].toString();
-    else if (obj_album.contains("name"_L1)) album = obj_album["name"_L1].toString();
+    if (object_album.contains("album"_L1)) album = object_album["album"_L1].toString();
+    else if (object_album.contains("name"_L1)) album = object_album["name"_L1].toString();
 
     if (album_songs_requests_pending_.contains(album_id)) continue;
 
@@ -288,8 +259,6 @@ void SubsonicRequest::AlbumsReplyReceived(QNetworkReply *reply, const int offset
     album_songs_requests_pending_.insert(album_id, request);
 
   }
-
-  AlbumsFinishCheck(offset_requested, size_requested, albums_received);
 
 }
 
@@ -342,14 +311,12 @@ void SubsonicRequest::AddAlbumSongsRequest(const QString &artist_id, const QStri
 void SubsonicRequest::FlushAlbumSongsRequests() {
 
   while (!album_songs_requests_queue_.isEmpty() && album_songs_requests_active_ < kMaxConcurrentAlbumSongsRequests) {
-
-    Request request = album_songs_requests_queue_.dequeue();
+    const Request request = album_songs_requests_queue_.dequeue();
     ++album_songs_requests_active_;
-    QNetworkReply *reply = CreateGetRequest(QStringLiteral("getAlbum"), ParamList() << Param(QStringLiteral("id"), request.album_id));
+    QNetworkReply *reply = CreateGetRequest(u"getAlbum"_s, ParamList() << Param(u"id"_s, request.album_id));
     replies_ << reply;
     QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, request]() { AlbumSongsReplyReceived(reply, request.artist_id, request.album_id, request.album_artist); });
     timeouts_->AddReply(reply);
-
   }
 
 }
@@ -366,72 +333,57 @@ void SubsonicRequest::AlbumSongsReplyReceived(QNetworkReply *reply, const QStrin
 
   Q_EMIT UpdateProgress(album_songs_received_);
 
-  QByteArray data = GetReplyData(reply);
+  const QScopeGuard finish_check = qScopeGuard([this]() { SongsFinishCheck(); });
 
   if (finished_) return;
 
-  if (data.isEmpty()) {
-    SongsFinishCheck();
+  const JsonObjectResult json_object_result = ParseJsonObject(reply);
+  if (!json_object_result.success()) {
+    Error(json_object_result.error_message);
     return;
   }
 
-  QJsonObject json_obj = ExtractJsonObj(data);
-  if (json_obj.isEmpty()) {
-    SongsFinishCheck();
+  const QJsonObject &json_object = json_object_result.json_object;
+  if (json_object.isEmpty()) {
     return;
   }
 
-  if (json_obj.contains("error"_L1)) {
-    QJsonValue json_error = json_obj["error"_L1];
-    if (!json_error.isObject()) {
-      Error(QStringLiteral("Json error is not an object."), json_obj);
-      SongsFinishCheck();
-      return;
-    }
-    json_obj = json_error.toObject();
-    if (!json_obj.isEmpty() && json_obj.contains("code"_L1) && json_obj.contains("message"_L1)) {
-      int code = json_obj["code"_L1].toInt();
-      QString message = json_obj["message"_L1].toString();
-      Error(QStringLiteral("%1 (%2)").arg(message).arg(code));
-      SongsFinishCheck();
-    }
-    else {
-      Error(QStringLiteral("Json error object missing code or message."), json_obj);
-      SongsFinishCheck();
-    }
+  if (!json_object.contains("album"_L1)) {
+    Error(u"Json reply is missing albumList."_s, json_object);
     return;
   }
-
-  if (!json_obj.contains("album"_L1)) {
-    Error(QStringLiteral("Json reply is missing albumList."), json_obj);
-    SongsFinishCheck();
-    return;
-  }
-  QJsonValue value_album = json_obj["album"_L1];
+  const QJsonValue value_album = json_object["album"_L1];
 
   if (!value_album.isObject()) {
-    Error(QStringLiteral("Json album is not an object."), value_album);
-    SongsFinishCheck();
+    Error(u"Json album is not an object."_s, value_album);
     return;
   }
-  QJsonObject obj_album = value_album.toObject();
+  const QJsonObject object_album = value_album.toObject();
 
-  if (!obj_album.contains("song"_L1)) {
-    Error(QStringLiteral("Json album object does not contain song array."), json_obj);
-    SongsFinishCheck();
+  if (!object_album.contains("song"_L1)) {
+    Error(u"Json album object does not contain song array."_s, object_album);
     return;
   }
-  QJsonValue json_song = obj_album["song"_L1];
-  if (!json_song.isArray()) {
-    Error(QStringLiteral("Json song is not an array."), obj_album);
-    SongsFinishCheck();
+  const QJsonValue value_songs = object_album["song"_L1];
+  if (!value_songs.isArray()) {
+    Error(u"Json song is not an array."_s, object_album);
     return;
   }
-  const QJsonArray array_songs = json_song.toArray();
+  const QJsonArray array_songs = value_songs.toArray();
 
   qint64 created = 0;
-  if (obj_album.contains("created"_L1)) {
-    created = QDateTime::fromString(obj_album["created"_L1].toString(), Qt::ISODate).toSecsSinceEpoch();
+  if (object_album.contains("created"_L1)) {
+    created = QDateTime::fromString(object_album["created"_L1].toString(), Qt::ISODate).toSecsSinceEpoch();
+  }
+
+  QString album_cover_id;
+  if (object_album.contains("coverArt"_L1)) {
+    if (object_album["coverArt"_L1].type() == QJsonValue::String) {
+      album_cover_id = object_album["coverArt"_L1].toString();
+    }
+    else {
+      album_cover_id = QString::number(object_album["coverArt"_L1].toInt());
+    }
   }
 
   bool compilation = false;
@@ -440,13 +392,13 @@ void SubsonicRequest::AlbumSongsReplyReceived(QNetworkReply *reply, const QStrin
   for (const QJsonValue &value_song : array_songs) {
 
     if (!value_song.isObject()) {
-      Error(QStringLiteral("Invalid Json reply, track is not a object."));
+      Error(u"Invalid Json reply, track is not a object."_s);
       continue;
     }
-    QJsonObject obj_song = value_song.toObject();
+    const QJsonObject object_song = value_song.toObject();
 
     Song song(Song::Source::Subsonic);
-    ParseSong(song, obj_song, artist_id, album_id, album_artist, created);
+    ParseSong(song, object_song, artist_id, album_id, album_artist, album_cover_id, created);
     if (!song.is_valid()) continue;
     if (song.disc() >= 2) multidisc = true;
     if (song.is_compilation()) compilation = true;
@@ -461,8 +413,6 @@ void SubsonicRequest::AlbumSongsReplyReceived(QNetworkReply *reply, const QStrin
     songs_.insert(song.song_id(), song);
   }
 
-  SongsFinishCheck();
-
 }
 
 void SubsonicRequest::SongsFinishCheck() {
@@ -471,15 +421,13 @@ void SubsonicRequest::SongsFinishCheck() {
 
   if (!album_songs_requests_queue_.isEmpty() && album_songs_requests_active_ < kMaxConcurrentAlbumSongsRequests) FlushAlbumSongsRequests();
 
-  if (
-      download_album_covers() &&
+  if (download_album_covers() &&
       album_songs_requests_queue_.isEmpty() &&
       album_songs_requests_active_ <= 0 &&
       album_cover_requests_queue_.isEmpty() &&
       album_covers_received_ <= 0 &&
       album_covers_requests_sent_.isEmpty() &&
-      album_songs_received_ >= album_songs_requested_
-  ) {
+      album_songs_received_ >= album_songs_requested_) {
     GetAlbumCovers();
   }
 
@@ -487,139 +435,140 @@ void SubsonicRequest::SongsFinishCheck() {
 
 }
 
-QString SubsonicRequest::ParseSong(Song &song, const QJsonObject &json_obj, const QString &artist_id_requested, const QString &album_id_requested, const QString &album_artist, const qint64 album_created) {
+QString SubsonicRequest::ParseSong(Song &song, const QJsonObject &json_object, const QString &artist_id_requested, const QString &album_id_requested, const QString &album_artist, const QString &album_cover_id, const qint64 album_created) {
 
   Q_UNUSED(artist_id_requested);
   Q_UNUSED(album_id_requested);
 
-  if (
-      !json_obj.contains("id"_L1) ||
-      !json_obj.contains("title"_L1) ||
-      !json_obj.contains("size"_L1) ||
-      !json_obj.contains("suffix"_L1) ||
-      !json_obj.contains("duration"_L1) ||
-      !json_obj.contains("type"_L1)
-    ) {
-    Error(QStringLiteral("Invalid Json reply, song is missing one or more values."), json_obj);
+  if (!json_object.contains("id"_L1) ||
+      !json_object.contains("title"_L1) ||
+      !json_object.contains("size"_L1) ||
+      !json_object.contains("suffix"_L1) ||
+      !json_object.contains("duration"_L1) ||
+      !json_object.contains("type"_L1)) {
+    Error(u"Invalid Json reply, song is missing one or more values."_s, json_object);
     return QString();
   }
 
   QString song_id;
-  if (json_obj["id"_L1].type() == QJsonValue::String) {
-    song_id = json_obj["id"_L1].toString();
+  if (json_object["id"_L1].type() == QJsonValue::String) {
+    song_id = json_object["id"_L1].toString();
   }
   else {
-    song_id = QString::number(json_obj["id"_L1].toInt());
+    song_id = QString::number(json_object["id"_L1].toInt());
   }
 
   QString album_id;
-  if (json_obj.contains("albumId"_L1)) {
-    if (json_obj["albumId"_L1].type() == QJsonValue::String) {
-      album_id = json_obj["albumId"_L1].toString();
+  if (json_object.contains("albumId"_L1)) {
+    if (json_object["albumId"_L1].type() == QJsonValue::String) {
+      album_id = json_object["albumId"_L1].toString();
     }
     else {
-      album_id = QString::number(json_obj["albumId"_L1].toInt());
+      album_id = QString::number(json_object["albumId"_L1].toInt());
     }
   }
 
   QString artist_id;
-  if (json_obj.contains("artistId"_L1)) {
-    if (json_obj["artistId"_L1].type() == QJsonValue::String) {
-      artist_id = json_obj["artistId"_L1].toString();
+  if (json_object.contains("artistId"_L1)) {
+    if (json_object["artistId"_L1].type() == QJsonValue::String) {
+      artist_id = json_object["artistId"_L1].toString();
     }
     else {
-      artist_id = QString::number(json_obj["artistId"_L1].toInt());
+      artist_id = QString::number(json_object["artistId"_L1].toInt());
     }
   }
 
-  QString title = json_obj["title"_L1].toString();
+  QString title = json_object["title"_L1].toString();
 
   QString album;
-  if (json_obj.contains("album"_L1)) {
-    album = json_obj["album"_L1].toString();
+  if (json_object.contains("album"_L1)) {
+    album = json_object["album"_L1].toString();
   }
   QString artist;
-  if (json_obj.contains("artist"_L1)) {
-    artist = json_obj["artist"_L1].toString();
+  if (json_object.contains("artist"_L1)) {
+    artist = json_object["artist"_L1].toString();
   }
 
   int size = 0;
-  if (json_obj["size"_L1].type() == QJsonValue::String) {
-    size = json_obj["size"_L1].toString().toInt();
+  if (json_object["size"_L1].type() == QJsonValue::String) {
+    size = json_object["size"_L1].toString().toInt();
   }
   else {
-    size = json_obj["size"_L1].toInt();
+    size = json_object["size"_L1].toInt();
   }
 
   qint64 duration = 0;
-  if (json_obj["duration"_L1].type() == QJsonValue::String) {
-    duration = json_obj["duration"_L1].toString().toInt() * kNsecPerSec;
+  if (json_object["duration"_L1].type() == QJsonValue::String) {
+    duration = json_object["duration"_L1].toString().toInt() * kNsecPerSec;
   }
   else {
-    duration = json_obj["duration"_L1].toInt() * kNsecPerSec;
+    duration = json_object["duration"_L1].toInt() * kNsecPerSec;
   }
 
   int bitrate = 0;
-  if (json_obj.contains("bitRate"_L1)) {
-    if (json_obj["bitRate"_L1].type() == QJsonValue::String) {
-      bitrate = json_obj["bitRate"_L1].toString().toInt();
+  if (json_object.contains("bitRate"_L1)) {
+    if (json_object["bitRate"_L1].type() == QJsonValue::String) {
+      bitrate = json_object["bitRate"_L1].toString().toInt();
     }
     else {
-      bitrate = json_obj["bitRate"_L1].toInt();
+      bitrate = json_object["bitRate"_L1].toInt();
     }
   }
 
   QString mimetype;
-  if (json_obj.contains("contentType"_L1)) {
-    mimetype = json_obj["contentType"_L1].toString();
+  if (json_object.contains("contentType"_L1)) {
+    mimetype = json_object["contentType"_L1].toString();
   }
 
   int year = 0;
-  if (json_obj.contains("year"_L1)) {
-    if (json_obj["year"_L1].type() == QJsonValue::String) {
-      year = json_obj["year"_L1].toString().toInt();
+  if (json_object.contains("year"_L1)) {
+    if (json_object["year"_L1].type() == QJsonValue::String) {
+      year = json_object["year"_L1].toString().toInt();
     }
     else {
-      year = json_obj["year"_L1].toInt();
+      year = json_object["year"_L1].toInt();
     }
   }
 
   int disc = 0;
-  if (json_obj.contains("discNumber"_L1)) {
-    if (json_obj["discNumber"_L1].type() == QJsonValue::String) {
-      disc = json_obj["discNumber"_L1].toString().toInt();
+  if (json_object.contains("discNumber"_L1)) {
+    if (json_object["discNumber"_L1].type() == QJsonValue::String) {
+      disc = json_object["discNumber"_L1].toString().toInt();
     }
     else {
-      disc = json_obj["discNumber"_L1].toInt();
+      disc = json_object["discNumber"_L1].toInt();
     }
   }
 
   int track = 0;
-  if (json_obj.contains("track"_L1)) {
-    if (json_obj["track"_L1].type() == QJsonValue::String) {
-      track = json_obj["track"_L1].toString().toInt();
+  if (json_object.contains("track"_L1)) {
+    if (json_object["track"_L1].type() == QJsonValue::String) {
+      track = json_object["track"_L1].toString().toInt();
     }
     else {
-      track = json_obj["track"_L1].toInt();
+      track = json_object["track"_L1].toInt();
     }
   }
 
   QString genre;
-  if (json_obj.contains("genre"_L1)) genre = json_obj["genre"_L1].toString();
+  if (json_object.contains("genre"_L1)) genre = json_object["genre"_L1].toString();
 
   QString cover_id;
-  if (json_obj.contains("coverArt"_L1)) {
-    if (json_obj["coverArt"_L1].type() == QJsonValue::String) {
-      cover_id = json_obj["coverArt"_L1].toString();
+  if (use_album_id_for_album_covers() && !album_cover_id.isEmpty()) {
+    cover_id = album_cover_id;
+  }
+  else {
+    if (json_object["coverArt"_L1].type() == QJsonValue::String) {
+      cover_id = json_object["coverArt"_L1].toString();
     }
     else {
-      cover_id = QString::number(json_obj["coverArt"_L1].toInt());
+      cover_id = QString::number(json_object["coverArt"_L1].toInt());
     }
   }
 
   qint64 created = 0;
-  if (json_obj.contains("created"_L1)) {
-    created = QDateTime::fromString(json_obj["created"_L1].toString(), Qt::ISODate).toSecsSinceEpoch();
+  if (json_object.contains("created"_L1)) {
+    created = QDateTime::fromString(json_object["created"_L1].toString(), Qt::ISODate).toSecsSinceEpoch();
   }
   else {
     created = album_created;
@@ -635,7 +584,7 @@ QString SubsonicRequest::ParseSong(Song &song, const QJsonObject &json_obj, cons
       cover_url = cover_urls_[cover_id];
     }
     else {
-      cover_url = CreateUrl(server_url(), auth_method(), username(), password(), QStringLiteral("getCoverArt"), ParamList() << Param(QStringLiteral("id"), cover_id));
+      cover_url = CreateUrl(server_url(), auth_method(), username(), password(), u"getCoverArt"_s, ParamList() << Param(u"id"_s, cover_id));
       cover_urls_.insert(cover_id, cover_url);
     }
   }
@@ -706,11 +655,11 @@ void SubsonicRequest::AddAlbumCoverRequest(const Song &song) {
 
   QUrlQuery cover_url_query(cover_url);
 
-  if (!cover_url_query.hasQueryItem(QStringLiteral("id"))) {
+  if (!cover_url_query.hasQueryItem(u"id"_s)) {
     return;
   }
 
-  QString cover_id = cover_url_query.queryItemValue(QStringLiteral("id"));
+  QString cover_id = cover_url_query.queryItemValue(u"id"_s);
 
   if (album_covers_requests_sent_.contains(cover_id)) {
     album_covers_requests_sent_.insert(cover_id, song.song_id());
@@ -739,20 +688,20 @@ void SubsonicRequest::FlushAlbumCoverRequests() {
 
   while (!album_cover_requests_queue_.isEmpty() && album_covers_requests_active_ < kMaxConcurrentAlbumCoverRequests) {
 
-    AlbumCoverRequest request = album_cover_requests_queue_.dequeue();
+    const AlbumCoverRequest request = album_cover_requests_queue_.dequeue();
     ++album_covers_requests_active_;
 
-    QNetworkRequest req(request.url);
-    req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-    req.setAttribute(QNetworkRequest::Http2AllowedAttribute, http2());
+    QNetworkRequest network_request(request.url);
+    network_request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    network_request.setAttribute(QNetworkRequest::Http2AllowedAttribute, http2());
 
     if (!verify_certificate()) {
       QSslConfiguration sslconfig = QSslConfiguration::defaultConfiguration();
       sslconfig.setPeerVerifyMode(QSslSocket::VerifyNone);
-      req.setSslConfiguration(sslconfig);
+      network_request.setSslConfiguration(sslconfig);
     }
 
-    QNetworkReply *reply = network_->get(req);
+    QNetworkReply *reply = network_->get(network_request);
     album_cover_replies_ << reply;
     QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, request]() { AlbumCoverReceived(reply, request); });
     timeouts_->AddReply(reply);
@@ -810,7 +759,7 @@ void SubsonicRequest::AlbumCoverReceived(QNetworkReply *reply, const AlbumCoverR
     return;
   }
 
-  QByteArray data = reply->readAll();
+  const QByteArray data = reply->readAll();
   if (data.isEmpty()) {
     Error(QStringLiteral("Received empty image data for %1").arg(request.url.toString()));
     if (album_covers_requests_sent_.contains(request.cover_id)) album_covers_requests_sent_.remove(request.cover_id);
@@ -860,8 +809,7 @@ void SubsonicRequest::AlbumCoverFinishCheck() {
 
 void SubsonicRequest::FinishCheck() {
 
-  if (
-      !finished_ &&
+  if (!finished_ &&
       albums_requests_queue_.isEmpty() &&
       album_songs_requests_queue_.isEmpty() &&
       album_cover_requests_queue_.isEmpty() &&
@@ -871,8 +819,7 @@ void SubsonicRequest::FinishCheck() {
       album_songs_requests_active_ <= 0 &&
       album_songs_received_ >= album_songs_requested_ &&
       album_covers_requests_active_ <= 0 &&
-      album_covers_received_ >= album_covers_requested_
-  ) {
+      album_covers_received_ >= album_covers_requested_) {
     finished_ = true;
     if (no_results_ && songs_.isEmpty()) {
       Q_EMIT Results(SongMap(), QString());
@@ -882,7 +829,7 @@ void SubsonicRequest::FinishCheck() {
         Q_EMIT Results(songs_, tr("Unknown error"));
       }
       else {
-        Q_EMIT Results(songs_, ErrorsToHTML(errors_));
+        Q_EMIT Results(songs_, Utilities::StringListToHTML(errors_));
       }
     }
 

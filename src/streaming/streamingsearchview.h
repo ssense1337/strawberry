@@ -2,7 +2,7 @@
  * Strawberry Music Player
  * This code was part of Clementine (GlobalSearch)
  * Copyright 2012, David Sansome <me@davidsansome.com>
- * Copyright 2018-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,10 +24,7 @@
 
 #include "config.h"
 
-#include <QtGlobal>
-#include <QObject>
 #include <QWidget>
-#include <QSet>
 #include <QPair>
 #include <QList>
 #include <QMap>
@@ -38,11 +35,12 @@
 #include <QPixmap>
 #include <QMetaType>
 
-#include "core/scoped_ptr.h"
-#include "core/shared_ptr.h"
+#include "includes/scoped_ptr.h"
+#include "includes/shared_ptr.h"
 #include "core/song.h"
 #include "collection/collectionmodel.h"
 #include "covermanager/albumcoverloaderresult.h"
+#include "streamingservice.h"
 
 class QSortFilterProxyModel;
 class QMimeData;
@@ -56,10 +54,9 @@ class QShowEvent;
 class QContextMenuEvent;
 class QTimerEvent;
 
-class Application;
 class MimeData;
+class AlbumCoverLoader;
 class GroupByDialog;
-class StreamingService;
 class StreamingSearchModel;
 class Ui_StreamingSearchView;
 
@@ -70,18 +67,13 @@ class StreamingSearchView : public QWidget {
   explicit StreamingSearchView(QWidget *parent = nullptr);
   ~StreamingSearchView() override;
 
-  enum class SearchType {
-    Artists = 1,
-    Albums = 2,
-    Songs = 3
-  };
   struct Result {
     Song metadata_;
     QString pixmap_cache_key_;
   };
   using ResultList = QList<Result>;
 
-  void Init(Application *app, SharedPtr<StreamingService> service);
+  void Init(const SharedPtr<StreamingService> service, const SharedPtr<AlbumCoverLoader> albumcover_loader);
 
   bool SearchFieldHasFocus() const;
   void FocusSearchField();
@@ -117,7 +109,7 @@ class StreamingSearchView : public QWidget {
   struct DelayedSearch {
     int id_;
     QString query_;
-    SearchType type_;
+    StreamingService::SearchType type_;
   };
 
   bool SearchKeyEvent(QKeyEvent *e);
@@ -125,10 +117,10 @@ class StreamingSearchView : public QWidget {
 
   MimeData *SelectedMimeData();
 
-  void SetSearchType(const SearchType type);
+  void SetSearchType(const StreamingService::SearchType type);
 
-  int SearchAsync(const QString &query, SearchType type);
-  void SearchAsync(const int id, const QString &query, const SearchType type);
+  int SearchAsync(const QString &query, const StreamingService::SearchType type);
+  void SearchAsync(const int id, const QString &query, const StreamingService::SearchType type);
   void SearchError(const int id, const QString &error);
   void CancelSearch(const int id);
 
@@ -137,10 +129,11 @@ class StreamingSearchView : public QWidget {
   int LoadAlbumCoverAsync(const Result &result);
 
  Q_SIGNALS:
-  void AddToPlaylist(QMimeData*);
+  void AddToPlaylist(QMimeData *mimedata);
   void AddArtistsSignal(const SongList &songs);
   void AddAlbumsSignal(const SongList &songs);
   void AddSongsSignal(const SongList &songs);
+  void OpenSettingsDialog(const Song::Source source);
 
  private Q_SLOTS:
   void SwapModels();
@@ -163,11 +156,11 @@ class StreamingSearchView : public QWidget {
   void AddAlbums();
   void AddSongs();
   void SearchForThis();
-  void OpenSettingsDialog();
+  void Configure();
 
-  void SearchArtistsClicked(const bool);
-  void SearchAlbumsClicked(const bool);
-  void SearchSongsClicked(const bool);
+  void SearchArtistsClicked(const bool checked);
+  void SearchAlbumsClicked(const bool checked);
+  void SearchSongsClicked(const bool checked);
   void GroupByClicked(QAction *action);
   void SetGroupBy(const CollectionModel::Grouping g);
 
@@ -177,8 +170,9 @@ class StreamingSearchView : public QWidget {
   void ReloadSettings();
 
  private:
-  Application *app_;
   SharedPtr<StreamingService> service_;
+  SharedPtr<AlbumCoverLoader> albumcover_loader_;
+
   Ui_StreamingSearchView *ui_;
   ScopedPtr<GroupByDialog> group_by_dialog_;
 
@@ -200,7 +194,7 @@ class StreamingSearchView : public QWidget {
   QTimer *swap_models_timer_;
 
   bool use_pretty_covers_;
-  SearchType search_type_;
+  StreamingService::SearchType search_type_;
   bool search_error_;
   int last_search_id_;
   int searches_next_id_;

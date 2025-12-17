@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2019-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2019-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,10 @@
 #include <QObject>
 #include <QString>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "settings/settingspage.h"
 
+class QShowEvent;
 class QEvent;
 class SettingsDialog;
 class QobuzService;
@@ -35,15 +36,16 @@ class QobuzSettingsPage : public SettingsPage {
   Q_OBJECT
 
  public:
-  explicit QobuzSettingsPage(SettingsDialog *dialog, QWidget *parent = nullptr);
+  explicit QobuzSettingsPage(SettingsDialog *dialog, const SharedPtr<QobuzService> service, QWidget *parent = nullptr);
   ~QobuzSettingsPage() override;
-
-  static const char *kSettingsGroup;
 
   void Load() override;
   void Save() override;
 
   bool eventFilter(QObject *object, QEvent *event) override;
+
+ protected:
+  void showEvent(QShowEvent *e) override;
 
  Q_SIGNALS:
   void Login(const QString &username, const QString &password, const QString &token);
@@ -56,7 +58,7 @@ class QobuzSettingsPage : public SettingsPage {
 
  private:
   Ui_QobuzSettingsPage *ui_;
-  SharedPtr<QobuzService> service_;
+  const SharedPtr<QobuzService> service_;
 };
 
 #endif  // QOBUZSETTINGSPAGE_H

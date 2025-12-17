@@ -45,7 +45,7 @@
 
 #include "core/song.h"
 #include "covermanager/albumcoverloaderresult.h"
-#include "settings/appearancesettingspage.h"
+#include "constants/appearancesettings.h"
 #include "playlist.h"
 
 class QWidget;
@@ -66,12 +66,18 @@ class QMouseEvent;
 class QPaintEvent;
 class QTimerEvent;
 
-class Application;
+class Player;
 class CollectionBackend;
+class PlaylistManager;
+class CurrentAlbumCoverLoader;
 class PlaylistHeader;
 class PlaylistProxyStyle;
 class DynamicPlaylistControls;
 class RatingItemDelegate;
+
+#ifdef HAVE_MOODBAR
+class MoodbarLoader;
+#endif
 
 class PlaylistView : public QTreeView {
   Q_OBJECT
@@ -82,7 +88,14 @@ class PlaylistView : public QTreeView {
 
   static ColumnAlignmentMap DefaultColumnAlignment();
 
-  void Init(Application *app);
+  void Init(const SharedPtr<Player> player,
+            const SharedPtr<PlaylistManager> playlist_manager,
+            const SharedPtr<CollectionBackend> collection_backend,
+#ifdef HAVE_MOODBAR
+            const SharedPtr<MoodbarLoader> moodbar_loader,
+#endif
+            const SharedPtr<CurrentAlbumCoverLoader> current_albumcover_loader);
+
   void SetItemDelegates();
   void SetPlaylist(Playlist *playlist);
   void RemoveSelected();
@@ -90,7 +103,7 @@ class PlaylistView : public QTreeView {
   void SetReadOnlySettings(const bool read_only) { read_only_settings_ = read_only; }
 
   Playlist *playlist() const { return playlist_; }
-  AppearanceSettingsPage::BackgroundImageType background_image_type() const { return background_image_type_; }
+  AppearanceSettings::BackgroundImageType background_image_type() const { return background_image_type_; }
   Qt::Alignment column_alignment(int section) const;
 
   void ResetHeaderState();
@@ -123,7 +136,7 @@ class PlaylistView : public QTreeView {
   void timerEvent(QTimerEvent *event) override;
   void mouseMoveEvent(QMouseEvent *event) override;
   void mousePressEvent(QMouseEvent *event) override;
-  void leaveEvent(QEvent*) override;
+  void leaveEvent(QEvent *e) override;
   void paintEvent(QPaintEvent *event) override;
   void dragMoveEvent(QDragMoveEvent *event) override;
   void dragEnterEvent(QDragEnterEvent *event) override;
@@ -143,10 +156,12 @@ class PlaylistView : public QTreeView {
   // QAbstractItemView
   void rowsInserted(const QModelIndex &parent, const int start, const int end) override;
   void closeEditor(QWidget *editor, const QAbstractItemDelegate::EndEditHint hint) override;
+  void startDrag(const Qt::DropActions drop_actions) override;
 
  private Q_SLOTS:
   void Update() { update(); }
   void SetHeaderState();
+  void HeaderSectionResized(const int logical_index, const int old_size, const int new_size);
   void InhibitAutoscrollTimeout();
   void MaybeAutoscroll(const Playlist::AutoScroll autoscroll);
   void InvalidateCachedCurrentPixmap();
@@ -175,7 +190,7 @@ class PlaylistView : public QTreeView {
   void LoadTinyPlayPausePixmaps(const int desired_size);
   void UpdateCachedCurrentRowPixmap(QStyleOptionViewItem option, const QModelIndex &idx);
 
-  void set_background_image_type(AppearanceSettingsPage::BackgroundImageType bg) {
+  void set_background_image_type(AppearanceSettings::BackgroundImageType bg) {
     background_image_type_ = bg;
     Q_EMIT BackgroundPropertyChanged();  // clazy:exclude=incorrect-emit
   }
@@ -192,15 +207,22 @@ class PlaylistView : public QTreeView {
 
   void RepositionDynamicControls();
 
-  Application *app_;
+  SharedPtr<Player> player_;
+  SharedPtr<PlaylistManager> playlist_manager_;
+  SharedPtr<CollectionBackend> collection_backend_;
+  SharedPtr<CurrentAlbumCoverLoader> current_albumcover_loader_;
+#ifdef HAVE_MOODBAR
+  SharedPtr<MoodbarLoader> moodbar_loader_;
+#endif
+
   PlaylistProxyStyle *style_;
   Playlist *playlist_;
   PlaylistHeader *header_;
 
   qreal device_pixel_ratio_;
-  AppearanceSettingsPage::BackgroundImageType background_image_type_;
+  AppearanceSettings::BackgroundImageType background_image_type_;
   QString background_image_filename_;
-  AppearanceSettingsPage::BackgroundImagePosition background_image_position_;
+  AppearanceSettings::BackgroundImagePosition background_image_position_;
   int background_image_maxsize_;
   bool background_image_stretch_;
   bool background_image_do_not_cut_;
@@ -263,7 +285,6 @@ class PlaylistView : public QTreeView {
   int drop_indicator_row_;
   bool drag_over_;
 
-  int header_state_version_;
   QByteArray header_state_;
   ColumnAlignmentMap column_alignment_;
   bool rating_locked_;

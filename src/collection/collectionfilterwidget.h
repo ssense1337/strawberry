@@ -24,8 +24,6 @@
 
 #include "config.h"
 
-#include <memory>
-
 #include <QWidget>
 #include <QObject>
 #include <QHash>
@@ -137,4 +135,3 @@ class CollectionFilterWidget : public QWidget {
 };
 
 #endif  // COLLECTIONFILTERWIDGET_H
-

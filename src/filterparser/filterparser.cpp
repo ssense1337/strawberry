@@ -20,15 +20,19 @@
  *
  */
 
-#include "config.h"
-
 #include <QString>
 
+#include "constants/timeconstants.h"
 #include "filterparser.h"
-#include "filtertree.h"
+#include "filtertreenop.h"
+#include "filtertreeand.h"
+#include "filtertreeor.h"
+#include "filtertreenot.h"
+#include "filtertreeterm.h"
+#include "filtertreecolumnterm.h"
 #include "filterparsersearchcomparators.h"
 
-using namespace Qt::StringLiterals;
+using namespace Qt::Literals::StringLiterals;
 
 FilterParser::FilterParser(const QString &filter_string) : filter_string_(filter_string), iter_{}, end_{} {}
 
@@ -52,9 +56,9 @@ void FilterParser::advance() {
 FilterTree *FilterParser::parseOrGroup() {
 
   advance();
-  if (iter_ == end_) return new NopFilter;
+  if (iter_ == end_) return new FilterTreeNop;
 
-  OrFilter *group = new OrFilter;
+  FilterTreeOr *group = new FilterTreeOr;
   group->add(parseAndGroup());
   advance();
   while (checkOr()) {
@@ -69,9 +73,9 @@ FilterTree *FilterParser::parseOrGroup() {
 FilterTree *FilterParser::parseAndGroup() {
 
   advance();
-  if (iter_ == end_) return new NopFilter;
+  if (iter_ == end_) return new FilterTreeNop;
 
-  AndFilter *group = new AndFilter();
+  FilterTreeAnd *group = new FilterTreeAnd();
   do {
     group->add(parseSearchExpression());
     advance();
@@ -88,17 +92,17 @@ FilterTree *FilterParser::parseAndGroup() {
 
 bool FilterParser::checkAnd() {
 
-  if (iter_ != end_) {
-    if (*iter_ == u'A') {
-      buf_ += *iter_;
-      ++iter_;
-      if (iter_ != end_ && *iter_ == u'N') {
-        buf_ += *iter_;
-        ++iter_;
-        if (iter_ != end_ && *iter_ == u'D') {
-          buf_ += *iter_;
-          ++iter_;
-          if (iter_ != end_ && (iter_->isSpace() || *iter_ == u'-' || *iter_ == u'(')) {
+  QString::const_iterator and_iter = iter_;
+
+  if (and_iter != end_) {
+    if (*and_iter == u'A') {
+      ++and_iter;
+      if (and_iter != end_ && *and_iter == u'N') {
+        ++and_iter;
+        if (and_iter != end_ && *and_iter == u'D') {
+          ++and_iter;
+          if (and_iter != end_ && (and_iter->isSpace() || *and_iter == u'-' || *and_iter == u'(')) {
+            iter_ = and_iter;
             advance();
             buf_.clear();
             return true;
@@ -124,17 +128,20 @@ bool FilterParser::checkOr(const bool step_over) {
     }
   }
   else {
-    if (iter_ != end_) {
-      if (*iter_ == u'O') {
-        buf_ += *iter_;
-        ++iter_;
-        if (iter_ != end_ && *iter_ == u'R') {
-          buf_ += *iter_;
-          ++iter_;
-          if (iter_ != end_ && (iter_->isSpace() || *iter_ == u'-' || *iter_ == u'(')) {
+    QString::const_iterator or_iter = iter_;
+    if (or_iter != end_) {
+      if (*or_iter == u'O') {
+        ++or_iter;
+        if (or_iter != end_ && *or_iter == u'R') {
+          ++or_iter;
+          if (or_iter != end_ && (or_iter->isSpace() || *or_iter == u'-' || *or_iter == u'(')) {
+            iter_ = or_iter;
             if (step_over) {
               buf_.clear();
               advance();
+            }
+            else {
+              buf_ += "OR"_L1;
             }
             return true;
           }
@@ -150,7 +157,7 @@ bool FilterParser::checkOr(const bool step_over) {
 FilterTree *FilterParser::parseSearchExpression() {
 
   advance();
-  if (iter_ == end_) return new NopFilter;
+  if (iter_ == end_) return new FilterTreeNop;
   if (*iter_ == u'(') {
     ++iter_;
     advance();
@@ -166,7 +173,7 @@ FilterTree *FilterParser::parseSearchExpression() {
   else if (*iter_ == u'-') {
     ++iter_;
     FilterTree *tree = parseSearchExpression();
-    if (tree->type() != FilterTree::FilterType::Nop) return new NotFilter(tree);
+    if (tree->type() != FilterTree::FilterType::Nop) return new FilterTreeNot(tree);
     return tree;
   }
   else {
@@ -182,8 +189,15 @@ FilterTree *FilterParser::parseSearchTerm() {
   QString value;
 
   bool in_quotes = false;
+  bool previous_char_operator = false;
 
   for (; iter_ != end_; ++iter_) {
+    if (previous_char_operator) {
+      if (iter_->isSpace()) {
+        continue;
+      }
+      previous_char_operator = false;
+    }
     if (in_quotes) {
       if (*iter_ == u'"') {
         in_quotes = false;
@@ -200,6 +214,7 @@ FilterTree *FilterParser::parseSearchTerm() {
         column = buf_.toLower();
         buf_.clear();
         prefix.clear();  // Prefix isn't allowed here - let's ignore it
+        previous_char_operator = true;
       }
       else if (iter_->isSpace() || *iter_ == u'(' || *iter_ == u')' || *iter_ == u'-') {
         break;
@@ -208,9 +223,11 @@ FilterTree *FilterParser::parseSearchTerm() {
         // We don't know whether there is a column part in this search term thus we assume the latter and just try and read a prefix
         if (prefix.isEmpty() && (*iter_ == u'>' || *iter_ == u'<' || *iter_ == u'=' || *iter_ == u'!')) {
           prefix += *iter_;
+          previous_char_operator = true;
         }
         else if (prefix != u'=' && *iter_ == u'=') {
           prefix += *iter_;
+          previous_char_operator = true;
         }
         else {
           buf_ += *iter_;
@@ -232,7 +249,7 @@ FilterTree *FilterParser::parseSearchTerm() {
 FilterTree *FilterParser::createSearchTermTreeNode(const QString &column, const QString &prefix, const QString &value) const {
 
   if (value.isEmpty() && prefix != u'=') {
-    return new NopFilter;
+    return new FilterTreeNop;
   }
 
   FilterParserSearchTermComparator *cmp = nullptr;
@@ -306,7 +323,7 @@ FilterTree *FilterParser::createSearchTermTreeNode(const QString &column, const 
     else if (Song::kInt64SearchColumns.contains(column, Qt::CaseInsensitive)) {
       qint64 number = 0;
       if (column == "length"_L1) {
-        number = ParseTime(value);
+        number = ParseTime(value) * kNsecPerSec;
       }
       else {
         number = value.toLongLong();
@@ -360,10 +377,10 @@ FilterTree *FilterParser::createSearchTermTreeNode(const QString &column, const 
   }
 
   if (cmp) {
-    return new FilterColumnTerm(column, cmp);
+    return new FilterTreeColumnTerm(column, cmp);
   }
 
-  return new FilterTerm(new FilterParserTextContainsComparator(value));
+  return new FilterTreeTerm(new FilterParserTextContainsComparator(value));
 
 }
 
@@ -460,13 +477,16 @@ float FilterParser::ParseRating(const QString &rating_str) {
 
 QString FilterParser::ToolTip() {
 
-  return QLatin1String("<html><head/><body><p>") +
+  return "<html><head/><body><p>"_L1 +
          QObject::tr("Prefix a search term with a field name to limit the search to that field, e.g.:") +
-         QLatin1Char(' ') +
+         u' ' +
          "<span style=\"font-weight:600;\">"_L1 +
          QObject::tr("artist") +
          ":</span><span style=\"font-style:italic;\">Strawbs</span> "_L1 +
-         QObject::tr("searches for all artists containing the word %1. ").arg("Strawbs"_L1) +
+         QObject::tr("searches for all artists containing the word %1.").arg("Strawbs"_L1) +
+         "</p><p>"_L1 +
+
+         QObject::tr("A word can be excluded with a preceding \"%1\", if you need to search for a word including \"%1\", place quotes around the word.").arg("-"_L1) +
          "</p><p>"_L1 +
 
          QObject::tr("Search terms for numerical fields can be prefixed with %1 or %2 to refine the search, e.g.: ")
@@ -478,7 +498,7 @@ QString FilterParser::ToolTip() {
          "<span style=\"font-weight:italic;\">4</span>"_L1 +
          "</p><p>"_L1 +
 
-         QObject::tr("Multiple search terms can also be combined with \"%1\" (default) and \"%2\", as well as grouped with parentheses. ")
+         QObject::tr("Multiple search terms can also be combined with \"%1\" (default) and \"%2\", as well as grouped with parentheses.")
                      .arg("AND"_L1, "OR"_L1) +
 
          "</p><p><span style=\"font-weight:600;\">"_L1 +

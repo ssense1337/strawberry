@@ -6,7 +6,6 @@
   <project_license>GPL-3.0+</project_license>
   <provides>
     <binary>strawberry</binary>
-    <binary>strawberry-tagreader</binary>
   </provides>
   <name>Strawberry Music Player</name>
   <summary>A music player and collection organizer</summary>
@@ -15,7 +14,7 @@
   <developer id="net.jkvinge.jonas">
     <name>Jonas Kvinge</name>
   </developer>
-  ​<translation type="gettext">strawberry</translation>
+  ​<translation type="qt">strawberry</translation>
   <content_rating type="oars-1.1" />
   <description>
     <p>
@@ -32,10 +31,10 @@
       <li>Edit tags on audio files</li>
       <li>Automatically retrieve tags from MusicBrainz</li>
       <li>Album cover art from Last.fm, Musicbrainz, Discogs, Musixmatch, Deezer, Tidal, Qobuz and Spotify</li>
-      <li>Song lyrics from Genius, Musixmatch, ChartLyrics, lyrics.ovh, lololyrics.com, songlyrics.com, azlyrics.com and elyrics.net</li>
+      <li>Lyrics from multiple sources</li>
       <li>Audio analyzer and equalizer</li>
       <li>Transfer music to mass-storage USB players, MTP compatible devices and iPod Nano/Classic</li>
-      <li>Scrobbler with support for Last.fm, Libre.fm and ListenBrainz</li>
+      <li>Scrobbler with support for Last.fm and ListenBrainz</li>
       <li>Streaming support for Subsonic-compatible servers</li>
       <li>Unofficial streaming support for Tidal, Spotify and Qobuz</li>
     </ul>
@@ -52,6 +51,22 @@
   </screenshots>
   <update_contact>eclipseo@fedoraproject.org</update_contact>
     <releases>
+        <release version="1.2.16" date="2025-12-16"/>
+        <release version="1.2.15" date="2025-11-25"/>
+        <release version="1.2.14" date="2025-10-25"/>
+        <release version="1.2.13" date="2025-08-31"/>
+        <release version="1.2.12" date="2025-08-12"/>
+        <release version="1.2.11" date="2025-05-15"/>
+        <release version="1.2.10" date="2025-04-18"/>
+        <release version="1.2.9" date="2025-04-08"/>
+        <release version="1.2.8" date="2025-04-05"/>
+        <release version="1.2.7" date="2025-01-31"/>
+        <release version="1.2.6" date="2025-01-17"/>
+        <release version="1.2.5" date="2025-01-17"/>
+        <release version="1.2.4" date="2025-01-10"/>
+        <release version="1.2.3" date="2024-12-08"/>
+        <release version="1.2.2" date="2024-11-23"/>
+        <release version="1.2.1" date="2024-11-21"/>
         <release version="1.1.3" date="2024-09-21"/>
         <release version="1.1.2" date="2024-09-12"/>
         <release version="1.1.1" date="2024-07-22"/>

@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2018-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +25,10 @@
 #include <QObject>
 #include <QString>
 
-#include "core/shared_ptr.h"
+#include "includes/shared_ptr.h"
 #include "settings/settingspage.h"
 
+class QShowEvent;
 class QEvent;
 class TidalService;
 class SettingsDialog;
@@ -37,28 +38,21 @@ class TidalSettingsPage : public SettingsPage {
   Q_OBJECT
 
  public:
-  explicit TidalSettingsPage(SettingsDialog *dialog, QWidget *parent = nullptr);
+  explicit TidalSettingsPage(SettingsDialog *dialog, SharedPtr<TidalService> service, QWidget *parent = nullptr);
   ~TidalSettingsPage() override;
-
-  static const char *kSettingsGroup;
-
-  enum class StreamUrlMethod {
-    StreamUrl,
-    UrlPostPaywall,
-    PlaybackInfoPostPaywall
-  };
 
   void Load() override;
   void Save() override;
 
   bool eventFilter(QObject *object, QEvent *event) override;
 
+ protected:
+  void showEvent(QShowEvent *e) override;
+
  Q_SIGNALS:
   void Authorize(const QString &client_id);
-  void Login(const QString &api_token, const QString &username, const QString &password);
 
  private Q_SLOTS:
-  void OAuthClicked(const bool enabled);
   void LoginClicked();
   void LogoutClicked();
   void LoginSuccess();

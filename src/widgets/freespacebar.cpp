@@ -42,6 +42,8 @@
 #include "utilities/strutils.h"
 #include "freespacebar.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 class QPaintEvent;
 
 namespace {
@@ -80,7 +82,9 @@ QSize FreeSpaceBar::sizeHint() const {
   return QSize(150, kBarHeight + kLabelBoxPadding + fontMetrics().height());
 }
 
-void FreeSpaceBar::paintEvent(QPaintEvent*) {
+void FreeSpaceBar::paintEvent(QPaintEvent *e) {
+
+  Q_UNUSED(e)
 
   // Geometry
   QRect bar_rect(rect());
@@ -130,7 +134,7 @@ void FreeSpaceBar::DrawBar(QPainter *p, const QRect r) {
   p->setRenderHint(QPainter::Antialiasing, true);
 
   QRect bar_rect(r);
-  bar_rect.setWidth(static_cast<int>(static_cast<float>(bar_rect.width()) * (static_cast<float>(total_ - free_) / static_cast<float>(total_))));
+  bar_rect.setWidth(std::max(0, static_cast<int>(static_cast<float>(bar_rect.width()) * (static_cast<float>(total_ - free_) / static_cast<float>(total_)))));
 
   QLinearGradient background_gradient(r.topLeft(), r.bottomLeft());
   background_gradient.setColorAt(0, kColorBg1);
@@ -237,7 +241,7 @@ QString FreeSpaceBar::TextForSize(const QString &prefix, const quint64 size) {
     ret = Utilities::PrettySize(size);
   }
   else {
-    ret = QStringLiteral("0 MB");
+    ret = u"0 MB"_s;
   }
 
   if (!prefix.isEmpty()) ret.prepend(prefix + QLatin1Char(' '));

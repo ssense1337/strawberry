@@ -33,7 +33,9 @@
 #include "pulsedevicefinder.h"
 #include "enginedevice.h"
 
-PulseDeviceFinder::PulseDeviceFinder() : DeviceFinder(QStringLiteral("pulseaudio"), { QStringLiteral("pulseaudio"), QStringLiteral("pulse"), QStringLiteral("pulsesink") }), mainloop_(nullptr), context_(nullptr) {}
+using namespace Qt::Literals::StringLiterals;
+
+PulseDeviceFinder::PulseDeviceFinder() : DeviceFinder(u"pulseaudio"_s, { u"pulseaudio"_s, u"pulse"_s, u"pulsesink"_s }), mainloop_(nullptr), context_(nullptr) {}
 
 bool PulseDeviceFinder::Initialize() {
 
@@ -145,4 +147,3 @@ PulseDeviceFinder::~PulseDeviceFinder() {
     pa_mainloop_free(mainloop_);
   }
 }
-

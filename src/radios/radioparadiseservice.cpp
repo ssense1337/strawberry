@@ -25,24 +25,23 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-#include "core/application.h"
-#include "core/networkaccessmanager.h"
 #include "core/taskmanager.h"
+#include "core/networkaccessmanager.h"
 #include "core/iconloader.h"
 #include "radioparadiseservice.h"
 #include "radiochannel.h"
 
-using namespace Qt::StringLiterals;
+using namespace Qt::Literals::StringLiterals;
 
 namespace {
 constexpr char kApiChannelsUrl[] = "https://api.radioparadise.com/api/list_streams";
-}
+}  // namespace
 
-RadioParadiseService::RadioParadiseService(Application *app, SharedPtr<NetworkAccessManager> network, QObject *parent)
-    : RadioService(Song::Source::RadioParadise, QStringLiteral("Radio Paradise"), IconLoader::Load(QStringLiteral("radioparadise")), app, network, parent) {}
+RadioParadiseService::RadioParadiseService(const SharedPtr<TaskManager> task_manager, const SharedPtr<NetworkAccessManager> network, QObject *parent)
+    : RadioService(Song::Source::RadioParadise, u"Radio Paradise"_s, IconLoader::Load(u"radioparadise"_s), task_manager, network, parent) {}
 
-QUrl RadioParadiseService::Homepage() { return QUrl(QStringLiteral("https://radioparadise.com/")); }
-QUrl RadioParadiseService::Donate() { return QUrl(QStringLiteral("https://payments.radioparadise.com/rp2s-content.php?name=Support&file=support")); }
+QUrl RadioParadiseService::Homepage() { return QUrl(u"https://radioparadise.com/"_s); }
+QUrl RadioParadiseService::Donate() { return QUrl(u"https://payments.radioparadise.com/rp2s-content.php?name=Support&file=support"_s); }
 
 void RadioParadiseService::Abort() {
 
@@ -61,11 +60,10 @@ void RadioParadiseService::GetChannels() {
 
   Abort();
 
-  QUrl url(QString::fromLatin1(kApiChannelsUrl));
-  QNetworkRequest req(url);
-  QNetworkReply *reply = network_->get(req);
+  QNetworkRequest network_request(QUrl(QString::fromLatin1(kApiChannelsUrl)));
+  QNetworkReply *reply = network_->get(network_request);
   replies_ << reply;
-  const int task_id = app_->task_manager()->StartTask(tr("Getting %1 channels").arg(name_));
+  const int task_id = task_manager_->StartTask(tr("Getting %1 channels").arg(name_));
   QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, task_id]() { GetChannelsReply(reply, task_id); });
 
 }
@@ -75,16 +73,16 @@ void RadioParadiseService::GetChannelsReply(QNetworkReply *reply, const int task
   if (replies_.contains(reply)) replies_.removeAll(reply);
   reply->deleteLater();
 
-  QJsonObject object = ExtractJsonObj(reply);
+  const QJsonObject object = ExtractJsonObj(reply);
   if (object.isEmpty()) {
-    app_->task_manager()->SetTaskFinished(task_id);
+    task_manager_->SetTaskFinished(task_id);
     Q_EMIT NewChannels();
     return;
   }
 
   if (!object.contains("channels"_L1) || !object["channels"_L1].isArray()) {
-    Error(QStringLiteral("Missing JSON channels array."), object);
-    app_->task_manager()->SetTaskFinished(task_id);
+    Error(u"Missing JSON channels array."_s, object);
+    task_manager_->SetTaskFinished(task_id);
     Q_EMIT NewChannels();
     return;
   }
@@ -93,25 +91,25 @@ void RadioParadiseService::GetChannelsReply(QNetworkReply *reply, const int task
   RadioChannelList channels;
   for (const QJsonValue &value_channel : array_channels) {
     if (!value_channel.isObject()) continue;
-    QJsonObject obj_channel = value_channel.toObject();
+    const QJsonObject obj_channel = value_channel.toObject();
     if (!obj_channel.contains("chan_name"_L1) || !obj_channel.contains("streams"_L1)) {
       continue;
     }
-    QString name = obj_channel["chan_name"_L1].toString();
-    QJsonValue value_streams = obj_channel["streams"_L1];
+    const QString name = obj_channel["chan_name"_L1].toString();
+    const QJsonValue value_streams = obj_channel["streams"_L1];
     if (!value_streams.isArray()) {
       continue;
     }
     const QJsonArray array_streams = obj_channel["streams"_L1].toArray();
     for (const QJsonValue &value_stream : array_streams) {
       if (!value_stream.isObject()) continue;
-      QJsonObject obj_stream = value_stream.toObject();
+      const QJsonObject obj_stream = value_stream.toObject();
       if (!obj_stream.contains("label"_L1) || !obj_stream.contains("url"_L1)) {
         continue;
       }
-      QString label = obj_stream["label"_L1].toString();
+      const QString label = obj_stream["label"_L1].toString();
       QString url = obj_stream["url"_L1].toString();
-      static const QRegularExpression regex_url_schema(QStringLiteral("^[0-9a-zA-Z]*:\\/\\/"), QRegularExpression::CaseInsensitiveOption);
+      static const QRegularExpression regex_url_schema(u"^[0-9a-zA-Z]*:\\/\\/"_s, QRegularExpression::CaseInsensitiveOption);
       if (!url.contains(regex_url_schema)) {
         url.prepend("https://"_L1);
       }
@@ -123,7 +121,7 @@ void RadioParadiseService::GetChannelsReply(QNetworkReply *reply, const int task
     }
   }
 
-  app_->task_manager()->SetTaskFinished(task_id);
+  task_manager_->SetTaskFinished(task_id);
 
   Q_EMIT NewChannels(channels);
 
