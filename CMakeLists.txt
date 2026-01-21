@@ -84,8 +84,6 @@ if(MSVC)
   list(APPEND COMPILE_OPTIONS -MP -W4 -wd4702)
 else()
   list(APPEND COMPILE_OPTIONS
-    $<$<COMPILE_LANGUAGE:C>:-std=c11>
-    $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>
     -Wall
     -Wextra
     -Wpedantic
@@ -255,7 +253,6 @@ find_package(KDSingleApplication-qt${QT_VERSION_MAJOR} 1.1.0 REQUIRED)
 
 if(APPLE)
   find_library(SPARKLE Sparkle)
-  #find_package(SPMediaKeyTap REQUIRED)
 endif()
 
 if(WIN32)
@@ -823,6 +820,8 @@ set(SOURCES
 
   src/fileview/fileview.cpp
   src/fileview/fileviewlist.cpp
+  src/fileview/fileviewtree.cpp
+  src/fileview/fileviewtreemodel.cpp
 
   src/device/devicemanager.cpp
   src/device/devicelister.cpp
@@ -1112,6 +1111,8 @@ set(HEADERS
 
   src/fileview/fileview.h
   src/fileview/fileviewlist.h
+  src/fileview/fileviewtree.h
+  src/fileview/fileviewtreemodel.h
 
   src/device/devicemanager.h
   src/device/devicelister.h
@@ -1213,6 +1214,10 @@ set(UI
   src/device/deviceproperties.ui
   src/device/deviceviewcontainer.ui
 )
+
+if(UNIX)
+  optional_source(UNIX SOURCES src/core/unixsignalwatcher.cpp HEADERS src/core/unixsignalwatcher.h)
+endif()
 
 if(APPLE)
   optional_source(APPLE
@@ -1442,6 +1447,7 @@ optional_source(HAVE_SPOTIFY
     src/spotify/spotifybaserequest.cpp
     src/spotify/spotifyrequest.cpp
     src/spotify/spotifyfavoriterequest.cpp
+    src/spotify/spotifymetadatarequest.cpp
     src/settings/spotifysettingspage.cpp
     src/covermanager/spotifycoverprovider.cpp
   HEADERS
@@ -1449,6 +1455,7 @@ optional_source(HAVE_SPOTIFY
     src/spotify/spotifybaserequest.h
     src/spotify/spotifyrequest.h
     src/spotify/spotifyfavoriterequest.h
+    src/spotify/spotifymetadatarequest.h
     src/settings/spotifysettingspage.h
     src/covermanager/spotifycoverprovider.h
   UI
@@ -1463,6 +1470,8 @@ optional_source(HAVE_QOBUZ
     src/qobuz/qobuzrequest.cpp
     src/qobuz/qobuzstreamurlrequest.cpp
     src/qobuz/qobuzfavoriterequest.cpp
+    src/qobuz/qobuzmetadatarequest.cpp
+    src/qobuz/qobuzcredentialfetcher.cpp
     src/settings/qobuzsettingspage.cpp
     src/covermanager/qobuzcoverprovider.cpp
   HEADERS
@@ -1472,6 +1481,8 @@ optional_source(HAVE_QOBUZ
     src/qobuz/qobuzrequest.h
     src/qobuz/qobuzstreamurlrequest.h
     src/qobuz/qobuzfavoriterequest.h
+    src/qobuz/qobuzmetadatarequest.h
+    src/qobuz/qobuzcredentialfetcher.h
     src/settings/qobuzsettingspage.h
     src/covermanager/qobuzcoverprovider.h
   UI

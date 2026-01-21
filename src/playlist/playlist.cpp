@@ -474,8 +474,10 @@ bool Playlist::setData(const QModelIndex &idx, const QVariant &value, const int 
       QObject::disconnect(*connection);
     }, Qt::QueuedConnection);
   }
-  else if (song.is_radio()) {
+  else if (song.is_stream()) {
     item->SetOriginalMetadata(song);
+    Q_EMIT dataChanged(index(row, 0), index(row, ColumnCount - 1));
+    Q_EMIT EditingFinished(id_, idx);
     ScheduleSave();
   }
 
@@ -1205,7 +1207,7 @@ void Playlist::InsertItemsWithoutUndo(const PlaylistItemPtrList &items, const in
     queue_->InsertFirst(indexes);
   }
 
-  if (auto_sort_) {
+  if (auto_sort_ && !is_loading_) {
     sort(static_cast<int>(sort_column_), sort_order_);
   }
 
