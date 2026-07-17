@@ -127,11 +127,12 @@ void ContextSettingsPage::Load() {
   Settings s;
   s.beginGroup(kSettingsGroup);
 
-  ui_->context_custom_text1->setText(s.value(kSettingsTitleFmt, u"%title% - %artist%"_s).toString());
-  ui_->context_custom_text2->setText(s.value(kSettingsSummaryFmt, u"%album%"_s).toString());
+  ui_->context_custom_text1->setText(s.value(kSettingsTitleFmt, QLatin1String(kDefaultTitleFmt)).toString());
+  ui_->context_custom_text2->setText(s.value(kSettingsSummaryFmt, QLatin1String(kDefaultSummaryFmt)).toString());
 
-  for (const QString &i : checkboxes_.keys()) {
-    checkboxes_[i]->setChecked(s.value(i, checkboxes_[i]->isChecked()).toBool());
+  const QStringList checkbox_keys = checkboxes_.keys();
+  for (const QString &i : checkbox_keys) {
+    checkboxes_.value(i)->setChecked(s.value(i, checkboxes_.value(i)->isChecked()).toBool());
   }
 
   // Fonts
@@ -151,7 +152,7 @@ void ContextSettingsPage::Load() {
   s.endGroup();
 
   s.beginGroup(MainWindowSettings::kSettingsGroup);
-  ui_->checkbox_search_cover->setChecked(s.value(MainWindowSettings::kSearchForCoverAuto, true).toBool());
+  ui_->checkbox_search_cover->setChecked(s.value(MainWindowSettings::kSearchForCoverAuto, MainWindowSettings::kDefaultSearchForCoverAuto).toBool());
   s.endGroup();
 
   Init(ui_->layout_contextsettingspage->parentWidget());
@@ -167,8 +168,9 @@ void ContextSettingsPage::Save() {
   s.beginGroup(kSettingsGroup);
   s.setValue(kSettingsTitleFmt, ui_->context_custom_text1->text());
   s.setValue(kSettingsSummaryFmt, ui_->context_custom_text2->text());
-  for (const QString &i : checkboxes_.keys()) {
-    s.setValue(i, checkboxes_[i]->isChecked());
+  const QStringList checkbox_keys = checkboxes_.keys();
+  for (const QString &i : checkbox_keys) {
+    s.setValue(i, checkboxes_.value(i)->isChecked());
   }
   s.setValue(kFontHeadline, ui_->font_headline->currentFont().family());
   s.setValue(kFontNormal, ui_->font_normal->currentFont().family());

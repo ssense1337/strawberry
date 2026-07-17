@@ -2,6 +2,17 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ja_JP" sourcelanguage="en-US">
   <context>
+    <name>ASXParser</name>
+    <message>
+      <source>ASX playlist is too large</source>
+      <translation type="unfinished">ASX playlist is too large</translation>
+    </message>
+    <message>
+      <source>Failed to write ASX playlist</source>
+      <translation type="unfinished">Failed to write ASX playlist</translation>
+    </message>
+  </context>
+  <context>
     <name>About</name>
     <message>
       <source>About</source>
@@ -36,8 +47,8 @@
       <translation>もし Strawberry が気に入って利用する場合は、後援または寄付を検討してください</translation>
     </message>
     <message>
-      <source>You can sponsor the author on %1. You can also make a one-time payment through %2.</source>
-      <translation>%1 の著者をスポンサーにすることができます。 %2 を通じて 1回限りの支払いを行うこともできます。</translation>
+      <source>You can sponsor the author on %1 or %2. You can also make a one-time payment through %3.</source>
+      <translation>%1, %2 の著者をスポンサーにすることができます。 %3 を通じて 1回限りの支払いを行うこともできます。</translation>
     </message>
     <message>
       <source>Author and maintainer</source>
@@ -361,14 +372,6 @@
       <translation>スタイル</translation>
     </message>
     <message>
-      <source>Use system theme icons</source>
-      <translation>システムのテーマアイコンを使用する</translation>
-    </message>
-    <message>
-      <source>Settings require restart.</source>
-      <translation>設定には再起動が必要です</translation>
-    </message>
-    <message>
       <source>Tabbar colors</source>
       <translation>タブバーの色</translation>
     </message>
@@ -517,8 +520,104 @@
       <translation>プレイリスト再生中の曲の色を選択:</translation>
     </message>
     <message>
+      <source>Window</source>
+      <translation type="unfinished">Window</translation>
+    </message>
+    <message>
+      <source>Window text</source>
+      <translation type="unfinished">Window text</translation>
+    </message>
+    <message>
+      <source>Base</source>
+      <translation type="unfinished">Base</translation>
+    </message>
+    <message>
+      <source>Alternate base</source>
+      <translation type="unfinished">Alternate base</translation>
+    </message>
+    <message>
+      <source>Tooltip base</source>
+      <translation type="unfinished">Tooltip base</translation>
+    </message>
+    <message>
+      <source>Tooltip text</source>
+      <translation type="unfinished">Tooltip text</translation>
+    </message>
+    <message>
+      <source>Placeholder text</source>
+      <translation type="unfinished">Placeholder text</translation>
+    </message>
+    <message>
+      <source>Text</source>
+      <translation type="unfinished">Text</translation>
+    </message>
+    <message>
+      <source>Button</source>
+      <translation type="unfinished">Button</translation>
+    </message>
+    <message>
+      <source>Button text</source>
+      <translation type="unfinished">Button text</translation>
+    </message>
+    <message>
+      <source>Bright text</source>
+      <translation type="unfinished">Bright text</translation>
+    </message>
+    <message>
+      <source>Select color</source>
+      <translation type="unfinished">Select color</translation>
+    </message>
+    <message>
       <source>Select background image</source>
       <translation>背景画像の選択</translation>
+    </message>
+    <message>
+      <source>Colors</source>
+      <translation type="unfinished">Colors</translation>
+    </message>
+    <message>
+      <source>&amp;Use the system default color set</source>
+      <translation type="unfinished">&amp;Use the system default color set</translation>
+    </message>
+    <message>
+      <source>Use a custom color set</source>
+      <translation type="unfinished">Use a custom color set</translation>
+    </message>
+    <message>
+      <source>Set a custom color set suitable for a dark theme</source>
+      <translation type="unfinished">Set a custom color set suitable for a dark theme</translation>
+    </message>
+    <message>
+      <source>Dark mode</source>
+      <translation type="unfinished">Dark mode</translation>
+    </message>
+    <message>
+      <source>Reset the custom color set to the system default colors</source>
+      <translation type="unfinished">Reset the custom color set to the system default colors</translation>
+    </message>
+    <message>
+      <source>Reset to default</source>
+      <translation type="unfinished">Reset to default</translation>
+    </message>
+    <message>
+      <source>You might need to restart Strawberry for this setting to fully apply</source>
+      <translation type="unfinished">You might need to restart Strawberry for this setting to fully apply</translation>
+    </message>
+    <message>
+      <source>You need to restart Strawberry for this setting to take affect</source>
+      <translation type="unfinished">You need to restart Strawberry for this setting to take affect</translation>
+    </message>
+    <message>
+      <source>System icons</source>
+      <translation type="unfinished">System icons</translation>
+    </message>
+    <message>
+      <source>Changing colors is only supported with some styles</source>
+      <translation type="unfinished">Changing colors is only supported with some styles</translation>
+    </message>
+    <message>
+      <source>Dark colors</source>
+      <translation type="unfinished">Dark colors</translation>
     </message>
   </context>
   <context>
@@ -578,6 +677,10 @@
     <message>
       <source>Improve headphone listening of stereo audio records (bs2b)</source>
       <translation>ステレオ音源をヘッドフォンで聴く場合の改善(bs2b)</translation>
+    </message>
+    <message>
+      <source>Use playbin3 when available</source>
+      <translation type="unfinished">Use playbin3 when available</translation>
     </message>
     <message>
       <source>Enable HTTP/2 for streaming</source>
@@ -690,6 +793,26 @@
     <message>
       <source>Fade out on pause / fade in on resume</source>
       <translation>一時停止/再開時にフェードアウト/インする</translation>
+    </message>
+    <message>
+      <source>You need to restart Strawberry for this setting to take affect</source>
+      <translation type="unfinished">You need to restart Strawberry for this setting to take affect</translation>
+    </message>
+    <message>
+      <source>Map the volume slider to a decibel scale so that perceived loudness changes evenly. Each 1% step equals 0.5 dB, 100% is 0 dB and 0% is silence.</source>
+      <translation type="unfinished">Map the volume slider to a decibel scale so that perceived loudness changes evenly. Each 1% step equals 0.5 dB, 100% is 0 dB and 0% is silence.</translation>
+    </message>
+    <message>
+      <source>Exponential volume scaling</source>
+      <translation type="unfinished">Exponential volume scaling</translation>
+    </message>
+    <message>
+      <source>Device warm-up</source>
+      <translation type="unfinished">Device warm-up</translation>
+    </message>
+    <message>
+      <source>Delay between opening the audio device and starting playback, to avoid the start of the track being cut off while the device (DAC) is still becoming ready.  Set to 0 to disable.</source>
+      <translation type="unfinished">Delay between opening the audio device and starting playback, to avoid the start of the track being cut off while the device (DAC) is still becoming ready.  Set to 0 to disable.</translation>
     </message>
   </context>
   <context>
@@ -832,18 +955,26 @@
     </message>
   </context>
   <context>
-    <name>CddaSongLoader</name>
+    <name>CDDASongLoader</name>
+    <message>
+      <source>Could not create cdiocddasrc</source>
+      <translation type="unfinished">Could not create cdiocddasrc</translation>
+    </message>
     <message>
       <source>Error while setting CDDA device to ready state.</source>
-      <translation>CDDA デバイスを準備中にエラーが発生しました</translation>
+      <translation type="unfinished">Error while setting CDDA device to ready state.</translation>
     </message>
     <message>
       <source>Error while setting CDDA device to pause state.</source>
-      <translation>CDDA デバイスを一時停止中にエラーが発生しました</translation>
+      <translation type="unfinished">Error while setting CDDA device to pause state.</translation>
+    </message>
+    <message>
+      <source>The &apos;track&apos; format is not supported by GStreamer.</source>
+      <translation type="unfinished">The &apos;track&apos; format is not supported by GStreamer.</translation>
     </message>
     <message>
       <source>Error while querying CDDA tracks.</source>
-      <translation>CDDAトラック取得中にエラーが発生しました</translation>
+      <translation type="unfinished">Error while querying CDDA tracks.</translation>
     </message>
   </context>
   <context>
@@ -908,12 +1039,40 @@
       <translation>保存した分類を管理する</translation>
     </message>
     <message>
-      <source>Show</source>
-      <translation>表示</translation>
+      <source>Any rating</source>
+      <translation type="unfinished">Any rating</translation>
+    </message>
+    <message>
+      <source>Rating non null</source>
+      <translation type="unfinished">Rating non null</translation>
+    </message>
+    <message>
+      <source>Rating greater than 1 star</source>
+      <translation type="unfinished">Rating greater than 1 star</translation>
+    </message>
+    <message>
+      <source>Rating greater than 2 stars</source>
+      <translation type="unfinished">Rating greater than 2 stars</translation>
+    </message>
+    <message>
+      <source>Rating greater than 3 stars</source>
+      <translation type="unfinished">Rating greater than 3 stars</translation>
+    </message>
+    <message>
+      <source>Rating greater than 4 stars</source>
+      <translation type="unfinished">Rating greater than 4 stars</translation>
     </message>
     <message>
       <source>Group by</source>
       <translation>グループ化</translation>
+    </message>
+    <message>
+      <source>Filter by age</source>
+      <translation type="unfinished">Filter by age</translation>
+    </message>
+    <message>
+      <source>Filter by rating</source>
+      <translation type="unfinished">Filter by rating</translation>
     </message>
     <message>
       <source>Display options</source>
@@ -990,6 +1149,10 @@
   </context>
   <context>
     <name>CollectionLibrary</name>
+    <message>
+      <source>Support for sort tags artist, album, album artist, title, composer and performer</source>
+      <translation type="unfinished">Support for sort tags artist, album, album artist, title, composer and performer</translation>
+    </message>
     <message>
       <source>Saving playcounts and ratings</source>
       <translation>再生回数と評価を保存</translation>
@@ -1091,8 +1254,16 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>さまざまなアーティストをコンピレーションアルバムに起用</translation>
     </message>
     <message>
-      <source>Skip leading articles (&quot;the&quot;, &quot;a&quot;, &quot;an&quot;) when sorting artist names</source>
-      <translation>アーティスト名を並べ替えるときに先頭の記事 (&quot;the&quot;、&quot;a&quot;、&quot;an&quot;) をスキップする</translation>
+      <source>Skip leading articles (&quot;the&quot;, &quot;a&quot;, &quot;an&quot;) when sorting artists, composers and performers</source>
+      <translation type="unfinished">Skip leading articles (&quot;the&quot;, &quot;a&quot;, &quot;an&quot;) when sorting artists, composers and performers</translation>
+    </message>
+    <message>
+      <source>Skip leading articles (&quot;the&quot;, &quot;a&quot;, &quot;an&quot;) when sorting albums</source>
+      <translation type="unfinished">Skip leading articles (&quot;the&quot;, &quot;a&quot;, &quot;an&quot;) when sorting albums</translation>
+    </message>
+    <message>
+      <source>Use sort tags for sorting when available</source>
+      <translation type="unfinished">Use sort tags for sorting when available</translation>
     </message>
     <message>
       <source>Album cover pixmap cache</source>
@@ -1430,12 +1601,32 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>曲の評価を追加</translation>
     </message>
     <message>
-      <source>%originalyear%</source>
-      <translation>%originalyear%</translation>
-    </message>
-    <message>
       <source>Add song original year tag</source>
       <translation>元の年タグを追加</translation>
+    </message>
+    <message>
+      <source>Add song artistsort tag</source>
+      <translation type="unfinished">Add song artistsort tag</translation>
+    </message>
+    <message>
+      <source>Add song albumartistsort tag</source>
+      <translation type="unfinished">Add song albumartistsort tag</translation>
+    </message>
+    <message>
+      <source>Add song titlesort tag</source>
+      <translation type="unfinished">Add song titlesort tag</translation>
+    </message>
+    <message>
+      <source>Add song composersort tag</source>
+      <translation type="unfinished">Add song composersort tag</translation>
+    </message>
+    <message>
+      <source>Add song performersort tag</source>
+      <translation type="unfinished">Add song performersort tag</translation>
+    </message>
+    <message>
+      <source>Add song albumsort tag</source>
+      <translation type="unfinished">Add song albumsort tag</translation>
     </message>
   </context>
   <context>
@@ -1459,14 +1650,6 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Bitrate</source>
       <translation>ビットレート</translation>
-    </message>
-    <message>
-      <source>EBU R 128 Integrated Loudness</source>
-      <translation>EBU R 128 統合ラウドネス</translation>
-    </message>
-    <message>
-      <source>EBU R 128 Loudness Range</source>
-      <translation>EBU R 128 ラウドネスレンジ</translation>
     </message>
     <message>
       <source>Show album cover</source>
@@ -1977,6 +2160,13 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
   </context>
   <context>
+    <name>DiscordRichPresence</name>
+    <message>
+      <source>on </source>
+      <translation type="unfinished">on </translation>
+    </message>
+  </context>
+  <context>
     <name>DynamicPlaylistControls</name>
     <message>
       <source>Dynamic mode is on</source>
@@ -2286,6 +2476,42 @@ If there are no matches then it will use the largest image in the directory.</so
       <source>Could not write metadata to %1: %2</source>
       <translation>メタデータを%1: %2に書き込めませんでした</translation>
     </message>
+    <message>
+      <source>ID3v2 version:</source>
+      <translation type="unfinished">ID3v2 version:</translation>
+    </message>
+    <message>
+      <source>2.3</source>
+      <translation type="unfinished">2.3</translation>
+    </message>
+    <message>
+      <source>2.4</source>
+      <translation type="unfinished">2.4</translation>
+    </message>
+    <message>
+      <source>Performer sort</source>
+      <translation type="unfinished">Performer sort</translation>
+    </message>
+    <message>
+      <source>Title sort</source>
+      <translation type="unfinished">Title sort</translation>
+    </message>
+    <message>
+      <source>Album artist sort</source>
+      <translation type="unfinished">Album artist sort</translation>
+    </message>
+    <message>
+      <source>Artist sort</source>
+      <translation type="unfinished">Artist sort</translation>
+    </message>
+    <message>
+      <source>Album sort</source>
+      <translation type="unfinished">Album sort</translation>
+    </message>
+    <message>
+      <source>Composer sort</source>
+      <translation type="unfinished">Composer sort</translation>
+    </message>
   </context>
   <context>
     <name>Equalizer</name>
@@ -2413,6 +2639,10 @@ If there are no matches then it will use the largest image in the directory.</so
       <source>Are you sure you want to delete the &quot;%1&quot; preset?</source>
       <translation>プリセット「%1」を削除してもよろしいですか?</translation>
     </message>
+    <message>
+      <source>You need to restart playback for this setting to take affect.</source>
+      <translation type="unfinished">You need to restart playback for this setting to take affect.</translation>
+    </message>
   </context>
   <context>
     <name>EqualizerSlider</name>
@@ -2472,6 +2702,22 @@ If there are no matches then it will use the largest image in the directory.</so
       <source>Form</source>
       <translation>フォーム</translation>
     </message>
+    <message>
+      <source>Add root directory</source>
+      <translation type="unfinished">Add root directory</translation>
+    </message>
+    <message>
+      <source>Remove selected root directory</source>
+      <translation type="unfinished">Remove selected root directory</translation>
+    </message>
+    <message>
+      <source>Toggle between list and tree view</source>
+      <translation type="unfinished">Toggle between list and tree view</translation>
+    </message>
+    <message>
+      <source>Select folder to add as tree root</source>
+      <translation type="unfinished">Select folder to add as tree root</translation>
+    </message>
   </context>
   <context>
     <name>FileViewList</name>
@@ -2510,6 +2756,49 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Show in file browser...</source>
       <translation>ファイルブラウザーで表示...</translation>
+    </message>
+  </context>
+  <context>
+    <name>FileViewTree</name>
+    <message>
+      <source>Append to current playlist</source>
+      <translation type="unfinished">Append to current playlist</translation>
+    </message>
+    <message>
+      <source>Replace current playlist</source>
+      <translation type="unfinished">Replace current playlist</translation>
+    </message>
+    <message>
+      <source>Open in new playlist</source>
+      <translation type="unfinished">Open in new playlist</translation>
+    </message>
+    <message>
+      <source>Copy to collection...</source>
+      <translation type="unfinished">Copy to collection...</translation>
+    </message>
+    <message>
+      <source>Move to collection...</source>
+      <translation type="unfinished">Move to collection...</translation>
+    </message>
+    <message>
+      <source>Copy to device...</source>
+      <translation type="unfinished">Copy to device...</translation>
+    </message>
+    <message>
+      <source>Delete from disk...</source>
+      <translation type="unfinished">Delete from disk...</translation>
+    </message>
+    <message>
+      <source>Edit track information...</source>
+      <translation type="unfinished">Edit track information...</translation>
+    </message>
+    <message>
+      <source>Show in file browser...</source>
+      <translation type="unfinished">Show in file browser...</translation>
+    </message>
+    <message>
+      <source>Files</source>
+      <translation type="unfinished">Files</translation>
     </message>
   </context>
   <context>
@@ -2555,29 +2844,6 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>An error occurred loading the iTunes database</source>
       <translation>iTunes のデータベースを読み込み中にエラーが発生しました</translation>
-    </message>
-  </context>
-  <context>
-    <name>GeniusLyricsProvider</name>
-    <message>
-      <source>Genius Authentication</source>
-      <translation>Genius 認証</translation>
-    </message>
-    <message>
-      <source>Please open this URL in your browser</source>
-      <translation>このURLをブラウザで開いてください</translation>
-    </message>
-    <message>
-      <source>Redirect missing token code!</source>
-      <translation>不足しているトークンコードをリダイレクトしてください！</translation>
-    </message>
-    <message>
-      <source>Received invalid reply from web browser.</source>
-      <translation>Webブラウザから無効な返信を受け取りました。</translation>
-    </message>
-    <message>
-      <source>Redirect from Genius is missing query items code or state.</source>
-      <translation>Genius からのリダイレクトにクエリアイテムのコードまたは状態がありません。</translation>
     </message>
   </context>
   <context>
@@ -2855,6 +3121,10 @@ If there are no matches then it will use the largest image in the directory.</so
       <source>Separate albums by grouping tag</source>
       <translation>グループタグでアルバムを分ける</translation>
     </message>
+    <message>
+      <source>Original year - Album - Disc</source>
+      <translation type="unfinished">Original year - Album - Disc</translation>
+    </message>
   </context>
   <context>
     <name>GstEngine</name>
@@ -2864,73 +3134,38 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
   </context>
   <context>
-    <name>LastFMImport</name>
+    <name>LastFMScrobbler</name>
     <message>
-      <source>Missing username, please login to last.fm first!</source>
-      <translation>ユーザー名がありません。最初に last.fm にログインしてください!</translation>
-    </message>
-  </context>
-  <context>
-    <name>LastFMImportDialog</name>
-    <message>
-      <source>Import data from last.fm</source>
-      <translation>last.fm からデータをインポート</translation>
+      <source>%1 Scrobbler Authentication</source>
+      <translation type="unfinished">%1 Scrobbler Authentication</translation>
     </message>
     <message>
-      <source>Choose data to import from last.fm</source>
-      <translation>last.fm からインポートするデータを選択</translation>
+      <source>Open URL in web browser?</source>
+      <translation type="unfinished">Open URL in web browser?</translation>
     </message>
     <message>
-      <source>Last played</source>
-      <translation type="unfinished">Last played</translation>
+      <source>Press &quot;Save&quot; to copy the URL to clipboard and manually open it in a web browser.</source>
+      <translation type="unfinished">Press &quot;Save&quot; to copy the URL to clipboard and manually open it in a web browser.</translation>
     </message>
     <message>
-      <source>Play counts</source>
-      <translation>再生回数</translation>
+      <source>Could not open URL. Please open this URL in your browser</source>
+      <translation type="unfinished">Could not open URL. Please open this URL in your browser</translation>
     </message>
     <message>
-      <source>Warning: Play counts and last played from last.fm will completely replace the same data for the matched songs. Play counts will replace the data based on artist and song title for the same albums! Please backup your database before you start.</source>
-      <translation>警告: last.fm から受信した再生回数と最後に再生された曲は、一致した曲の同じデータを完全に置き換えます。再生回数は同じアルバムのアーティストと曲名に基づいてデータを置き換えます! 開始する前にデータベースをバックアップしてください。</translation>
+      <source>Invalid reply from web browser. Missing token.</source>
+      <translation type="unfinished">Invalid reply from web browser. Missing token.</translation>
     </message>
     <message>
-      <source>Go!</source>
-      <translation type="unfinished">Go!</translation>
+      <source>Received invalid reply from web browser. Try another browser.</source>
+      <translation type="unfinished">Received invalid reply from web browser. Try another browser.</translation>
     </message>
     <message>
-      <source>Close</source>
-      <translation>閉じる</translation>
+      <source>Scrobbler %1 is not authenticated!</source>
+      <translation type="unfinished">Scrobbler %1 is not authenticated!</translation>
     </message>
     <message>
-      <source>Cancel</source>
-      <translation>キャンセル</translation>
-    </message>
-    <message>
-      <source>Receiving initial data from last.fm...</source>
-      <translation>last.fm から初期データを受信中...</translation>
-    </message>
-    <message>
-      <source>Receiving playcount for %1 songs and last played for %2 songs.</source>
-      <translation type="unfinished">Receiving playcount for %1 songs and last played for %2 songs.</translation>
-    </message>
-    <message>
-      <source>Receiving last played for %1 songs.</source>
-      <translation>最近再生した %1 曲を受信中です。</translation>
-    </message>
-    <message>
-      <source>Receiving playcounts for %1 songs.</source>
-      <translation>%1 曲の再生回数を受信中。</translation>
-    </message>
-    <message>
-      <source>Playcounts for %1 songs and last played for %2 songs received.</source>
-      <translation type="unfinished">Playcounts for %1 songs and last played for %2 songs received.</translation>
-    </message>
-    <message>
-      <source>Last played for %1 songs received.</source>
-      <translation>最近再生した %1 曲を受信しました</translation>
-    </message>
-    <message>
-      <source>Playcounts for %1 songs received.</source>
-      <translation>%1 曲の再生回数を受信しました。</translation>
+      <source>Scrobbler %1 error: %2</source>
+      <translation type="unfinished">Scrobbler %1 error: %2</translation>
     </message>
   </context>
   <context>
@@ -2949,22 +3184,6 @@ If there are no matches then it will use the largest image in the directory.</so
   </context>
   <context>
     <name>ListenBrainzScrobbler</name>
-    <message>
-      <source>ListenBrainz Authentication</source>
-      <translation>ListenBrainz 認証</translation>
-    </message>
-    <message>
-      <source>Please open this URL in your browser</source>
-      <translation>このURLをブラウザで開いてください</translation>
-    </message>
-    <message>
-      <source>Redirect missing token code!</source>
-      <translation>不足しているトークンコードをリダイレクトしてください！</translation>
-    </message>
-    <message>
-      <source>Received invalid reply from web browser.</source>
-      <translation>Webブラウザから無効な返信を受け取りました。</translation>
-    </message>
     <message>
       <source>Unable to scrobble %1 - %2 because of error: %3</source>
       <translation type="unfinished">Unable to scrobble %1 - %2 because of error: %3</translation>
@@ -3179,10 +3398,6 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>プレイリストをシャッフル(&amp;s)</translation>
     </message>
     <message>
-      <source>Ctrl+H</source>
-      <translation type="unfinished">Ctrl+H</translation>
-    </message>
-    <message>
       <source>&amp;Add file...</source>
       <translation>ファイルを追加...</translation>
     </message>
@@ -3335,10 +3550,6 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>サイドバーを表示</translation>
     </message>
     <message>
-      <source>Import data from last.fm...</source>
-      <translation>last.fm からデータをインポート中...</translation>
-    </message>
-    <message>
       <source>Context</source>
       <translation>コンテキスト</translation>
     </message>
@@ -3421,6 +3632,10 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Rescan song(s)...</source>
       <translation>曲を再スキャン中...</translation>
+    </message>
+    <message>
+      <source>Fetch metadata from service</source>
+      <translation type="unfinished">Fetch metadata from service</translation>
     </message>
     <message>
       <source>Copy URL(s)...</source>
@@ -3566,6 +3781,22 @@ If there are no matches then it will use the largest image in the directory.</so
       <source>Collection rescan notice</source>
       <translation>ライブラリー再スキャン通知</translation>
     </message>
+    <message>
+      <source>Ctrl+Shift+H</source>
+      <translation type="unfinished">Ctrl+Shift+H</translation>
+    </message>
+    <message>
+      <source>Go to last playlist tab</source>
+      <translation type="unfinished">Go to last playlist tab</translation>
+    </message>
+    <message>
+      <source>Go to active playlist tab</source>
+      <translation type="unfinished">Go to active playlist tab</translation>
+    </message>
+    <message>
+      <source>Close current playlist tab</source>
+      <translation type="unfinished">Close current playlist tab</translation>
+    </message>
   </context>
   <context>
     <name>MessageDialog</name>
@@ -3586,25 +3817,10 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
   </context>
   <context>
-    <name>MoodbarProxyStyle</name>
-    <message>
-      <source>Show moodbar</source>
-      <translation>ムードバーを表示</translation>
-    </message>
-    <message>
-      <source>Moodbar style</source>
-      <translation>ムードバーのスタイル</translation>
-    </message>
-  </context>
-  <context>
     <name>MoodbarSettingsPage</name>
     <message>
       <source>Moodbar</source>
       <translation>ムードバー</translation>
-    </message>
-    <message>
-      <source>Show a moodbar in the track progress bar</source>
-      <translation>プログレスバー内にムードバーを表示</translation>
     </message>
     <message>
       <source>Moodbar style</source>
@@ -3613,10 +3829,6 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Save the .mood files directly in the songs folders</source>
       <translation>.mood ファイルを曲フォルダーに直接保存</translation>
-    </message>
-    <message>
-      <source>Enabled</source>
-      <translation>有効</translation>
     </message>
   </context>
   <context>
@@ -3698,6 +3910,10 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Use proxy settings for streaming</source>
       <translation>ストリーミングプロキシ設定</translation>
+    </message>
+    <message>
+      <source>Only HTTP proxy is supported for streaming.</source>
+      <translation type="unfinished">Only HTTP proxy is supported for streaming.</translation>
     </message>
   </context>
   <context>
@@ -3927,6 +4143,61 @@ If there are no matches then it will use the largest image in the directory.</so
       <source>Drag to reposition</source>
       <translation>位置を変更するにはドラッグします</translation>
     </message>
+    <message>
+      <source>Discord</source>
+      <translation type="unfinished">Discord</translation>
+    </message>
+    <message>
+      <source>Enable Rich Presence</source>
+      <translation type="unfinished">Enable Rich Presence</translation>
+    </message>
+    <message>
+      <source>&quot;Listening to...&quot;</source>
+      <translation type="unfinished">&quot;Listening to...&quot;</translation>
+    </message>
+    <message>
+      <source>Strawberry</source>
+      <translation type="unfinished">Strawberry</translation>
+    </message>
+    <message>
+      <source>Artist name</source>
+      <translation type="unfinished">Artist name</translation>
+    </message>
+    <message>
+      <source>Song title</source>
+      <translation type="unfinished">Song title</translation>
+    </message>
+  </context>
+  <context>
+    <name>OAuthenticator</name>
+    <message>
+      <source>Authentication</source>
+      <translation type="unfinished">Authentication</translation>
+    </message>
+    <message>
+      <source>Please open this URL in your browser</source>
+      <translation type="unfinished">Please open this URL in your browser</translation>
+    </message>
+    <message>
+      <source>Received invalid reply from web browser.</source>
+      <translation type="unfinished">Received invalid reply from web browser.</translation>
+    </message>
+    <message>
+      <source>Redirect URL is missing query.</source>
+      <translation type="unfinished">Redirect URL is missing query.</translation>
+    </message>
+    <message>
+      <source>Request URL is missing code!</source>
+      <translation type="unfinished">Request URL is missing code!</translation>
+    </message>
+    <message>
+      <source>Request URL is missing state!</source>
+      <translation type="unfinished">Request URL is missing state!</translation>
+    </message>
+    <message>
+      <source>Request URL has wrong state %1 != %2</source>
+      <translation type="unfinished">Request URL has wrong state %1 != %2</translation>
+    </message>
   </context>
   <context>
     <name>OSDBase</name>
@@ -3981,6 +4252,10 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Shuffle albums</source>
       <translation>アルバムをシャッフル</translation>
+    </message>
+    <message>
+      <source>Shuffle grouping</source>
+      <translation type="unfinished">Shuffle grouping</translation>
     </message>
     <message>
       <source>Don&apos;t repeat</source>
@@ -4195,6 +4470,14 @@ If there are no matches then it will use the largest image in the directory.</so
       <source>Don&apos;t know how to handle %1</source>
       <translation>%1 の処理方法がわかりません</translation>
     </message>
+    <message>
+      <source>File %1 does not exist</source>
+      <translation type="unfinished">File %1 does not exist</translation>
+    </message>
+    <message>
+      <source>Could not read file %1: %2</source>
+      <translation type="unfinished">Could not read file %1: %2</translation>
+    </message>
   </context>
   <context>
     <name>PlayingWidget</name>
@@ -4230,12 +4513,24 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>タイトル</translation>
     </message>
     <message>
+      <source>Title Sort</source>
+      <translation type="unfinished">Title Sort</translation>
+    </message>
+    <message>
       <source>Artist</source>
       <translation>アーティスト</translation>
     </message>
     <message>
+      <source>Artist Sort</source>
+      <translation type="unfinished">Artist Sort</translation>
+    </message>
+    <message>
       <source>Album</source>
       <translation>アルバム</translation>
+    </message>
+    <message>
+      <source>Album Sort</source>
+      <translation type="unfinished">Album Sort</translation>
     </message>
     <message>
       <source>Track</source>
@@ -4266,12 +4561,24 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>アルバムアーティスト</translation>
     </message>
     <message>
+      <source>Album Artist Sort</source>
+      <translation type="unfinished">Album Artist Sort</translation>
+    </message>
+    <message>
       <source>Composer</source>
       <translation>作曲者</translation>
     </message>
     <message>
+      <source>Composer Sort</source>
+      <translation type="unfinished">Composer Sort</translation>
+    </message>
+    <message>
       <source>Performer</source>
       <translation>出演者</translation>
+    </message>
+    <message>
+      <source>Performer Sort</source>
+      <translation type="unfinished">Performer Sort</translation>
     </message>
     <message>
       <source>Grouping</source>
@@ -4302,8 +4609,8 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>ビットレート</translation>
     </message>
     <message>
-      <source>File Name</source>
-      <translation>ファイル名</translation>
+      <source>Initial key</source>
+      <translation type="unfinished">Initial key</translation>
     </message>
     <message>
       <source>File Name (without path)</source>
@@ -4334,12 +4641,24 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>ソース</translation>
     </message>
     <message>
+      <source>Moodbar</source>
+      <translation type="unfinished">Moodbar</translation>
+    </message>
+    <message>
+      <source>BPM</source>
+      <translation type="unfinished">BPM</translation>
+    </message>
+    <message>
       <source>Mood</source>
       <translation>ムード</translation>
     </message>
     <message>
       <source>Rating</source>
       <translation>評価</translation>
+    </message>
+    <message>
+      <source>URL</source>
+      <translation type="unfinished">URL</translation>
     </message>
     <message>
       <source>CUE</source>
@@ -4464,6 +4783,10 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Playlist</source>
       <translation>プレイリスト</translation>
+    </message>
+    <message>
+      <source>Copy songs to playlist</source>
+      <translation type="unfinished">Copy songs to playlist</translation>
     </message>
     <message>
       <source>Copy to device</source>
@@ -4634,6 +4957,10 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Shuffle albums</source>
       <translation>アルバムをシャッフル</translation>
+    </message>
+    <message>
+      <source>Shuffle grouping</source>
+      <translation type="unfinished">Shuffle grouping</translation>
     </message>
   </context>
   <context>
@@ -4934,6 +5261,10 @@ Are you sure you want to continue?</source>
       <translation>バージョン情報を出力</translation>
     </message>
     <message>
+      <source>Create fingerprint</source>
+      <translation type="unfinished">Create fingerprint</translation>
+    </message>
+    <message>
       <source>Failed to create directory %1.</source>
       <translation>ディレクトリ %1 の作成に失敗しました。</translation>
     </message>
@@ -4960,10 +5291,6 @@ Are you sure you want to continue?</source>
     <message>
       <source>LU</source>
       <translation>LU</translation>
-    </message>
-    <message>
-      <source>File %1 is not recognized as a valid audio file.</source>
-      <translation>ファイル %1 は正常な音声ファイルではありません</translation>
     </message>
     <message>
       <source>1 day</source>
@@ -5042,8 +5369,8 @@ Are you sure you want to continue?</source>
       <translation>ファイルを解析できませんでした</translation>
     </message>
     <message>
-      <source>Could save file</source>
-      <translation>ファイルを保存できました</translation>
+      <source>Could not save file</source>
+      <translation type="unfinished">Could not save file</translation>
     </message>
     <message>
       <source>Unknown error</source>
@@ -5058,19 +5385,23 @@ Are you sure you want to continue?</source>
       <translation>アーティスト</translation>
     </message>
     <message>
-      <source>searches for all artists containing the word %1. </source>
-      <translation>%1 という単語を含むすべてのアーティストを検索します。 </translation>
+      <source>searches for all artists containing the word %1.</source>
+      <translation>%1 という単語を含むすべてのアーティストを検索します。</translation>
     </message>
     <message>
       <source>Search terms for numerical fields can be prefixed with %1 or %2 to refine the search, e.g.: </source>
       <translation>数値フィールドの検索語には、先頭に %1 または %2 を付けると、検索を絞り込むことができます。例: </translation>
     </message>
     <message>
+      <source>A word can be excluded with a preceding &quot;%1&quot;, if you need to search for a word including &quot;%1&quot;, place quotes around the word.</source>
+      <translation type="unfinished">A word can be excluded with a preceding &quot;%1&quot;, if you need to search for a word including &quot;%1&quot;, place quotes around the word.</translation>
+    </message>
+    <message>
       <source>rating</source>
       <translation>評価</translation>
     </message>
     <message>
-      <source>Multiple search terms can also be combined with &quot;%1&quot; (default) and &quot;%2&quot;, as well as grouped with parentheses. </source>
+      <source>Multiple search terms can also be combined with &quot;%1&quot; (default) and &quot;%2&quot;, as well as grouped with parentheses.</source>
       <translation>複数の検索語を「%1」(デフォルト) および「%2」と組み合わせたり、括弧でグループ化したりすることもできます。</translation>
     </message>
     <message>
@@ -5276,6 +5607,17 @@ Are you sure you want to continue?</source>
     </message>
   </context>
   <context>
+    <name>QobuzMetadataRequest</name>
+    <message>
+      <source>Not authenticated</source>
+      <translation type="unfinished">Not authenticated</translation>
+    </message>
+    <message>
+      <source>No track ID</source>
+      <translation type="unfinished">No track ID</translation>
+    </message>
+  </context>
+  <context>
     <name>QobuzRequest</name>
     <message>
       <source>Receiving artists...</source>
@@ -5329,24 +5671,44 @@ Are you sure you want to continue?</source>
   <context>
     <name>QobuzService</name>
     <message>
-      <source>Authenticating...</source>
-      <translation>認証中...</translation>
-    </message>
-    <message>
-      <source>Maximum number of login attempts reached.</source>
-      <translation>ログイン試行数が最大数に達しました</translation>
-    </message>
-    <message>
       <source>Missing Qobuz app ID.</source>
       <translation>Qobuz app ID がありません</translation>
     </message>
     <message>
-      <source>Missing Qobuz username.</source>
-      <translation>Qobuz ユーザー名がありません</translation>
+      <source>Missing app ID. Please fetch credentials first.</source>
+      <translation type="unfinished">Missing app ID. Please fetch credentials first.</translation>
     </message>
     <message>
-      <source>Missing Qobuz password.</source>
-      <translation>Qobuz パスワードがありません</translation>
+      <source>Missing app secret. Please fetch credentials first.</source>
+      <translation type="unfinished">Missing app secret. Please fetch credentials first.</translation>
+    </message>
+    <message>
+      <source>Missing private key. Please fetch credentials first.</source>
+      <translation type="unfinished">Missing private key. Please fetch credentials first.</translation>
+    </message>
+    <message>
+      <source>Failed to start local server for OAuth redirect: %1</source>
+      <translation type="unfinished">Failed to start local server for OAuth redirect: %1</translation>
+    </message>
+    <message>
+      <source>Failed to open the web browser. Please open this URL manually: %1</source>
+      <translation type="unfinished">Failed to open the web browser. Please open this URL manually: %1</translation>
+    </message>
+    <message>
+      <source>Waiting for browser authentication...</source>
+      <translation type="unfinished">Waiting for browser authentication...</translation>
+    </message>
+    <message>
+      <source>OAuth redirect failed: %1</source>
+      <translation type="unfinished">OAuth redirect failed: %1</translation>
+    </message>
+    <message>
+      <source>OAuth redirect is missing authorization code.</source>
+      <translation type="unfinished">OAuth redirect is missing authorization code.</translation>
+    </message>
+    <message>
+      <source>Exchanging authorization code...</source>
+      <translation type="unfinished">Exchanging authorization code...</translation>
     </message>
     <message>
       <source>Not authenticated with Qobuz.</source>
@@ -5355,6 +5717,10 @@ Are you sure you want to continue?</source>
     <message>
       <source>Missing Qobuz app ID or secret.</source>
       <translation>Qobuz app ID またはシークレットがありません</translation>
+    </message>
+    <message>
+      <source>Not authenticated. Please login to Qobuz in the settings.</source>
+      <translation type="unfinished">Not authenticated. Please login to Qobuz in the settings.</translation>
     </message>
   </context>
   <context>
@@ -5368,24 +5734,12 @@ Are you sure you want to continue?</source>
       <translation>有効</translation>
     </message>
     <message>
-      <source>Qobuz support is not official and requires an API app ID and secret from a registered application to work. We can&apos;t help you getting these.</source>
-      <translation>Qobuz のサポートは公式ではなく、利用するには API app ID と登録済みアプリケーションのシークレットが必要です。私たちはあなたがこれらを手に入れるのを手伝うことはできません。</translation>
-    </message>
-    <message>
       <source>Authentication</source>
       <translation>認証</translation>
     </message>
     <message>
       <source>App ID</source>
       <translation type="unfinished">App ID</translation>
-    </message>
-    <message>
-      <source>Username</source>
-      <translation>ユーザー名</translation>
-    </message>
-    <message>
-      <source>Password</source>
-      <translation>パスワード</translation>
     </message>
     <message>
       <source>App Secret</source>
@@ -5428,28 +5782,56 @@ Are you sure you want to continue?</source>
       <translation>アルバムカバーをダウンロード</translation>
     </message>
     <message>
-      <source>Base64 encoded secret</source>
-      <translation>Base64でエンコードされたシークレット</translation>
-    </message>
-    <message>
       <source>Configuration incomplete</source>
       <translation>設定に失敗</translation>
     </message>
     <message>
-      <source>Missing app id.</source>
-      <translation>app id がありません</translation>
+      <source>Missing app id. Please fetch credentials first.</source>
+      <translation type="unfinished">Missing app id. Please fetch credentials first.</translation>
     </message>
     <message>
-      <source>Missing username.</source>
-      <translation>ユーザー名がありません</translation>
+      <source>Missing app secret. Please fetch credentials first.</source>
+      <translation type="unfinished">Missing app secret. Please fetch credentials first.</translation>
     </message>
     <message>
-      <source>Missing password.</source>
-      <translation>パスワードがありません</translation>
+      <source>Missing private key. Please fetch credentials first.</source>
+      <translation type="unfinished">Missing private key. Please fetch credentials first.</translation>
     </message>
     <message>
       <source>Authentication failed</source>
       <translation>認証に失敗しました</translation>
+    </message>
+    <message>
+      <source>Fetching...</source>
+      <translation type="unfinished">Fetching...</translation>
+    </message>
+    <message>
+      <source>Credentials fetched</source>
+      <translation type="unfinished">Credentials fetched</translation>
+    </message>
+    <message>
+      <source>Credentials have been successfully fetched. Click Login to authenticate via your browser.</source>
+      <translation type="unfinished">Credentials have been successfully fetched. Click Login to authenticate via your browser.</translation>
+    </message>
+    <message>
+      <source>Credential fetch failed</source>
+      <translation type="unfinished">Credential fetch failed</translation>
+    </message>
+    <message>
+      <source>Fetch Credentials</source>
+      <translation type="unfinished">Fetch Credentials</translation>
+    </message>
+    <message>
+      <source>Remove (Remastered), etc from song titles</source>
+      <translation type="unfinished">Remove (Remastered), etc from song titles</translation>
+    </message>
+    <message>
+      <source>Private key</source>
+      <translation type="unfinished">Private key</translation>
+    </message>
+    <message>
+      <source>Automatically fetch app ID, app secret and private key from Qobuz web player</source>
+      <translation type="unfinished">Automatically fetch app ID, app secret and private key from Qobuz web player</translation>
     </message>
   </context>
   <context>
@@ -5457,6 +5839,10 @@ Are you sure you want to continue?</source>
     <message>
       <source>Missing Qobuz app ID or secret.</source>
       <translation>Qobuz app ID またはシークレットがありません</translation>
+    </message>
+    <message>
+      <source>Not authenticated. Please log in on the Qobuz settings page.</source>
+      <translation type="unfinished">Not authenticated. Please log in on the Qobuz settings page.</translation>
     </message>
     <message>
       <source>Cancelled.</source>
@@ -5508,10 +5894,162 @@ Are you sure you want to continue?</source>
     </message>
   </context>
   <context>
+    <name>RadioBrowserSearchModel</name>
+    <message>
+      <source>Name</source>
+      <translation type="unfinished">Name</translation>
+    </message>
+    <message>
+      <source>Country</source>
+      <translation type="unfinished">Country</translation>
+    </message>
+    <message>
+      <source>Tags</source>
+      <translation type="unfinished">Tags</translation>
+    </message>
+    <message>
+      <source>Codec</source>
+      <translation type="unfinished">Codec</translation>
+    </message>
+  </context>
+  <context>
+    <name>RadioBrowserSearchView</name>
+    <message>
+      <source>Load more...</source>
+      <translation type="unfinished">Load more...</translation>
+    </message>
+    <message>
+      <source>Search for radio stations using radio-browser.info</source>
+      <translation type="unfinished">Search for radio stations using radio-browser.info</translation>
+    </message>
+    <message>
+      <source>Search radio stations...</source>
+      <translation type="unfinished">Search radio stations...</translation>
+    </message>
+    <message>
+      <source>All countries</source>
+      <translation type="unfinished">All countries</translation>
+    </message>
+    <message>
+      <source>By votes</source>
+      <translation type="unfinished">By votes</translation>
+    </message>
+    <message>
+      <source>By clicks</source>
+      <translation type="unfinished">By clicks</translation>
+    </message>
+    <message>
+      <source>By name</source>
+      <translation type="unfinished">By name</translation>
+    </message>
+    <message>
+      <source>By bitrate</source>
+      <translation type="unfinished">By bitrate</translation>
+    </message>
+    <message>
+      <source>Searching...</source>
+      <translation type="unfinished">Searching...</translation>
+    </message>
+    <message>
+      <source>No stations found.</source>
+      <translation type="unfinished">No stations found.</translation>
+    </message>
+    <message>
+      <source>%1 stations found</source>
+      <translation type="unfinished">%1 stations found</translation>
+    </message>
+    <message>
+      <source>Append to current playlist</source>
+      <translation type="unfinished">Append to current playlist</translation>
+    </message>
+  </context>
+  <context>
+    <name>RadioBrowserService</name>
+    <message>
+      <source>No Radio Browser server available.</source>
+      <translation type="unfinished">No Radio Browser server available.</translation>
+    </message>
+    <message>
+      <source>Searching Radio Browser</source>
+      <translation type="unfinished">Searching Radio Browser</translation>
+    </message>
+    <message>
+      <source>Radio Browser search failed: %1</source>
+      <translation type="unfinished">Radio Browser search failed: %1</translation>
+    </message>
+  </context>
+  <context>
     <name>RadioParadiseService</name>
     <message>
       <source>Getting %1 channels</source>
       <translation>%1 チャネルを取得中</translation>
+    </message>
+  </context>
+  <context>
+    <name>RadioSettingsPage</name>
+    <message>
+      <source>Radios</source>
+      <translation type="unfinished">Radios</translation>
+    </message>
+    <message>
+      <source>SomaFM</source>
+      <translation type="unfinished">SomaFM</translation>
+    </message>
+    <message>
+      <source>Stream quality:</source>
+      <translation type="unfinished">Stream quality:</translation>
+    </message>
+    <message>
+      <source>Radio Browser</source>
+      <translation type="unfinished">Radio Browser</translation>
+    </message>
+    <message>
+      <source>Search results limit:</source>
+      <translation type="unfinished">Search results limit:</translation>
+    </message>
+    <message>
+      <source>Hide broken stations</source>
+      <translation type="unfinished">Hide broken stations</translation>
+    </message>
+    <message>
+      <source>Default sort order:</source>
+      <translation type="unfinished">Default sort order:</translation>
+    </message>
+    <message>
+      <source>Default country:</source>
+      <translation type="unfinished">Default country:</translation>
+    </message>
+    <message>
+      <source>All countries</source>
+      <translation type="unfinished">All countries</translation>
+    </message>
+    <message>
+      <source>Highest</source>
+      <translation type="unfinished">Highest</translation>
+    </message>
+    <message>
+      <source>High</source>
+      <translation type="unfinished">High</translation>
+    </message>
+    <message>
+      <source>Low</source>
+      <translation type="unfinished">Low</translation>
+    </message>
+    <message>
+      <source>By votes</source>
+      <translation type="unfinished">By votes</translation>
+    </message>
+    <message>
+      <source>By clicks</source>
+      <translation type="unfinished">By clicks</translation>
+    </message>
+    <message>
+      <source>By name</source>
+      <translation type="unfinished">By name</translation>
+    </message>
+    <message>
+      <source>By bitrate</source>
+      <translation type="unfinished">By bitrate</translation>
     </message>
   </context>
   <context>
@@ -5546,6 +6084,14 @@ Are you sure you want to continue?</source>
     <message>
       <source>Form</source>
       <translation>フォーム</translation>
+    </message>
+    <message>
+      <source>Channels</source>
+      <translation type="unfinished">Channels</translation>
+    </message>
+    <message>
+      <source>Radio Browser</source>
+      <translation type="unfinished">Radio Browser</translation>
     </message>
   </context>
   <context>
@@ -5785,10 +6331,6 @@ Are you sure you want to continue?</source>
       <translation>ログイン</translation>
     </message>
     <message>
-      <source>Libre.fm</source>
-      <translation type="unfinished">Libre.fm</translation>
-    </message>
-    <message>
       <source>Listenbrainz</source>
       <translation type="unfinished">Listenbrainz</translation>
     </message>
@@ -5815,41 +6357,6 @@ Are you sure you want to continue?</source>
     <message>
       <source>Spotify</source>
       <translation type="unfinished">Spotify</translation>
-    </message>
-  </context>
-  <context>
-    <name>ScrobblingAPI20</name>
-    <message>
-      <source>%1 Scrobbler Authentication</source>
-      <translation>%1 Scrobbler 認証</translation>
-    </message>
-    <message>
-      <source>Open URL in web browser?</source>
-      <translation>ブラウザで開きますか?</translation>
-    </message>
-    <message>
-      <source>Press &quot;Save&quot; to copy the URL to clipboard and manually open it in a web browser.</source>
-      <translation>&quot;保存&quot;を押してURLをクリップボードにコピーし、Webブラウザで手動で開きます</translation>
-    </message>
-    <message>
-      <source>Could not open URL. Please open this URL in your browser</source>
-      <translation>URLを開けません。ブラウザで開いてください。</translation>
-    </message>
-    <message>
-      <source>Invalid reply from web browser. Missing token.</source>
-      <translation>ブラウザからの不正な応答 トークンがありません</translation>
-    </message>
-    <message>
-      <source>Received invalid reply from web browser. Try another browser.</source>
-      <translation type="unfinished">Received invalid reply from web browser. Try another browser.</translation>
-    </message>
-    <message>
-      <source>Scrobbler %1 is not authenticated!</source>
-      <translation type="unfinished">Scrobbler %1 is not authenticated!</translation>
-    </message>
-    <message>
-      <source>Scrobbler %1 error: %2</source>
-      <translation>Scrobbler %1 のエラー: %2</translation>
     </message>
   </context>
   <context>
@@ -6132,44 +6639,13 @@ Are you sure you want to continue?</source>
       <source>Edit smart playlist...</source>
       <translation>スマートプレイリストを編集...</translation>
     </message>
-  </context>
-  <context>
-    <name>SnapDialog</name>
     <message>
-      <source>Strawberry is running as a Snap</source>
-      <translation>Strawberry は Snap として実行されています</translation>
+      <source>Are you sure you want to restore the default smart playlists? This will remove all custom smart playlists</source>
+      <translation type="unfinished">Are you sure you want to restore the default smart playlists? This will remove all custom smart playlists</translation>
     </message>
     <message>
-      <source>It is detected that Strawberry is running as a Snap</source>
-      <translation type="unfinished">It is detected that Strawberry is running as a Snap</translation>
-    </message>
-    <message>
-      <source>Strawberry is slower, and has restrictions when running as a Snap. Accessing the root filesystem (/) will not work. There also might be other restrictions such as accessing certain devices or network shares.</source>
-      <translation>Strawberry はスナップとして実行する場合、遅く、制限があります。ルートファイルシステム ( /) へのアクセスはできません。特定のデバイスやネットワーク共有へのアクセスなど、他の制限もある場合があります。</translation>
-    </message>
-    <message>
-      <source>For Ubuntu there is an official PPA repository available at %1.</source>
-      <translation type="unfinished">For Ubuntu there is an official PPA repository available at %1.</translation>
-    </message>
-    <message>
-      <source>Official releases are available for Debian and Ubuntu which also work on most of their derivatives. See %1 for more information.</source>
-      <translation type="unfinished">Official releases are available for Debian and Ubuntu which also work on most of their derivatives. See %1 for more information.</translation>
-    </message>
-    <message>
-      <source>For a better experience please consider the other options above.</source>
-      <translation>より良い体験のために、上記の他のオプションを検討してください</translation>
-    </message>
-    <message>
-      <source>Copy your strawberry.conf and strawberry.db from your ~/snap directory to avoid losing configuration before you uninstall the snap:</source>
-      <translation>snapをアンインストールする前に、構成が失われないように ~/snap ディレクトリからstrawberry.confとstrawberry.dbをコピーする:</translation>
-    </message>
-    <message>
-      <source>Uninstall the snap with:</source>
-      <translation type="unfinished">Uninstall the snap with:</translation>
-    </message>
-    <message>
-      <source>Install strawberry through PPA:</source>
-      <translation type="unfinished">Install strawberry through PPA:</translation>
+      <source>Restore defaults</source>
+      <translation type="unfinished">Restore defaults</translation>
     </message>
   </context>
   <context>
@@ -6238,6 +6714,21 @@ Are you sure you want to continue?</source>
     </message>
   </context>
   <context>
+    <name>SpotifyMetadataRequest</name>
+    <message>
+      <source>Not authenticated</source>
+      <translation type="unfinished">Not authenticated</translation>
+    </message>
+    <message>
+      <source>No track ID</source>
+      <translation type="unfinished">No track ID</translation>
+    </message>
+    <message>
+      <source>No pending song for track ID</source>
+      <translation type="unfinished">No pending song for track ID</translation>
+    </message>
+  </context>
+  <context>
     <name>SpotifyRequest</name>
     <message>
       <source>Authenticating...</source>
@@ -6294,22 +6785,6 @@ Are you sure you want to continue?</source>
   </context>
   <context>
     <name>SpotifyService</name>
-    <message>
-      <source>Spotify Authentication</source>
-      <translation>Spotify 認証</translation>
-    </message>
-    <message>
-      <source>Please open this URL in your browser</source>
-      <translation>このURLをブラウザで開いてください</translation>
-    </message>
-    <message>
-      <source>Redirect missing token code or state!</source>
-      <translation>不足しているトークンコードまたは状態をリダイレクトしてください！</translation>
-    </message>
-    <message>
-      <source>Received invalid reply from web browser.</source>
-      <translation>Webブラウザから無効な返信を受け取りました。</translation>
-    </message>
     <message>
       <source>Not authenticated with Spotify.</source>
       <translation type="unfinished">Not authenticated with Spotify.</translation>
@@ -6372,6 +6847,10 @@ Are you sure you want to continue?</source>
     <message>
       <source>Authentication failed</source>
       <translation>認証に失敗しました</translation>
+    </message>
+    <message>
+      <source>Remove (Remastered), etc from song titles</source>
+      <translation type="unfinished">Remove (Remastered), etc from song titles</translation>
     </message>
   </context>
   <context>
@@ -6694,6 +7173,14 @@ Are you sure you want to continue?</source>
   <context>
     <name>TagFetcher</name>
     <message>
+      <source>Stage: %1</source>
+      <translation type="unfinished">Stage: %1</translation>
+    </message>
+    <message>
+      <source>Reason: %1</source>
+      <translation type="unfinished">Reason: %1</translation>
+    </message>
+    <message>
       <source>Identifying song</source>
       <translation type="unfinished">Identifying song</translation>
     </message>
@@ -6702,16 +7189,40 @@ Are you sure you want to continue?</source>
       <translation type="unfinished">Fingerprinting song</translation>
     </message>
     <message>
+      <source>Generated fingerprint is empty or invalid</source>
+      <translation type="unfinished">Generated fingerprint is empty or invalid</translation>
+    </message>
+    <message>
+      <source>Fingerprinting</source>
+      <translation type="unfinished">Fingerprinting</translation>
+    </message>
+    <message>
+      <source>Fingerprint length: %1</source>
+      <translation type="unfinished">Fingerprint length: %1</translation>
+    </message>
+    <message>
+      <source>Minimum required length: %1</source>
+      <translation type="unfinished">Minimum required length: %1</translation>
+    </message>
+    <message>
       <source>Downloading metadata</source>
       <translation type="unfinished">Downloading metadata</translation>
+    </message>
+    <message>
+      <source>No MusicBrainz metadata was found for this track</source>
+      <translation type="unfinished">No MusicBrainz metadata was found for this track</translation>
+    </message>
+    <message>
+      <source>MusicBrainz metadata</source>
+      <translation type="unfinished">MusicBrainz metadata</translation>
+    </message>
+    <message>
+      <source>Candidate metadata rows: 0</source>
+      <translation type="unfinished">Candidate metadata rows: 0</translation>
     </message>
   </context>
   <context>
     <name>TidalRequest</name>
-    <message>
-      <source>Authenticating...</source>
-      <translation>認証中...</translation>
-    </message>
     <message>
       <source>Receiving artists...</source>
       <translation type="unfinished">Receiving artists...</translation>
@@ -6760,32 +7271,8 @@ Are you sure you want to continue?</source>
   <context>
     <name>TidalService</name>
     <message>
-      <source>Reply from Tidal is missing query items.</source>
-      <translation>Tidal からの返信にクエリアイテムがありません。</translation>
-    </message>
-    <message>
-      <source>Missing Tidal API token.</source>
-      <translation>Tidal API トークンがありません。</translation>
-    </message>
-    <message>
-      <source>Missing Tidal username.</source>
-      <translation>Tidal ユーザー名がありません。</translation>
-    </message>
-    <message>
-      <source>Missing Tidal password.</source>
-      <translation>Tidal パスワードがありません。</translation>
-    </message>
-    <message>
-      <source>Not authenticated with Tidal and reached maximum number of login attempts.</source>
-      <translation>Tidal で認証されずログイン最大試行回数に達しました。</translation>
-    </message>
-    <message>
       <source>Not authenticated with Tidal.</source>
       <translation>Tidal で認証されませんでした。</translation>
-    </message>
-    <message>
-      <source>Missing Tidal API token, username or password.</source>
-      <translation>Tidal API トークン、ユーザー名またはパスワードがありません。</translation>
     </message>
   </context>
   <context>
@@ -6807,24 +7294,8 @@ Are you sure you want to continue?</source>
       <translation>認証</translation>
     </message>
     <message>
-      <source>Use OAuth</source>
-      <translation>OAuth を使用する</translation>
-    </message>
-    <message>
       <source>Client ID</source>
       <translation>クライアント ID</translation>
-    </message>
-    <message>
-      <source>API Token</source>
-      <translation>API トークン</translation>
-    </message>
-    <message>
-      <source>Username</source>
-      <translation>ユーザー名</translation>
-    </message>
-    <message>
-      <source>Password</source>
-      <translation>パスワード</translation>
     </message>
     <message>
       <source>Login</source>
@@ -6887,20 +7358,12 @@ Are you sure you want to continue?</source>
       <translation>Tidal Client ID がありません。</translation>
     </message>
     <message>
-      <source>Missing API token.</source>
-      <translation>API トークンがありません</translation>
-    </message>
-    <message>
-      <source>Missing username.</source>
-      <translation>ユーザー名がありません</translation>
-    </message>
-    <message>
-      <source>Missing password.</source>
-      <translation>パスワードがありません</translation>
-    </message>
-    <message>
       <source>Authentication failed</source>
       <translation>認証に失敗しました</translation>
+    </message>
+    <message>
+      <source>Remove (Remastered), etc from song titles</source>
+      <translation type="unfinished">Remove (Remastered), etc from song titles</translation>
     </message>
   </context>
   <context>
@@ -6908,10 +7371,6 @@ Are you sure you want to continue?</source>
     <message>
       <source>Not authenticated with Tidal.</source>
       <translation>Tidal で認証されませんでした。</translation>
-    </message>
-    <message>
-      <source>Missing Tidal API token, username or password.</source>
-      <translation>Tidal API トークン、ユーザー名またはパスワードがありません。</translation>
     </message>
     <message>
       <source>Cancelled.</source>
@@ -6931,10 +7390,6 @@ Are you sure you want to continue?</source>
     <message>
       <source>Tag fetcher</source>
       <translation>タグ取得ツール</translation>
-    </message>
-    <message>
-      <source>Sorry</source>
-      <translation>申し訳ありません</translation>
     </message>
     <message>
       <source>Strawberry was unable to find results for this file</source>
@@ -6973,6 +7428,10 @@ Are you sure you want to continue?</source>
       <translation>次へ</translation>
     </message>
     <message>
+      <source>Error</source>
+      <translation type="unfinished">Error</translation>
+    </message>
+    <message>
       <source>Original tags</source>
       <translation>元のタグ</translation>
     </message>
@@ -6983,6 +7442,14 @@ Are you sure you want to continue?</source>
     <message>
       <source>Saving tracks</source>
       <translation>トラックの保存中</translation>
+    </message>
+    <message>
+      <source>Album artist</source>
+      <translation type="unfinished">Album artist</translation>
+    </message>
+    <message>
+      <source>No results</source>
+      <translation type="unfinished">No results</translation>
     </message>
   </context>
   <context>
@@ -6998,6 +7465,22 @@ Are you sure you want to continue?</source>
     <message>
       <source>Click to toggle between remaining time and total time</source>
       <translation>ここをクリックすると、残り時間と合計時間の表示を切り替えます</translation>
+    </message>
+    <message>
+      <source>Normal</source>
+      <translation type="unfinished">Normal</translation>
+    </message>
+    <message>
+      <source>Moodbar</source>
+      <translation type="unfinished">Moodbar</translation>
+    </message>
+    <message>
+      <source>Moodbar style</source>
+      <translation type="unfinished">Moodbar style</translation>
+    </message>
+    <message>
+      <source>Waveform</source>
+      <translation type="unfinished">Waveform</translation>
     </message>
   </context>
   <context>
@@ -7517,6 +8000,32 @@ Are you sure you want to continue?</source>
     <message>
       <source>Password</source>
       <translation>パスワード</translation>
+    </message>
+  </context>
+  <context>
+    <name>WaveformSettingsPage</name>
+    <message>
+      <source>Waveform</source>
+      <translation type="unfinished">Waveform</translation>
+    </message>
+    <message>
+      <source>Color</source>
+      <translation type="unfinished">Color</translation>
+    </message>
+    <message>
+      <source>Select waveform color</source>
+      <translation type="unfinished">Select waveform color</translation>
+    </message>
+    <message>
+      <source>Save the .waveform files directly in the songs folders</source>
+      <translation type="unfinished">Save the .waveform files directly in the songs folders</translation>
+    </message>
+  </context>
+  <context>
+    <name>XSPFParser</name>
+    <message>
+      <source>Failed to write XSPF playlist</source>
+      <translation type="unfinished">Failed to write XSPF playlist</translation>
     </message>
   </context>
 </TS>

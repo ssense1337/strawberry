@@ -27,6 +27,7 @@
 #include <QObject>
 #include <QString>
 #include <QFile>
+#include <QSaveFile>
 #include <QIODevice>
 #include <QTextStream>
 #include <QTimer>
@@ -62,6 +63,8 @@ ScrobblerCache::ScrobblerCache(const QString &filename, QObject *parent)
 }
 
 ScrobblerCache::~ScrobblerCache() {
+  // Flush any unsaved items so scrobbles added since the last timer tick aren't lost on shutdown.
+  if (!scrobbler_cache_.isEmpty()) WriteCache();
   scrobbler_cache_.clear();
 }
 
@@ -211,7 +214,8 @@ void ScrobblerCache::WriteCache() {
   }
 
   QJsonArray array;
-  for (ScrobblerCacheItemPtr cache_item : std::as_const(scrobbler_cache_)) {
+  for (int i = 0; i < scrobbler_cache_.count(); i++) {
+    ScrobblerCacheItemPtr cache_item = scrobbler_cache_.at(i);
     QJsonObject object;
     object.insert("timestamp"_L1, QJsonValue::fromVariant(cache_item->timestamp));
     object.insert("artist"_L1, QJsonValue::fromVariant(cache_item->metadata.artist));
@@ -242,7 +246,8 @@ void ScrobblerCache::WriteCache() {
   object.insert("tracks"_L1, array);
   QJsonDocument doc(object);
 
-  QFile file(filename_);
+  // Write via QSaveFile so a crash/kill mid-write can't leave a truncated/empty cache (which ReadCache would discard).
+  QSaveFile file(filename_);
   bool result = file.open(QIODevice::WriteOnly | QIODevice::Text);
   if (!result) {
     qLog(Error) << "Unable to open scrobbler cache file" << filename_;
@@ -251,7 +256,10 @@ void ScrobblerCache::WriteCache() {
   QTextStream stream(&file);
   stream.setEncoding(QStringConverter::Encoding::Utf8);
   stream << doc.toJson();
-  file.close();
+  stream.flush();
+  if (!file.commit()) {
+    qLog(Error) << "Unable to write scrobbler cache file" << filename_;
+  }
 
 }
 
@@ -278,7 +286,8 @@ void ScrobblerCache::Remove(ScrobblerCacheItemPtr cache_item) {
 
 void ScrobblerCache::ClearSent(ScrobblerCacheItemPtrList cache_items) {
 
-  for (ScrobblerCacheItemPtr cache_item : cache_items) {
+  for (int i = 0; i < cache_items.count(); i++) {
+    ScrobblerCacheItemPtr cache_item = cache_items.at(i);
     cache_item->sent = false;
   }
 
@@ -286,15 +295,17 @@ void ScrobblerCache::ClearSent(ScrobblerCacheItemPtrList cache_items) {
 
 void ScrobblerCache::SetError(ScrobblerCacheItemPtrList cache_items) {
 
-  for (ScrobblerCacheItemPtr item : cache_items) {
-    item->error = true;
+  for (int i = 0; i < cache_items.count(); i++) {
+    ScrobblerCacheItemPtr cache_item = cache_items.at(i);
+    cache_item->error = true;
   }
 
 }
 
 void ScrobblerCache::Flush(ScrobblerCacheItemPtrList cache_items) {
 
-  for (ScrobblerCacheItemPtr cache_item : cache_items) {
+  for (int i = 0; i < cache_items.count(); i++) {
+    ScrobblerCacheItemPtr cache_item = cache_items.at(i);
     if (scrobbler_cache_.contains(cache_item)) {
       scrobbler_cache_.removeAll(cache_item);
     }

@@ -60,11 +60,14 @@
 #include "ui_playlistcontainer.h"
 #include "widgets/searchfield.h"
 #include "constants/appearancesettings.h"
+#include "constants/playlistsettings.h"
 
 using namespace Qt::Literals::StringLiterals;
 
 namespace {
 constexpr char kSettingsGroup[] = "Playlist";
+constexpr char kCurrentPlaylist[] = "current_playlist";
+constexpr char kLastLoadPlaylist[] = "last_load_playlist";
 constexpr int kFilterDelayMs = 100;
 constexpr int kFilterDelayPlaylistSizeThreshold = 5000;
 }  // namespace
@@ -137,22 +140,26 @@ PlaylistContainer::~PlaylistContainer() { delete ui_; }
 
 PlaylistView *PlaylistContainer::view() const { return ui_->playlist; }
 
-void PlaylistContainer::SetActions(QAction *new_playlist, QAction *load_playlist, QAction *save_playlist, QAction *clear_playlist, QAction *next_playlist, QAction *previous_playlist, QAction *save_all_playlists) {
+void PlaylistContainer::SetActions(const Actions &actions) {
 
-  ui_->create_new->setDefaultAction(new_playlist);
-  ui_->load->setDefaultAction(load_playlist);
-  ui_->save->setDefaultAction(save_playlist);
-  ui_->clear->setDefaultAction(clear_playlist);
+  ui_->create_new->setDefaultAction(actions.new_playlist);
+  ui_->load->setDefaultAction(actions.load_playlist);
+  ui_->save->setDefaultAction(actions.save_playlist);
+  ui_->clear->setDefaultAction(actions.clear_playlist);
 
-  ui_->tab_bar->SetActions(new_playlist, load_playlist);
+  ui_->tab_bar->SetActions(actions.new_playlist, actions.load_playlist);
 
-  QObject::connect(new_playlist, &QAction::triggered, this, &PlaylistContainer::NewPlaylist);
-  QObject::connect(save_playlist, &QAction::triggered, this, &PlaylistContainer::SaveCurrentPlaylist);
-  QObject::connect(load_playlist, &QAction::triggered, this, &PlaylistContainer::LoadPlaylist);
-  QObject::connect(clear_playlist, &QAction::triggered, this, &PlaylistContainer::ClearPlaylist);
-  QObject::connect(next_playlist, &QAction::triggered, this, &PlaylistContainer::GoToNextPlaylistTab);
-  QObject::connect(previous_playlist, &QAction::triggered, this, &PlaylistContainer::GoToPreviousPlaylistTab);
-  QObject::connect(save_all_playlists, &QAction::triggered, &*manager_, &PlaylistManager::SaveAllPlaylists);
+  QObject::connect(actions.new_playlist, &QAction::triggered, this, &PlaylistContainer::NewPlaylist);
+  QObject::connect(actions.load_playlist, &QAction::triggered, this, &PlaylistContainer::LoadPlaylist);
+  QObject::connect(actions.save_playlist, &QAction::triggered, this, &PlaylistContainer::SaveCurrentPlaylist);
+  QObject::connect(actions.clear_playlist, &QAction::triggered, this, &PlaylistContainer::ClearPlaylist);
+  QObject::connect(actions.next_playlist, &QAction::triggered, this, &PlaylistContainer::GoToNextPlaylistTab);
+  QObject::connect(actions.previous_playlist, &QAction::triggered, this, &PlaylistContainer::GoToPreviousPlaylistTab);
+  QObject::connect(actions.last_playlist, &QAction::triggered, this, &PlaylistContainer::GoToLastPlaylistTab);
+  QObject::connect(actions.active_playlist, &QAction::triggered, this, &PlaylistContainer::GoToActivePlaylistTab);
+  QObject::connect(actions.close_playlist, &QAction::triggered, &*ui_->tab_bar, &PlaylistTabBar::CloseCurrentTab);
+  QObject::connect(&*ui_->tab_bar, &PlaylistTabBar::LastTabCloseRequested, this, &PlaylistContainer::LastTabCloseRequested);
+  QObject::connect(actions.save_all_playlists, &QAction::triggered, &*manager_, &PlaylistManager::SaveAllPlaylists);
 
 }
 
@@ -243,7 +250,7 @@ void PlaylistContainer::ReloadSettings() {
 
   Settings s;
   s.beginGroup(AppearanceSettings::kSettingsGroup);
-  int iconsize = s.value(AppearanceSettings::kIconSizePlaylistButtons, 20).toInt();
+  int iconsize = s.value(AppearanceSettings::kIconSizePlaylistButtons, AppearanceSettings::kDefaultIconSizePlaylistButtons).toInt();
   s.endGroup();
 
   ui_->create_new->setIconSize(QSize(iconsize, iconsize));
@@ -254,9 +261,9 @@ void PlaylistContainer::ReloadSettings() {
   ui_->redo->setIconSize(QSize(iconsize, iconsize));
   ui_->search_field->setIconSize(iconsize);
 
-  s.beginGroup(kSettingsGroup);
-  const bool playlist_clear = s.value("playlist_clear", true).toBool();
-  const bool show_toolbar = s.value("show_toolbar", true).toBool();
+  s.beginGroup(PlaylistSettings::kSettingsGroup);
+  const bool playlist_clear = s.value(PlaylistSettings::kPlaylistClear, PlaylistSettings::kDefaultPlaylistClear).toBool();
+  const bool show_toolbar = s.value(PlaylistSettings::kShowToolbar, PlaylistSettings::kDefaultShowToolbar).toBool();
   s.endGroup();
 
   if (playlist_clear) {
@@ -310,7 +317,7 @@ void PlaylistContainer::PlaylistAdded(const int id, const QString &name, const b
   // Are we start up, should we select this tab?
   Settings s;
   s.beginGroup(kSettingsGroup);
-  const int current_playlist = s.value("current_playlist", 1).toInt();
+  const int current_playlist = s.value(kCurrentPlaylist, 1).toInt();
   s.endGroup();
 
   if (starting_up_ && current_playlist == id) {
@@ -354,12 +361,12 @@ void PlaylistContainer::LoadPlaylist() {
 
   Settings s;
   s.beginGroup(kSettingsGroup);
-  QString filename = s.value("last_load_playlist").toString();
+  QString filename = s.value(kLastLoadPlaylist).toString();
   filename = QFileDialog::getOpenFileName(this, tr("Load playlist"), filename, manager_->parser()->filters(PlaylistParser::Type::Load));
 
   if (filename.isNull()) return;
 
-  s.setValue("last_load_playlist", filename);
+  s.setValue(kLastLoadPlaylist, filename);
 
   manager_->Load(filename);
 
@@ -394,13 +401,33 @@ void PlaylistContainer::GoToPreviousPlaylistTab() {
 
 }
 
+void PlaylistContainer::GoToLastPlaylistTab() {
+
+  if (ui_->tab_bar->count() == 0) return;
+  const int id_last = ui_->tab_bar->id_of(ui_->tab_bar->count() - 1);
+  if (id_last == manager_->current_id()) return;
+  manager_->SetCurrentPlaylist(id_last);
+
+}
+
+void PlaylistContainer::GoToActivePlaylistTab() {
+
+  const int active_id = manager_->active_id();
+
+  // Do nothing if no playlist is currently playing: jumping to an arbitrary tab (e.g. the first one) would be surprising when the user asked to go to "the playing tab" and none exists.
+  if (active_id == -1 || active_id == manager_->current_id()) return;
+
+  manager_->SetCurrentPlaylist(active_id);
+
+}
+
 void PlaylistContainer::Save() {
 
   if (starting_up_) return;
 
   Settings s;
   s.beginGroup(kSettingsGroup);
-  s.setValue("current_playlist", ui_->tab_bar->current_id());
+  s.setValue(kCurrentPlaylist, ui_->tab_bar->current_id());
   s.endGroup();
 
 }

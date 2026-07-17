@@ -128,7 +128,7 @@ void FileView::ReloadSettings() {
 
   Settings s;
   s.beginGroup(AppearanceSettings::kSettingsGroup);
-  int iconsize = s.value(AppearanceSettings::kIconSizeLeftPanelButtons, 22).toInt();
+  int iconsize = s.value(AppearanceSettings::kIconSizeLeftPanelButtons, AppearanceSettings::kDefaultIconSizeLeftPanelButtons).toInt();
   s.endGroup();
 
   ui_->back->setIconSize(QSize(iconsize, iconsize));
@@ -194,6 +194,12 @@ void FileView::ChangeFilePath(const QString &new_path_native) {
 
   QFileInfo info(new_path);
   if (!info.exists() || !info.isDir()) {
+    return;
+  }
+
+  // model_ is created lazily in showEvent; this slot can fire before that.
+  if (!model_) {
+    lazy_set_path_ = new_path;
     return;
   }
 
@@ -311,8 +317,8 @@ void FileView::DeleteFinished(const SongList &songs_with_errors) {
   if (songs_with_errors.isEmpty()) return;
 
   OrganizeErrorDialog *dialog = new OrganizeErrorDialog(this);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
   dialog->Show(OrganizeErrorDialog::OperationType::Delete, songs_with_errors);
-  // It deletes itself when the user closes it
 
 }
 
@@ -448,7 +454,7 @@ void FileView::SaveTreeRootPaths() {
 
 void FileView::AddRootButtonClicked() {
 
-  const QString dir = QFileDialog::getExistingDirectory(this, tr("Select folder to add as tree root"), tree_root_paths_.isEmpty() ? QDir::homePath() : tree_root_paths_.first(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+  const QString dir = QFileDialog::getExistingDirectory(this, tr("Select folder to add as tree root"), tree_root_paths_.isEmpty() ? QDir::homePath() : tree_root_paths_.constFirst(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
   if (!dir.isEmpty()) {
     AddTreeRootPath(dir);
   }

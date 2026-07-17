@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2025, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2025-2026, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,12 +41,18 @@ HttpBaseRequest::~HttpBaseRequest() {
 
   if (!replies_.isEmpty()) {
     qLog(Debug) << "Aborting" << replies_.count() << "network replies";
-    while (!replies_.isEmpty()) {
-      QNetworkReply *reply = replies_.takeFirst();
-      QObject::disconnect(reply, nullptr, this, nullptr);
-      reply->abort();
-      reply->deleteLater();
-    }
+    AbortNetworkReplies();
+  }
+
+}
+
+void HttpBaseRequest::AbortNetworkReplies() {
+
+  while (!replies_.isEmpty()) {
+    QNetworkReply *reply = replies_.takeFirst();
+    QObject::disconnect(reply, nullptr, this, nullptr);
+    reply->abort();
+    reply->deleteLater();
   }
 
 }
@@ -87,7 +93,7 @@ QNetworkReply *HttpBaseRequest::CreateGetRequest(const QUrl &url, const QUrlQuer
     network_request.setRawHeader("Authorization", authorization_header());
   }
   if (fake_user_agent_header) {
-    network_request.setHeader(QNetworkRequest::UserAgentHeader, u"Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0"_s);
+    network_request.setHeader(QNetworkRequest::UserAgentHeader, u"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"_s);
   }
   QNetworkReply *reply = network_->get(network_request);
   QObject::connect(reply, &QNetworkReply::sslErrors, this, &HttpBaseRequest::HandleSSLErrors);

@@ -127,8 +127,7 @@ void GlobalShortcutsSettingsPage::Load() {
     }
 #endif
 
-    const QList<GlobalShortcutsManager::Shortcut> shortcuts = global_shortcuts_manager_->shortcuts().values();
-    for (const GlobalShortcutsManager::Shortcut &i : shortcuts) {
+    for (const GlobalShortcutsManager::Shortcut &i : global_shortcuts_manager_->shortcuts()) {
       Shortcut shortcut;
       shortcut.s = i;
       shortcut.key = i.action->shortcut();
@@ -148,13 +147,13 @@ void GlobalShortcutsSettingsPage::Load() {
 
 #ifdef HAVE_KGLOBALACCEL_GLOBALSHORTCUTS
   if (ui_->widget_kglobalaccel->isVisibleTo(this)) {
-    ui_->checkbox_kglobalaccel->setChecked(s.value(kUseKGlobalAccel, true).toBool());
+    ui_->checkbox_kglobalaccel->setChecked(s.value(kUseKGlobalAccel, kDefaultUseKGlobalAccel).toBool());
   }
 #endif
 
 #ifdef HAVE_X11_GLOBALSHORTCUTS
   if (ui_->widget_x11->isVisibleTo(this)) {
-    ui_->checkbox_x11->setChecked(s.value(kUseX11, false).toBool());
+    ui_->checkbox_x11->setChecked(s.value(kUseX11, kDefaultUseX11).toBool());
   }
 #endif
 
@@ -231,6 +230,7 @@ void GlobalShortcutsSettingsPage::SetShortcut(const QString &id, const QKeySeque
 
 void GlobalShortcutsSettingsPage::ItemClicked(QTreeWidgetItem *item) {
 
+  if (!item) return;
   current_id_ = item->data(0, Qt::UserRole).toString();
   const Shortcut shortcut = shortcuts_.value(current_id_);
 
@@ -259,7 +259,7 @@ void GlobalShortcutsSettingsPage::NoneClicked() {
 
 void GlobalShortcutsSettingsPage::DefaultClicked() {
 
-  SetShortcut(current_id_, shortcuts_[current_id_].s.default_key);
+  SetShortcut(current_id_, shortcuts_.value(current_id_).s.default_key);
   set_changed();
 
 }

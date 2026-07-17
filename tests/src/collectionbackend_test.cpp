@@ -30,6 +30,7 @@
 
 #include "includes/scoped_ptr.h"
 #include "includes/shared_ptr.h"
+#include "core/logging.h"
 #include "core/song.h"
 #include "core/memorydatabase.h"
 #include "constants/timeconstants.h"
@@ -63,8 +64,8 @@ class CollectionBackendTest : public ::testing::Test {
     return ret;
   }
 
-  SharedPtr<Database> database_;  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
-  ScopedPtr<CollectionBackend> backend_;  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
+  SharedPtr<Database> database_;
+  ScopedPtr<CollectionBackend> backend_;
 };
 
 TEST_F(CollectionBackendTest, EmptyDatabase) {
@@ -153,7 +154,7 @@ class SingleSong : public CollectionBackendTest {
     EXPECT_EQ(1, list[0].directory_id());
   }
 
-  Song song_;  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
+  Song song_;
 
 };
 
@@ -347,6 +348,122 @@ TEST_F(SingleSong, MarkSongsUnavailable) {
 
   CollectionBackend::AlbumList albums = backend_->GetAllAlbums();
   EXPECT_EQ(0, albums.size());
+
+}
+
+// Regression tests for duplicate-URL insertion: AddOrUpdateSongs() must not create a second row when a song with id == -1 arrives for a URL that is already in the database.
+
+TEST_F(SingleSong, ReAddSameUrlDoesNotDuplicate) {
+
+  AddDummySong();
+  if (HasFatalFailure()) return;
+
+  // The collection watcher would normally set the id, but a missed match hands us a fresh song
+  // (id == -1) for a URL that already exists.
+  Song readd(song_);
+  readd.set_id(-1);
+  readd.set_title(u"Title changed"_s);
+
+  QSignalSpy added_spy(&*backend_, &CollectionBackend::SongsAdded);
+  QSignalSpy changed_spy(&*backend_, &CollectionBackend::SongsChanged);
+
+  backend_->AddOrUpdateSongs(SongList() << readd);
+
+  EXPECT_EQ(0, added_spy.count());
+  EXPECT_EQ(1, changed_spy.count());
+
+  const SongList all = backend_->GetAllSongs();
+  ASSERT_EQ(1, all.count());
+  EXPECT_EQ(1, all[0].id());
+  EXPECT_EQ(u"Title changed"_s, all[0].title());
+
+}
+
+TEST_F(SingleSong, ReAddSameUrlUnderDifferentDirectoryDoesNotDuplicate) {
+
+  AddDummySong();
+  if (HasFatalFailure()) return;
+
+  backend_->AddDirectory(u"/tmp/sub"_s);  // ID 2
+
+  // Same URL discovered under a different directory_id (the watcher's match snapshot is dir-scoped).
+  Song readd(song_);
+  readd.set_id(-1);
+  readd.set_directory_id(2);
+
+  backend_->AddOrUpdateSongs(SongList() << readd);
+
+  const SongList all = backend_->GetAllSongs();
+  ASSERT_EQ(1, all.count());           // not duplicated across directories
+  EXPECT_EQ(2, all[0].directory_id());  // and the existing row is healed to the new directory
+
+}
+
+TEST_F(SingleSong, ReAddSameUrlPreservesPlaycountAndRating) {
+
+  song_.set_playcount(7);
+  song_.set_rating(0.8F);
+  AddDummySong();
+  if (HasFatalFailure()) return;
+
+  // A re-scan hands us freshly-read (zeroed) statistics.
+  Song readd(song_);
+  readd.set_id(-1);
+  readd.set_playcount(0);
+  readd.set_rating(0.0F);
+
+  backend_->AddOrUpdateSongs(SongList() << readd);
+
+  const SongList all = backend_->GetAllSongs();
+  ASSERT_EQ(1, all.count());
+  EXPECT_EQ(7U, all[0].playcount());
+  EXPECT_FLOAT_EQ(0.8F, all[0].rating());
+
+}
+
+TEST_F(SingleSong, ReAddRestoresUnavailableSongWithoutDuplicating) {
+
+  AddDummySong();
+  if (HasFatalFailure()) return;
+
+  Song unavailable(song_);
+  unavailable.set_id(1);
+  backend_->MarkSongsUnavailable(SongList() << unavailable);
+  ASSERT_TRUE(backend_->GetSongById(1).unavailable());
+
+  // The file reappears and the watcher misses the (unavailable) row: it must be restored, not duplicated.
+  Song readd(song_);
+  readd.set_id(-1);
+
+  backend_->AddOrUpdateSongs(SongList() << readd);
+
+  const SongList all = backend_->GetAllSongs();
+  ASSERT_EQ(1, all.count());
+  EXPECT_EQ(1, all[0].id());
+  EXPECT_FALSE(all[0].unavailable());
+
+}
+
+TEST_F(CollectionBackendTest, SameUrlDifferentBeginningKeptSeparate) {
+
+  backend_->AddDirectory(u"/tmp"_s);
+
+  // Two CUE tracks share one media file (same URL) but have different beginnings: they must stay distinct.
+  Song track1 = MakeDummySong(1);
+  track1.set_title(u"Track 1"_s);
+  track1.set_artist(u"Artist"_s);
+  track1.set_album(u"Album"_s);
+  track1.set_beginning_nanosec(0);
+
+  Song track2 = MakeDummySong(1);
+  track2.set_title(u"Track 2"_s);
+  track2.set_artist(u"Artist"_s);
+  track2.set_album(u"Album"_s);
+  track2.set_beginning_nanosec(180000000000LL);
+
+  backend_->AddOrUpdateSongs(SongList() << track1 << track2);
+
+  EXPECT_EQ(2, backend_->GetAllSongs().count());
 
 }
 
@@ -605,6 +722,72 @@ TEST_F(UpdateSongsBySongID, UpdateSongsBySongID) {
     EXPECT_EQ(changed_songs[0].song_id(), u"song1"_s);
     EXPECT_EQ(changed_songs[1].song_id(), u"song6"_s);
 
+  }
+
+}
+
+class ChangeDirPath : public CollectionBackendTest {
+ protected:
+  void SetUp() override {
+    CollectionBackendTest::SetUp();
+    backend_->AddDirectory(u"/mnt/music"_s);  // Gets directory ID 1.
+  }
+};
+
+TEST_F(ChangeDirPath, RewritesSongPaths) {
+
+  Song song(Song::Source::Collection);
+  song.set_directory_id(1);
+  song.set_title(u"Title"_s);
+  song.set_album(u"Album"_s);
+  song.set_artist(u"Artist"_s);
+  song.set_url(QUrl::fromLocalFile(u"/mnt/music/album/song.flac"_s));
+  song.set_length_nanosec(kNsecPerSec);
+  song.set_mtime(1);
+  song.set_ctime(1);
+  song.set_filesize(1);
+  song.set_valid(true);
+  backend_->AddOrUpdateSongs(SongList() << song);
+
+  {
+    SongList songs = backend_->FindSongsInDirectory(1);
+    ASSERT_EQ(1, songs.count());
+    EXPECT_EQ(QUrl::fromLocalFile(u"/mnt/music/album/song.flac"_s), songs[0].url());
+  }
+
+  // Move the directory to a new mount point.
+  backend_->ChangeDirPath(1, u"/mnt/music"_s, u"/mnt/newmusic"_s);
+
+  // The song's url must be rewritten to the new path. If ChangeDirPath's UPDATE fails the transaction rolls back and the url stays unchanged - which is what this test guards against.
+  {
+    SongList songs = backend_->FindSongsInDirectory(1);
+    ASSERT_EQ(1, songs.count());
+    EXPECT_EQ(QUrl::fromLocalFile(u"/mnt/newmusic/album/song.flac"_s), songs[0].url());
+  }
+
+}
+
+TEST_F(ChangeDirPath, RewritesSubdirectoryPaths) {
+
+  // Subdirectory paths are stored as plain filesystem paths (not file:// URLs).
+  CollectionSubdirectory subdir;
+  subdir.directory_id = 1;
+  subdir.path = u"/mnt/music/album"_s;
+  subdir.mtime = 1;
+  backend_->AddOrUpdateSubdirs(CollectionSubdirectoryList() << subdir);
+
+  {
+    CollectionSubdirectoryList subdirs = backend_->SubdirsInDirectory(1);
+    ASSERT_EQ(1, subdirs.count());
+    EXPECT_EQ(u"/mnt/music/album"_s, subdirs[0].path);
+  }
+
+  backend_->ChangeDirPath(1, u"/mnt/music"_s, u"/mnt/newmusic"_s);
+
+  {
+    CollectionSubdirectoryList subdirs = backend_->SubdirsInDirectory(1);
+    ASSERT_EQ(1, subdirs.count());
+    EXPECT_EQ(u"/mnt/newmusic/album"_s, subdirs[0].path);
   }
 
 }

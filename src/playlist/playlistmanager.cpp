@@ -150,6 +150,7 @@ QList<Playlist*> PlaylistManager::GetAllPlaylists() const {
 
 QItemSelection PlaylistManager::selection(const int id) const {
   QMap<int, Data>::const_iterator it = playlists_.find(id);
+  if (it == playlists_.constEnd()) return QItemSelection();
   return it->selection;
 }
 
@@ -167,6 +168,9 @@ Playlist *PlaylistManager::AddPlaylist(const int id, const QString &name, const 
   QObject::connect(ret, &Playlist::Error, this, &PlaylistManager::Error);
   QObject::connect(ret, &Playlist::PlayRequested, this, &PlaylistManager::PlayRequested);
   QObject::connect(ret, &Playlist::Rename, this, &PlaylistManager::Rename);
+  QObject::connect(ret, &Playlist::PlaylistItemsAdded, this, &PlaylistManager::PlaylistItemsAdded);
+  QObject::connect(ret, &Playlist::PlaylistItemsRemoved, this, &PlaylistManager::PlaylistItemsRemoved);
+  QObject::connect(ret, &Playlist::PlaylistItemMetadataChanged, this, &PlaylistManager::PlaylistItemMetadataChanged);
   QObject::connect(playlist_container_->view(), &PlaylistView::ColumnAlignmentChanged, ret, &Playlist::SetColumnAlignment);
   QObject::connect(&*current_albumcover_loader_, &CurrentAlbumCoverLoader::AlbumCoverLoaded, ret, &Playlist::AlbumCoverLoaded);
 
@@ -230,7 +234,7 @@ void PlaylistManager::Save(const int id, const QString &playlist_name, const QSt
   else {
     // Playlist is not in the playlist manager: probably save action was triggered from the left sidebar and the playlist isn't loaded.
     QFuture<SongList> future = QtConcurrent::run(&PlaylistBackend::GetPlaylistSongs, playlist_backend_, id);
-    QFutureWatcher<SongList> *watcher = new QFutureWatcher<SongList>();
+    QFutureWatcher<SongList> *watcher = new QFutureWatcher<SongList>(this);
     QObject::connect(watcher, &QFutureWatcher<SongList>::finished, this, [this, watcher, playlist_name, filename, path_type]() {
       ItemsLoadedForSavePlaylist(playlist_name, watcher->result(), filename, path_type);
       watcher->deleteLater();
@@ -269,7 +273,7 @@ void PlaylistManager::SaveWithUI(const int id, const QString &playlist_name) {
   }
 
   s.beginGroup(PlaylistSettings::kSettingsGroup);
-  PlaylistSettings::PathType path_type = static_cast<PlaylistSettings::PathType>(s.value(PlaylistSettings::kPathType, static_cast<int>(PlaylistSettings::PathType::Automatic)).toInt());
+  PlaylistSettings::PathType path_type = static_cast<PlaylistSettings::PathType>(s.value(PlaylistSettings::kPathType, static_cast<int>(PlaylistSettings::kDefaultPathType)).toInt());
   s.endGroup();
   if (path_type == PlaylistSettings::PathType::Ask_User) {
     PlaylistSaveOptionsDialog optionsdialog;
@@ -372,7 +376,7 @@ void PlaylistManager::SetCurrentPlaylist(const int id) {
   }
 
   current_ = id;
-  Q_EMIT CurrentChanged(current(), playlists_[id].scroll_position);
+  Q_EMIT CurrentChanged(current(), playlists_.value(id).scroll_position);
   UpdateSummaryText();
 
 }
@@ -477,7 +481,8 @@ void PlaylistManager::UpdateCollectionSongs(const SongList &songs) {
   for (const Song &song : songs) {
     for (const Data &data : std::as_const(playlists_)) {
       const PlaylistItemPtrList items = data.p->collection_items(song.source(), song.id());
-      for (PlaylistItemPtr item : items) {
+      for (int i = 0; i < items.count(); ++i) {
+        PlaylistItemPtr item = items.at(i);
         if (item->EffectiveMetadata().directory_id() != song.directory_id()) continue;
         data.p->UpdateItemMetadata(item, song, false);
       }
@@ -498,19 +503,19 @@ void PlaylistManager::SongChangeRequestProcessed(const QUrl &url, const bool val
 
 }
 
-void PlaylistManager::InsertUrls(const int id, const QList<QUrl> &urls, const int pos, const bool play_now, const bool enqueue) {
+void PlaylistManager::InsertUrls(const int id, const QList<QUrl> &urls, const int pos, const bool play_now, const bool enqueue, const bool signal) {
 
   Q_ASSERT(playlists_.contains(id));
 
-  playlists_[id].p->InsertUrls(urls, pos, play_now, enqueue);
+  playlists_.constFind(id)->p->InsertUrls(urls, pos, play_now, enqueue, /*enqueue_next=*/false, signal);
 
 }
 
-void PlaylistManager::InsertSongs(const int id, const SongList &songs, const int pos, const bool play_now, const bool enqueue) {
+void PlaylistManager::InsertSongs(const int id, const SongList &songs, const int pos, const bool play_now, const bool enqueue, const bool signal) {
 
   Q_ASSERT(playlists_.contains(id));
 
-  playlists_[id].p->InsertSongs(songs, pos, play_now, enqueue);
+  playlists_.constFind(id)->p->InsertSongs(songs, pos, play_now, enqueue, /*enqueue_next=*/false, signal);
 
 }
 
@@ -518,7 +523,7 @@ void PlaylistManager::RemoveItemsWithoutUndo(const int id, const QList<int> &ind
 
   Q_ASSERT(playlists_.contains(id));
 
-  playlists_[id].p->RemoveItemsWithoutUndo(indices);
+  playlists_.constFind(id)->p->RemoveItemsWithoutUndo(indices);
 
 }
 
@@ -598,7 +603,7 @@ void PlaylistManager::SaveAllPlaylists() {
 
   Settings s;
   s.beginGroup(PlaylistSettings::kSettingsGroup);
-  PlaylistSettings::PathType path_type = static_cast<PlaylistSettings::PathType>(s.value(PlaylistSettings::kPathType, static_cast<int>(PlaylistSettings::PathType::Automatic)).toInt());
+  PlaylistSettings::PathType path_type = static_cast<PlaylistSettings::PathType>(s.value(PlaylistSettings::kPathType, static_cast<int>(PlaylistSettings::kDefaultPathType)).toInt());
   s.endGroup();
   if (path_type == PlaylistSettings::PathType::Ask_User) {
     PlaylistSaveOptionsDialog optionsdialog;

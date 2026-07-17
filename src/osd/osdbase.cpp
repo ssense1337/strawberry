@@ -69,16 +69,16 @@ void OSDBase::ReloadSettings() {
 
   Settings s;
   s.beginGroup(OSDSettings::kSettingsGroup);
-  type_ = static_cast<OSDSettings::Type>(s.value(OSDSettings::kType, static_cast<int>(OSDSettings::Type::Native)).toInt());
-  timeout_msec_ = s.value(OSDSettings::kTimeout, 5000).toInt();
-  show_on_volume_change_ = s.value("ShowOnVolumeChange", false).toBool();
-  show_art_ = s.value("ShowArt", true).toBool();
-  show_on_play_mode_change_ = s.value("ShowOnPlayModeChange", true).toBool();
-  show_on_pause_ = s.value("ShowOnPausePlayback", true).toBool();
-  show_on_resume_ = s.value("ShowOnResumePlayback", false).toBool();
-  use_custom_text_ = s.value(("CustomTextEnabled"), false).toBool();
-  custom_text1_ = s.value("CustomText1").toString();
-  custom_text2_ = s.value("CustomText2").toString();
+  type_ = static_cast<OSDSettings::Type>(s.value(OSDSettings::kType, static_cast<int>(OSDSettings::kDefaultType)).toInt());
+  timeout_msec_ = s.value(OSDSettings::kTimeout, OSDSettings::kDefaultTimeout).toInt();
+  show_on_volume_change_ = s.value(OSDSettings::kShowOnVolumeChange, OSDSettings::kDefaultShowOnVolumeChange).toBool();
+  show_art_ = s.value(OSDSettings::kShowArt, OSDSettings::kDefaultShowArt).toBool();
+  show_on_play_mode_change_ = s.value(OSDSettings::kShowOnPlayModeChange, OSDSettings::kDefaultShowOnPlayModeChange).toBool();
+  show_on_pause_ = s.value(OSDSettings::kShowOnPausePlayback, OSDSettings::kDefaultShowOnPausePlayback).toBool();
+  show_on_resume_ = s.value(OSDSettings::kShowOnResumePlayback, OSDSettings::kDefaultShowOnResumePlayback).toBool();
+  use_custom_text_ = s.value(OSDSettings::kCustomTextEnabled, OSDSettings::kDefaultCustomTextEnabled).toBool();
+  custom_text1_ = s.value(OSDSettings::kCustomText1).toString();
+  custom_text2_ = s.value(OSDSettings::kCustomText2).toString();
   s.endGroup();
 
   if (!IsTypeSupported(type_)) {
@@ -367,6 +367,7 @@ void OSDBase::ShuffleModeChanged(const PlaylistSequence::ShuffleMode mode) {
       case PlaylistSequence::ShuffleMode::All:         current_mode = tr("Shuffle all");     break;
       case PlaylistSequence::ShuffleMode::InsideAlbum: current_mode = tr("Shuffle tracks in this album"); break;
       case PlaylistSequence::ShuffleMode::Albums:      current_mode = tr("Shuffle albums");  break;
+      case PlaylistSequence::ShuffleMode::Grouping:    current_mode = tr("Shuffle grouping"); break;
     }
     ShowMessage(QCoreApplication::applicationName(), current_mode);
   }

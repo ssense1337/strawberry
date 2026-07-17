@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2026, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,9 @@
 using namespace Qt::Literals::StringLiterals;
 
 namespace {
-constexpr int kSearchTimeoutMs = 5000;
+// Two-stage search timeout: at kSearchEarlyTimeoutMs we finish the search if any provider has returned results so far; at kSearchTimeoutMs we finish unconditionally even if some providers haven't responded yet.
+constexpr int kSearchEarlyTimeoutMs = 6000;
+constexpr int kSearchTimeoutMs = 15000;
 constexpr int kGoodLyricsLength = 60;
 constexpr float kHighScore = 2.5;
 }  // namespace
@@ -45,11 +47,16 @@ LyricsFetcherSearch::LyricsFetcherSearch(const quint64 id, const LyricsSearchReq
     : QObject(parent),
       id_(id),
       request_(request),
+      timer_search_early_timeout_(new QTimer(this)),
       timer_search_timeout_(new QTimer(this)),
       cancel_requested_(false),
       finished_(false) {
 
+  QObject::connect(timer_search_early_timeout_, &QTimer::timeout, this, &LyricsFetcherSearch::EarlyTimeout);
   QObject::connect(timer_search_timeout_, &QTimer::timeout, this, &LyricsFetcherSearch::SearchTimeout);
+
+  timer_search_early_timeout_->setSingleShot(true);
+  timer_search_early_timeout_->setInterval(kSearchEarlyTimeoutMs);
 
   timer_search_timeout_->setSingleShot(true);
   timer_search_timeout_->setInterval(kSearchTimeoutMs);
@@ -91,6 +98,7 @@ void LyricsFetcherSearch::Start(SharedPtr<LyricsProviders> lyrics_providers) {
     return;
   }
 
+  timer_search_early_timeout_->start();
   timer_search_timeout_->start();
 
 }
@@ -102,7 +110,7 @@ void LyricsFetcherSearch::ProviderSearchFinished(const int id, const LyricsSearc
 
   LyricsSearchResults results_copy(results);
   float higest_score = 0.0;
-  for (int i = 0; i < results_copy.count(); ++i) {
+  for (int i = 0; i < results_copy.size(); ++i) {
     results_copy[i].provider = provider->name();
     results_copy[i].score = 0.0;
     if (results_copy[i].artist.compare(request_.albumartist, Qt::CaseInsensitive) == 0 || results_copy[i].artist.compare(request_.artist, Qt::CaseInsensitive) == 0) {
@@ -117,7 +125,7 @@ void LyricsFetcherSearch::ProviderSearchFinished(const int id, const LyricsSearc
     if (results_copy[i].artist.compare(request_.artist, Qt::CaseInsensitive) != 0 && results_copy[i].title.compare(request_.title, Qt::CaseInsensitive) != 0) {
       results_copy[i].score -= 1.5;
     }
-    if (results_copy[i].lyrics.length() > kGoodLyricsLength) results_copy[i].score += 1.0;
+    if (results_copy[i].lyrics.size() > kGoodLyricsLength) results_copy[i].score += 1.0;
     if (results_copy[i].score > higest_score) higest_score = results_copy[i].score;
   }
 
@@ -136,11 +144,24 @@ void LyricsFetcherSearch::ProviderSearchFinished(const int id, const LyricsSearc
 
 }
 
+void LyricsFetcherSearch::EarlyTimeout() {
+
+  if (finished_) return;
+
+  // Wait for the hard timeout if no provider has produced results yet.
+  if (results_.isEmpty()) return;
+
+  qLog(Debug) << "Lyrics search for" << request_.artist << request_.album << request_.title << "finishing at early timeout with" << results_.size() << "result(s) from" << pending_requests_.size() << "still-pending provider(s)";
+
+  FinishSearch();
+
+}
+
 void LyricsFetcherSearch::SearchTimeout() {
 
   if (finished_) return;
 
-  qLog(Debug) << "Lyrics search for" << request_.artist << request_.album << request_.title << "timed out for remaining" << pending_requests_.count() << "providers";
+  qLog(Debug) << "Lyrics search for" << request_.artist << request_.album << request_.title << "timed out for remaining" << pending_requests_.size() << "providers";
 
   FinishSearch();
 
@@ -154,6 +175,9 @@ void LyricsFetcherSearch::FinishSearch() {
     CancelRequests();
   }
 
+  if (timer_search_early_timeout_->isActive()) {
+    timer_search_early_timeout_->stop();
+  }
   if (timer_search_timeout_->isActive()) {
     timer_search_timeout_->stop();
   }

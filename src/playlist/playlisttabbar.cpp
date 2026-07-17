@@ -44,6 +44,7 @@
 #include <QSettings>
 
 #include "includes/shared_ptr.h"
+#include "constants/playlistsettings.h"
 #include "core/logging.h"
 #include "core/iconloader.h"
 #include "core/mimedata.h"
@@ -57,7 +58,6 @@
 using namespace Qt::Literals::StringLiterals;
 
 namespace {
-constexpr char kSettingsGroup[] = "PlaylistTabBar";
 constexpr int kDragHoverTimeout = 500;
 }  // namespace
 
@@ -143,11 +143,12 @@ void PlaylistTabBar::contextMenuEvent(QContextMenuEvent *e) {
 
 void PlaylistTabBar::mouseReleaseEvent(QMouseEvent *e) {
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 11, 0)
   if (e->button() == Qt::MiddleButton) {
-    // Update menu index
     menu_index_ = tabAt(e->pos());
     CloseSlot();
   }
+#endif
 
   QTabBar::mouseReleaseEvent(e);
 
@@ -222,9 +223,9 @@ void PlaylistTabBar::CloseSlot() {
   const int playlist_id = tabData(menu_index_).toInt();
 
   Settings s;
-  s.beginGroup(kSettingsGroup);
+  s.beginGroup(PlaylistSettings::kSettingsGroup);
 
-  const bool ask_for_delete = s.value("warn_close_playlist", true).toBool();
+  const bool ask_for_delete = s.value(PlaylistSettings::kWarnClosePlaylist, PlaylistSettings::kDefaultWarnClosePlaylist).toBool();
 
   if (ask_for_delete && !manager_->IsPlaylistFavorite(playlist_id) && !manager_->playlist(playlist_id)->GetAllSongs().empty()) {
     QMessageBox confirmation_box;
@@ -262,7 +263,7 @@ void PlaylistTabBar::CloseSlot() {
 
     // If user changed the pref, save the new one
     if (dont_prompt_again.isChecked() != ask_for_delete) {
-      s.setValue("warn_close_playlist", dont_prompt_again.isChecked());
+      s.setValue(PlaylistSettings::kWarnClosePlaylist, dont_prompt_again.isChecked());
     }
   }
 
@@ -271,7 +272,7 @@ void PlaylistTabBar::CloseSlot() {
   Q_EMIT Close(playlist_id);
 
   // Select the nearest tab.
-  if (menu_index_ > 1) {
+  if (menu_index_ > 0) {
     setCurrentIndex(menu_index_ - 1);
   }
 
@@ -285,6 +286,23 @@ void PlaylistTabBar::CloseFromTabIndex(int index) {
   // Update the global index
   menu_index_ = index;
   CloseSlot();
+
+}
+
+void PlaylistTabBar::CloseCurrentTab() {
+
+  // We need to finish the renaming action before closing a tab, otherwise RenameInline() would later act on a stale menu_index_ once tab indices have shifted.
+  if (rename_editor_->isVisible()) {
+    // Discard any change
+    HideEditor();
+  }
+
+  if (count() <= 1) {
+    Q_EMIT LastTabCloseRequested();
+    return;
+  }
+
+  CloseFromTabIndex(currentIndex());
 
 }
 

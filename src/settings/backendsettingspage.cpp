@@ -165,36 +165,38 @@ void BackendSettingsPage::Load() {
 #endif
 
 #ifdef Q_OS_WIN32
-  ui_->checkbox_exclusive_mode->setChecked(s.value(kExclusiveMode, false).toBool());
+  ui_->checkbox_exclusive_mode->setChecked(s.value(kExclusiveMode, kDefaultExclusiveMode).toBool());
 #endif
 
   Load_Output(output_current_, device_current_);
 
-  ui_->checkbox_volume_control->setChecked(s.value(kVolumeControl, true).toBool());
+  ui_->checkbox_volume_control->setChecked(s.value(kVolumeControl, kDefaultVolumeControl).toBool());
+  ui_->checkbox_volume_exponential->setChecked(s.value(kVolumeExponential, kDefaultVolumeExponential).toBool());
 
-  ui_->checkbox_channels->setChecked(s.value(kChannelsEnabled, false).toBool());
+  ui_->checkbox_channels->setChecked(s.value(kChannelsEnabled, kDefaultChannelsEnabled).toBool());
   ui_->spinbox_channels->setValue(s.value(kChannels, 2).toInt());
   ui_->widget_channels->setEnabled(ui_->checkbox_channels->isChecked());
 
-  ui_->checkbox_bs2b->setChecked(s.value(kBS2B, false).toBool());
+  ui_->checkbox_bs2b->setChecked(s.value(kBS2B, kDefaultBS2B).toBool());
 
-  ui_->checkbox_playbin3->setChecked(s.value(kPlaybin3, true).toBool());
+  ui_->checkbox_playbin3->setChecked(s.value(kPlaybin3, kDefaultPlaybin3).toBool());
 
-  ui_->checkbox_http2->setChecked(s.value(kHTTP2, false).toBool());
-  ui_->checkbox_strict_ssl->setChecked(s.value(kStrictSSL, false).toBool());
+  ui_->checkbox_http2->setChecked(s.value(kHTTP2, kDefaultHTTP2).toBool());
+  ui_->checkbox_strict_ssl->setChecked(s.value(kStrictSSL, kDefaultStrictSSL).toBool());
 
   ui_->spinbox_bufferduration->setValue(s.value(kBufferDuration, kDefaultBufferDuration).toInt());
   ui_->spinbox_low_watermark->setValue(s.value(kBufferLowWatermark, kDefaultBufferLowWatermark).toDouble());
   ui_->spinbox_high_watermark->setValue(s.value(kBufferHighWatermark, kDefaultBufferHighWatermark).toDouble());
+  ui_->spinbox_device_warmup->setValue(s.value(kDeviceWarmupDuration, kDefaultDeviceWarmupDuration).toInt());
 
-  ui_->radiobutton_replaygain->setChecked(s.value(kRgEnabled, false).toBool());
-  ui_->combobox_replaygainmode->setCurrentIndex(s.value(kRgMode, 0).toInt());
-  ui_->stickyslider_replaygainpreamp->setValue(static_cast<int>(s.value(kRgPreamp, 0.0).toDouble() * 10 + 600));
-  ui_->checkbox_replaygaincompression->setChecked(s.value(kRgCompression, true).toBool());
-  ui_->stickyslider_replaygainfallbackgain->setValue(static_cast<int>(s.value(kRgFallbackGain, 0.0).toDouble() * 10 + 600));
+  ui_->radiobutton_replaygain->setChecked(s.value(kRgEnabled, kDefaultRgEnabled).toBool());
+  ui_->combobox_replaygainmode->setCurrentIndex(s.value(kRgMode, kDefaultRgMode).toInt());
+  ui_->stickyslider_replaygainpreamp->setValue(static_cast<int>(s.value(kRgPreamp, kDefaultRgPreamp).toDouble() * 10 + 600));
+  ui_->checkbox_replaygaincompression->setChecked(s.value(kRgCompression, kDefaultRgCompression).toBool());
+  ui_->stickyslider_replaygainfallbackgain->setValue(static_cast<int>(s.value(kRgFallbackGain, kDefaultRgFallbackGain).toDouble() * 10 + 600));
 
-  ui_->radiobutton_ebur128_loudness_normalization->setChecked(s.value(kEBUR128LoudnessNormalization, false).toBool());
-  ui_->stickyslider_ebur128_target_level->setValue(static_cast<int>(s.value(kEBUR128TargetLevelLUFS, -23.0).toDouble() * 10));
+  ui_->radiobutton_ebur128_loudness_normalization->setChecked(s.value(kEBUR128LoudnessNormalization, kDefaultEBUR128LoudnessNormalization).toBool());
+  ui_->stickyslider_ebur128_target_level->setValue(static_cast<int>(s.value(kEBUR128TargetLevelLUFS, kDefaultEBUR128TargetLevelLUFS).toDouble() * 10));
 
 #ifdef HAVE_ALSA
   bool fade_default = false;
@@ -204,11 +206,11 @@ void BackendSettingsPage::Load() {
 
   ui_->checkbox_fadeout_stop->setChecked(s.value(kFadeoutEnabled, fade_default).toBool());
   ui_->checkbox_fadeout_cross->setChecked(s.value(kCrossfadeEnabled, fade_default).toBool());
-  ui_->checkbox_fadeout_auto->setChecked(s.value(kAutoCrossfadeEnabled, false).toBool());
-  ui_->checkbox_fadeout_samealbum->setChecked(s.value(kNoCrossfadeSameAlbum, true).toBool());
-  ui_->checkbox_fadeout_pauseresume->setChecked(s.value(kFadeoutPauseEnabled, false).toBool());
-  ui_->spinbox_fadeduration->setValue(s.value(kFadeoutDuration, 2000).toInt());
-  ui_->spinbox_fadeduration_pauseresume->setValue(s.value(kFadeoutPauseDuration, 250).toInt());
+  ui_->checkbox_fadeout_auto->setChecked(s.value(kAutoCrossfadeEnabled, kDefaultAutoCrossfadeEnabled).toBool());
+  ui_->checkbox_fadeout_samealbum->setChecked(s.value(kNoCrossfadeSameAlbum, kDefaultNoCrossfadeSameAlbum).toBool());
+  ui_->checkbox_fadeout_pauseresume->setChecked(s.value(kFadeoutPauseEnabled, kDefaultFadeoutPauseEnabled).toBool());
+  ui_->spinbox_fadeduration->setValue(s.value(kFadeoutDuration, kDefaultFadeoutDuration).toInt());
+  ui_->spinbox_fadeduration_pauseresume->setValue(s.value(kFadeoutPauseDuration, kDefaultFadeoutPauseDuration).toInt());
 
   configloaded_ = true;
 
@@ -436,6 +438,7 @@ void BackendSettingsPage::Save() {
 #endif
 
   s.setValue(kVolumeControl, ui_->checkbox_volume_control->isChecked());
+  s.setValue(kVolumeExponential, ui_->checkbox_volume_exponential->isChecked());
 
   s.setValue(kChannelsEnabled, ui_->checkbox_channels->isChecked());
   s.setValue(kChannels, ui_->spinbox_channels->value());
@@ -450,6 +453,7 @@ void BackendSettingsPage::Save() {
   s.setValue(kBufferDuration, ui_->spinbox_bufferduration->value());
   s.setValue(kBufferLowWatermark, ui_->spinbox_low_watermark->value());
   s.setValue(kBufferHighWatermark, ui_->spinbox_high_watermark->value());
+  s.setValue(kDeviceWarmupDuration, ui_->spinbox_device_warmup->value());
 
   s.setValue(kRgEnabled, ui_->radiobutton_replaygain->isChecked());
   s.setValue(kRgMode, ui_->combobox_replaygainmode->currentIndex());
@@ -479,7 +483,11 @@ void BackendSettingsPage::OutputChanged(const int index) {
   EngineBase::OutputDetails output = ui_->combobox_output->itemData(index).value<EngineBase::OutputDetails>();
 
 #ifdef Q_OS_WIN32
-  ui_->widget_exclusive_mode->setEnabled(player_->engine()->ExclusiveModeSupport(output.name));
+  const bool exclusive_mode_supported = player_->engine()->ExclusiveModeSupport(output.name);
+  ui_->widget_exclusive_mode->setEnabled(exclusive_mode_supported);
+  if (!exclusive_mode_supported && ui_->checkbox_exclusive_mode->isChecked()) {
+    ui_->checkbox_exclusive_mode->setChecked(false);
+  }
 #endif
 
   Load_Device(output.name, QVariant());
@@ -764,6 +772,7 @@ void BackendSettingsPage::BufferDefaults() {
   ui_->spinbox_bufferduration->setValue(kDefaultBufferDuration);
   ui_->spinbox_low_watermark->setValue(kDefaultBufferLowWatermark);
   ui_->spinbox_high_watermark->setValue(kDefaultBufferHighWatermark);
+  ui_->spinbox_device_warmup->setValue(kDefaultDeviceWarmupDuration);
 
 }
 

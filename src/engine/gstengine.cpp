@@ -91,7 +91,7 @@ constexpr qint64 kPreloadGapNanosec = 8000 * kNsecPerMsec;     // 8s
 constexpr qint64 kSeekDelayNanosec = 100 * kNsecPerMsec;       // 100msec
 }  // namespace
 
-#ifdef __clang_
+#ifdef __clang__
 #  pragma clang diagnostic pop
 #endif
 
@@ -280,7 +280,7 @@ bool GstEngine::Play(const bool pause, const quint64 offset_nanosec) {
   if (current_pipeline_->state() == GstState::GST_STATE_PLAYING) {
     if (offset_nanosec != 0 || beginning_offset_nanosec_ != 0) {
       Seek(offset_nanosec);
-      PlayDone(GST_STATE_CHANGE_SUCCESS, false, offset_nanosec, current_pipeline_->id());
+      PlayDone(GST_STATE_CHANGE_SUCCESS, false, current_pipeline_->id());
     }
     return true;
   }
@@ -301,12 +301,12 @@ bool GstEngine::Play(const bool pause, const quint64 offset_nanosec) {
   delayed_state_pause_ = false;
   delayed_state_offset_nanosec_ = 0;
 
-  QFutureWatcher<GstStateChangeReturn> *watcher = new QFutureWatcher<GstStateChangeReturn>();
+  QFutureWatcher<GstStateChangeReturn> *watcher = new QFutureWatcher<GstStateChangeReturn>(this);
   const int pipeline_id = current_pipeline_->id();
-  QObject::connect(watcher, &QFutureWatcher<GstStateChangeReturn>::finished, this, [this, watcher, pipeline_id, pause, offset_nanosec]() {
+  QObject::connect(watcher, &QFutureWatcher<GstStateChangeReturn>::finished, this, [this, watcher, pipeline_id, pause]() {
     const GstStateChangeReturn ret = watcher->result();
     watcher->deleteLater();
-    PlayDone(ret, pause, offset_nanosec, pipeline_id);
+    PlayDone(ret, pause, pipeline_id);
   });
   QFuture<GstStateChangeReturn> future = current_pipeline_->Play(pause, beginning_offset_nanosec_ + offset_nanosec);
   watcher->setFuture(future);
@@ -611,7 +611,7 @@ void GstEngine::timerEvent(QTimerEvent *e) {
       const qint64 gap = static_cast<qint64>(buffer_duration_nanosec_) + (autocrossfade_enabled_ ? fadeout_duration_nanosec_ : kPreloadGapNanosec);
       // Emit TrackAboutToEnd when we're a few seconds away from finishing
       if (remaining < gap + fudge) {
-        qLog(Debug) << "Stream from URL" << media_url_.toString() << "about to end in" << remaining / kNsecPerSec << "seconds. Fuge:" << fudge / kNsecPerMsec << "+" << "Gap:" << gap / kNsecPerMsec;
+        qLog(Debug) << "Stream from URL" << media_url_.toString() << "about to end in" << remaining / kNsecPerSec << "seconds. Fudge:" << fudge / kNsecPerMsec << "+" << "Gap:" << gap / kNsecPerMsec;
         EmitAboutToFinish();
       }
     }
@@ -742,49 +742,16 @@ void GstEngine::SeekNow() {
 
 }
 
-void GstEngine::PlayDone(const GstStateChangeReturn ret, const bool pause, const quint64 offset_nanosec, const int pipeline_id) {
+void GstEngine::PlayDone(const GstStateChangeReturn state_change_return, const bool pause, const int pipeline_id) {
 
   if (!current_pipeline_ || pipeline_id != current_pipeline_->id()) {
     return;
   }
 
-  if (ret == GST_STATE_CHANGE_FAILURE) {
-    // Failure, but we got a redirection URL - try loading that instead
-    GstEnginePipelinePtr old_pipeline = current_pipeline_;
-    current_pipeline_ = GstEnginePipelinePtr();
-    QByteArray redirect_url;
-    {
-      QMutexLocker l(old_pipeline->mutex_redirect_url());
-      redirect_url = old_pipeline->redirect_url();
-      redirect_url.detach();
-    }
-    QByteArray gst_url;
-    {
-      QMutexLocker l(old_pipeline->mutex_url());
-      gst_url = old_pipeline->gst_url();
-      gst_url.detach();
-    }
-    if (!redirect_url.isEmpty() && redirect_url != gst_url) {
-      qLog(Info) << "Redirecting to" << redirect_url;
-      QUrl media_url;
-      QUrl stream_url;
-      {
-        QMutexLocker l(old_pipeline->mutex_url());
-        media_url = old_pipeline->media_url();
-        media_url.detach();
-        stream_url = old_pipeline->stream_url();
-        stream_url.detach();
-      }
-      current_pipeline_ = CreatePipeline(media_url, stream_url, redirect_url, static_cast<qint64>(beginning_offset_nanosec_), end_offset_nanosec_, old_pipeline->ebur128_loudness_normalizing_gain_db());
-      FinishPipeline(old_pipeline);
-      Play(pause, offset_nanosec);
-      return;
-    }
-
-    // Failure - give up
-    qLog(Warning) << "Could not set thread to PLAYING.";
-    FinishPipeline(old_pipeline);
-    BufferingFinished();
+  if (state_change_return == GST_STATE_CHANGE_FAILURE) {
+    // Don't tear the pipeline down or emit anything here: GStreamer guarantees that an element which fails a state change also posts a GST_MESSAGE_ERROR on the bus explaining why, and that message is still on its way to ErrorMessageReceived()/HandlePipelineError() via the normal bus watch.
+    // Leaving current_pipeline_ (and its signal connections) untouched means that when it arrives, HandlePipelineError() finds current_pipeline_->id() == pipeline_id and does the full, correct job - FinishPipeline(), StateChanged(Error), InvalidSongRequested()/FatalError() - using the real GStreamer error text instead of a generic one synthesized here, and without racing FinishPipeline()'s QObject::disconnect() against that still-pending bus message.
+    qLog(Warning) << "Could not set pipeline" << pipeline_id << "to" << (pause ? "Paused" : "Playing") << "- waiting for the GStreamer error message";
     return;
   }
 
@@ -924,6 +891,7 @@ GstEnginePipelinePtr GstEngine::CreatePipeline() {
   pipeline->set_playbin3_enabled(playbin3_enabled_);
   pipeline->set_exclusive_mode(exclusive_mode_);
   pipeline->set_volume_enabled(volume_control_);
+  pipeline->set_volume_exponential(volume_exponential_);
   pipeline->set_stereo_balancer_enabled(stereo_balancer_enabled_);
   pipeline->set_equalizer_enabled(equalizer_enabled_);
   pipeline->set_replaygain(rg_enabled_, rg_mode_, rg_preamp_, rg_fallbackgain_, rg_compression_);
@@ -931,11 +899,12 @@ GstEnginePipelinePtr GstEngine::CreatePipeline() {
   pipeline->set_buffer_duration_nanosec(buffer_duration_nanosec_);
   pipeline->set_buffer_low_watermark(buffer_low_watermark_);
   pipeline->set_buffer_high_watermark(buffer_high_watermark_);
+  pipeline->set_device_warmup_duration_ms(current_pipeline_ ? 0 : device_warmup_duration_ms_);
   pipeline->set_proxy_settings(proxy_address_, proxy_authentication_, proxy_user_, proxy_pass_);
   pipeline->set_channels(channels_enabled_, channels_);
   pipeline->set_bs2b_enabled(bs2b_enabled_);
   pipeline->set_strict_ssl_enabled(strict_ssl_enabled_);
-  pipeline->set_fading_enabled(fadeout_enabled_ || autocrossfade_enabled_ || fadeout_pause_enabled_);
+  pipeline->set_fading_enabled(fadeout_enabled_ || crossfade_enabled_ || autocrossfade_enabled_ || fadeout_pause_enabled_);
 
 #ifdef HAVE_SPOTIFY
   pipeline->set_spotify_access_token(spotify_access_token_);
@@ -1037,7 +1006,9 @@ void GstEngine::UpdateScope(const int chunk_length) {
   if (GST_BUFFER_DURATION(latest_buffer_) == 0) return;
 
   GstMapInfo map;
-  gst_buffer_map(latest_buffer_, &map, GST_MAP_READ);
+  if (!gst_buffer_map(latest_buffer_, &map, GST_MAP_READ)) {
+    return;
+  }
 
   // Determine where to split the buffer
   int chunk_density = static_cast<int>((map.size * kNsecPerMsec) / GST_BUFFER_DURATION(latest_buffer_));
@@ -1053,26 +1024,33 @@ void GstEngine::UpdateScope(const int chunk_length) {
 
   const sample_type *source = reinterpret_cast<sample_type*>(map.data);
   sample_type *dest = scope_.data();
-  source += (chunk_size / sizeof(sample_type)) * scope_chunk_;
+
+  // scope_chunks_ is derived from the buffer duration via ceil() while chunk_size is derived independently, so chunk_size * scope_chunk_ can exceed map.size.
+  // Guard the offset so source never points past the mapped buffer (which would make the memcpy below read out of bounds).
+  const size_t byte_offset = (chunk_size / sizeof(sample_type)) * static_cast<size_t>(scope_chunk_) * sizeof(sample_type);
+  if (byte_offset >= map.size) {
+    scope_chunk_ = 0;
+    gst_buffer_unmap(latest_buffer_, &map);
+    return;
+  }
+  source += byte_offset / sizeof(sample_type);
 
   size_t bytes = 0;
 
   // Make sure we don't go beyond the end of the buffer
   if (scope_chunk_ == scope_chunks_ - 1) {
-    bytes = qMin(static_cast<EngineBase::Scope::size_type>(map.size - (chunk_size * scope_chunk_)), scope_.size() * sizeof(sample_type));
+    bytes = qMin(static_cast<EngineBase::Scope::size_type>(map.size - byte_offset), scope_.size() * sizeof(sample_type));
   }
   else {
     bytes = qMin(static_cast<EngineBase::Scope::size_type>(chunk_size), scope_.size() * sizeof(sample_type));
   }
 
+  // Never read past the remaining mapped bytes regardless of the chunk arithmetic above.
+  bytes = qMin(bytes, static_cast<size_t>(map.size - byte_offset));
+
   scope_chunk_++;
 
-  if (buffer_format_.startsWith("S16LE"_L1) ||
-      buffer_format_.startsWith("U16LE"_L1) ||
-      buffer_format_.startsWith("S24LE"_L1) ||
-      buffer_format_.startsWith("S24_32LE"_L1) ||
-      buffer_format_.startsWith("S32LE"_L1) ||
-      buffer_format_.startsWith("F32LE"_L1)) {
+  if (buffer_format_.startsWith("S16LE"_L1)) {
     memcpy(dest, source, bytes);
   }
   else {
@@ -1136,32 +1114,35 @@ void GstEngine::StreamDiscovered(GstDiscoverer *discoverer, GstDiscovererInfo *i
 
     GstCaps *caps = gst_discoverer_stream_info_get_caps(stream_info);
 
-    const guint caps_size = gst_caps_get_size(caps);
-    for (guint i = 0; i < caps_size; ++i) {
-      GstStructure *gst_structure = gst_caps_get_structure(caps, i);
-      if (!gst_structure) continue;
-      QString mimetype = QString::fromUtf8(gst_structure_get_name(gst_structure));
-      if (!mimetype.isEmpty() && mimetype != "audio/mpeg"_L1) {
-        engine_metadata.filetype = Song::FiletypeByMimetype(mimetype);
-        if (engine_metadata.filetype == Song::FileType::Unknown) {
-          qLog(Error) << "Unknown mimetype" << mimetype;
+    if (caps) {
+      const guint caps_size = gst_caps_get_size(caps);
+      for (guint i = 0; i < caps_size; ++i) {
+        GstStructure *gst_structure = gst_caps_get_structure(caps, i);
+        if (!gst_structure) continue;
+        QString mimetype = QString::fromUtf8(gst_structure_get_name(gst_structure));
+        if (!mimetype.isEmpty() && mimetype != "audio/mpeg"_L1) {
+          engine_metadata.filetype = Song::FiletypeByMimetype(mimetype);
+          if (engine_metadata.filetype == Song::FileType::Unknown) {
+            qLog(Error) << "Unknown mimetype" << mimetype;
+          }
         }
       }
-    }
 
-    if (engine_metadata.filetype == Song::FileType::Unknown) {
-      gchar *codec_description = gst_pb_utils_get_codec_description(caps);
-      QString filetype_description = (codec_description ? QString::fromUtf8(codec_description) : QString());
-      g_free(codec_description);
-      if (!filetype_description.isEmpty()) {
-        engine_metadata.filetype = Song::FiletypeByDescription(filetype_description);
-        if (engine_metadata.filetype == Song::FileType::Unknown) {
-          qLog(Error) << "Unknown filetype" << filetype_description;
+      if (engine_metadata.filetype == Song::FileType::Unknown) {
+        gchar *codec_description = gst_pb_utils_get_codec_description(caps);
+        QString filetype_description = (codec_description ? QString::fromUtf8(codec_description) : QString());
+        g_free(codec_description);
+        if (!filetype_description.isEmpty()) {
+          engine_metadata.filetype = Song::FiletypeByDescription(filetype_description);
+          if (engine_metadata.filetype == Song::FileType::Unknown) {
+            qLog(Error) << "Unknown filetype" << filetype_description;
+          }
         }
       }
+
+      gst_caps_unref(caps);
     }
 
-    gst_caps_unref(caps);
     gst_discoverer_stream_info_list_free(audio_streams);
 
     qLog(Debug) << "Got stream info for" << discovered_url + ":" << Song::TextForFiletype(engine_metadata.filetype);

@@ -161,7 +161,8 @@ void DeviceProperties::UpdateHardwareInfo() {
     // Remove empty items
     QStringList keys = info.keys();
     for (const QString &key : std::as_const(keys)) {
-      if (info[key].isNull() || info[key].toString().isEmpty())
+      const QVariant v = info.value(key);
+      if (v.isNull() || v.toString().isEmpty())
         info.remove(key);
     }
 
@@ -174,7 +175,7 @@ void DeviceProperties::UpdateHardwareInfo() {
     AddHardwareInfo(row++, tr("Manufacturer"), lister->DeviceManufacturer(id));
     keys = info.keys();
     for (const QString &key : std::as_const(keys)) {
-      AddHardwareInfo(row++, key, info[key].toString());
+      AddHardwareInfo(row++, key, info.value(key).toString());
     }
 
     ui_->hardware_info->sortItems(0);
@@ -242,7 +243,7 @@ void DeviceProperties::UpdateFormats() {
     supported_formats_.clear();
 
     QFuture<bool> future = QtConcurrent::run(&ConnectedDevice::GetSupportedFiletypes, device, &supported_formats_);
-    QFutureWatcher<bool> *watcher = new QFutureWatcher<bool>();
+    QFutureWatcher<bool> *watcher = new QFutureWatcher<bool>(this);
     QObject::connect(watcher, &QFutureWatcher<bool>::finished, this, &DeviceProperties::UpdateFormatsFinished);
     watcher->setFuture(future);
 

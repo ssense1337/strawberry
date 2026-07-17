@@ -515,7 +515,7 @@ void SpotifyRequest::ArtistsReplyReceived(QNetworkReply *reply, const int limit_
   }
   artists_received_ += artists_received;
 
-  if (offset_requested != 0) Q_EMIT UpdateProgress(query_id_, GetProgress(artists_total_, artists_received_));
+  if (offset_requested != 0) Q_EMIT UpdateProgress(query_id_, GetProgress(artists_received_, artists_total_));
 
 }
 
@@ -1302,10 +1302,10 @@ void SpotifyRequest::AlbumCoverReceived(QNetworkReply *reply, const QString &alb
     return;
   }
 
-  QList<QByteArray> format_list = QImageReader::imageFormatsForMimeType(mimetype.toUtf8());
-  char *format = nullptr;
+  const QList<QByteArray> format_list = QImageReader::imageFormatsForMimeType(mimetype.toUtf8());
+  const char *format = nullptr;
   if (!format_list.isEmpty()) {
-    format = format_list[0].data();
+    format = format_list.constFirst().constData();
   }
 
   QImage image;
@@ -1380,6 +1380,7 @@ void SpotifyRequest::FinishCheck() {
 
 int SpotifyRequest::GetProgress(const int count, const int total) {
 
+  if (total <= 0) return 0;
   return static_cast<int>((static_cast<float>(count) / static_cast<float>(total)) * 100.0F);
 
 }

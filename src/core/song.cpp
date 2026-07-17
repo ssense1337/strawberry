@@ -247,7 +247,8 @@ const QStringList Song::kAcceptedExtensions = QStringList() << u"wav"_s
                                                             << u"ac3"_s
                                                             << u"dts"_s
                                                             << u"spc"_s
-                                                            << u"vgm"_s;
+                                                            << u"vgm"_s
+                                                            << u"tak"_s;
 
 const QStringList Song::kRejectedExtensions = QStringList() << u"tmp"_s
                                                             << u"tar"_s
@@ -260,7 +261,8 @@ const QStringList Song::kRejectedExtensions = QStringList() << u"tmp"_s
                                                             << u"zip"_s
                                                             << u"rar"_s
                                                             << u"wvc"_s
-                                                            << u"zst"_s;
+                                                            << u"zst"_s
+                                                            << u"lrc"_s;
 
 struct Song::Private : public QSharedData {
 
@@ -457,7 +459,7 @@ QString Song::song_id() const { return d->song_id_.isNull() ? ""_L1 : d->song_id
 
 qint64 Song::beginning_nanosec() const { return d->beginning_; }
 qint64 Song::end_nanosec() const { return d->end_; }
-qint64 Song::length_nanosec() const { return d->end_ - d->beginning_; }
+qint64 Song::length_nanosec() const { return d->end_ < 0 ? -1 : d->end_ - d->beginning_; }
 
 int Song::bitrate() const { return d->bitrate_; }
 int Song::samplerate() const { return d->samplerate_; }
@@ -574,7 +576,7 @@ void Song::set_song_id(const QString &v) { d->song_id_ = v; }
 
 void Song::set_beginning_nanosec(const qint64 v) { d->beginning_ = qMax(0LL, v); }
 void Song::set_end_nanosec(const qint64 v) { d->end_ = v; }
-void Song::set_length_nanosec(const qint64 v) { d->end_ = d->beginning_ + v; }
+void Song::set_length_nanosec(const qint64 v) { d->end_ = v < 0 ? -1 : d->beginning_ + v; }
 
 void Song::set_bitrate(const int v) { d->bitrate_ = v; }
 void Song::set_samplerate(const int v) { d->samplerate_ = v; }
@@ -686,7 +688,7 @@ const QString &Song::playlist_effective_albumartistsort() const { return is_comp
 bool Song::is_metadata_good() const { return !d->url_.isEmpty() && !d->artist_.isEmpty() && !d->title_.isEmpty(); }
 bool Song::is_local_collection_song() const { return d->source_ == Source::Collection; }
 bool Song::is_linked_collection_song() const { return IsLinkedCollectionSource(d->source_); }
-bool Song::is_radio() const { return d->source_ == Source::Stream || d->source_ == Source::SomaFM || d->source_ == Source::RadioParadise; }
+bool Song::is_radio() const { return d->source_ == Source::Stream || d->source_ == Source::SomaFM || d->source_ == Source::RadioParadise || d->source_ == Source::RadioBrowser; }
 bool Song::is_stream_service() const { return d->source_ == Source::Subsonic || d->source_ == Source::Tidal || d->source_ == Source::Qobuz || d->source_ == Source::Spotify; }
 bool Song::is_stream() const { return is_radio() || is_stream_service(); }
 bool Song::is_cdda() const { return d->source_ == Source::CDDA; }
@@ -968,7 +970,6 @@ bool Song::IsFileInfoEqual(const Song &other) const {
          d->basefilename_ == other.d->basefilename_ &&
          d->filetype_ == other.d->filetype_ &&
          d->filesize_ == other.d->filesize_ &&
-         d->mtime_ == other.d->mtime_ &&
          d->ctime_ == other.d->ctime_ &&
          d->mtime_ == other.d->mtime_ &&
          d->stream_url_ == other.d->stream_url_;
@@ -1164,6 +1165,7 @@ QString Song::TextForSource(const Source source) {
     case Source::Qobuz:         return u"qobuz"_s;
     case Source::SomaFM:        return u"somafm"_s;
     case Source::RadioParadise: return u"radioparadise"_s;
+    case Source::RadioBrowser:  return u"radiobrowser"_s;
     case Source::Unknown:       return u"unknown"_s;
   }
   return u"unknown"_s;
@@ -1184,6 +1186,7 @@ QString Song::DescriptionForSource(const Source source) {
     case Source::Qobuz:         return u"Qobuz"_s;
     case Source::SomaFM:        return u"SomaFM"_s;
     case Source::RadioParadise: return u"Radio Paradise"_s;
+    case Source::RadioBrowser:  return u"Radio Browser"_s;
     case Source::Unknown:       return u"Unknown"_s;
   }
   return u"unknown"_s;
@@ -1203,7 +1206,7 @@ Song::Source Song::SourceFromText(const QString &source) {
   if (source.compare("qobuz"_L1, Qt::CaseInsensitive) == 0) return Source::Qobuz;
   if (source.compare("somafm"_L1, Qt::CaseInsensitive) == 0) return Source::SomaFM;
   if (source.compare("radioparadise"_L1, Qt::CaseInsensitive) == 0) return Source::RadioParadise;
-
+  if (source.compare("radiobrowser"_L1, Qt::CaseInsensitive) == 0) return Source::RadioBrowser;
   return Source::Unknown;
 
 }
@@ -1222,6 +1225,7 @@ QIcon Song::IconForSource(const Source source) {
     case Source::Qobuz:         return IconLoader::Load(u"qobuz"_s);
     case Source::SomaFM:        return IconLoader::Load(u"somafm"_s);
     case Source::RadioParadise: return IconLoader::Load(u"radioparadise"_s);
+    case Source::RadioBrowser:  return IconLoader::Load(u"radiobrowser"_s);
     case Source::Unknown:       return IconLoader::Load(u"edit-delete"_s);
   }
   return IconLoader::Load(u"edit-delete"_s);
@@ -1238,6 +1242,7 @@ QString Song::DomainForSource(const Source source) {
     case Song::Source::Qobuz:         return u"qobuz.com"_s;
     case Song::Source::SomaFM:        return u"somafm.com"_s;
     case Song::Source::RadioParadise: return u"radioparadise.com"_s;
+    case Song::Source::RadioBrowser:  return u"radio-browser.info"_s;
     case Song::Source::Spotify:       return u"spotify.com"_s;
     default: return QString();
   }
@@ -1352,7 +1357,8 @@ QString Song::ShareURL() const {
 
   switch (source()) {
     case Song::Source::Stream:
-    case Song::Source::SomaFM:  return url().toString();
+    case Song::Source::SomaFM:
+    case Song::Source::RadioBrowser:  return url().toString();
     case Song::Source::Tidal:   return "https://tidal.com/track/%1"_L1.arg(song_id());
     case Song::Source::Qobuz:   return "https://open.qobuz.com/track/%1"_L1.arg(song_id());
     case Song::Source::Spotify: return "https://open.spotify.com/track/%1"_L1.arg(song_id());
@@ -1430,7 +1436,7 @@ Song::FileType Song::FiletypeByDescription(const QString &text) {
   if (text.compare("audio/x-dsd"_L1, Qt::CaseInsensitive) == 0) return FileType::DSDIFF;
   if (text.compare("audio/x-ffmpeg-parsed-ape"_L1, Qt::CaseInsensitive) == 0) return FileType::APE;
   if (text.compare("Module Music Format (MOD)"_L1, Qt::CaseInsensitive) == 0) return FileType::MOD;
-  if (text.compare("Module Music Format (MOD)"_L1, Qt::CaseInsensitive) == 0) return FileType::S3M;
+  if (text.compare("Module Music Format (S3M)"_L1, Qt::CaseInsensitive) == 0) return FileType::S3M;
   if (text.compare("SNES SPC700"_L1, Qt::CaseInsensitive) == 0) return FileType::SPC;
   if (text.compare("VGM"_L1, Qt::CaseInsensitive) == 0) return FileType::VGM;
   if (text.compare("Apple Lossless Audio Codec (ALAC)"_L1, Qt::CaseInsensitive) == 0) return FileType::ALAC;
@@ -1495,6 +1501,7 @@ QString Song::ImageCacheDir(const Source source) {
     case Source::Stream:
     case Source::SomaFM:
     case Source::RadioParadise:
+    case Source::RadioBrowser:
     case Source::Unknown:
       return StandardPaths::WritableLocation(StandardPaths::StandardLocation::AppLocalDataLocation) + u"/albumcovers"_s;
   }
@@ -1503,7 +1510,7 @@ QString Song::ImageCacheDir(const Source source) {
 
 }
 
-int Song::CompareSongsName(const Song &song1, const Song &song2) {
+bool Song::CompareSongsName(const Song &song1, const Song &song2) {
   return song1.PrettyTitleWithArtist().localeAwareCompare(song2.PrettyTitleWithArtist()) < 0;
 }
 
@@ -2008,15 +2015,15 @@ bool Song::MergeFromEngineMetadata(const EngineMetadata &engine_metadata) {
 
   if (d->init_from_file_ || is_local_collection_song() || d->url_.isLocalFile()) {
     // This Song was already loaded using TagLib. Our tags are probably better than the engine's.
-    if (title() != engine_metadata.title && title().isEmpty() && !engine_metadata.title.isEmpty()) {
+    if (title().isEmpty() && !engine_metadata.title.isEmpty()) {
       set_title(engine_metadata.title);
       minor = false;
     }
-    if (artist() != engine_metadata.artist && artist().isEmpty() && !engine_metadata.artist.isEmpty()) {
+    if (artist().isEmpty() && !engine_metadata.artist.isEmpty()) {
       set_artist(engine_metadata.artist);
       minor = false;
     }
-    if (album() != engine_metadata.album && album().isEmpty() && !engine_metadata.album.isEmpty()) {
+    if (album().isEmpty() && !engine_metadata.album.isEmpty()) {
       set_album(engine_metadata.album);
       minor = false;
     }
@@ -2025,15 +2032,16 @@ bool Song::MergeFromEngineMetadata(const EngineMetadata &engine_metadata) {
     if (lyrics().isEmpty() && !engine_metadata.lyrics.isEmpty()) set_lyrics(engine_metadata.lyrics);
   }
   else {
-    if (title() != engine_metadata.title && !engine_metadata.title.isEmpty()) {
+    const bool isradio = is_radio();
+    if ((isradio || !engine_metadata.title.isEmpty()) && title() != engine_metadata.title) {
       set_title(engine_metadata.title);
       minor = false;
     }
-    if (artist() != engine_metadata.artist && !engine_metadata.artist.isEmpty()) {
+    if ((isradio || !engine_metadata.artist.isEmpty()) && artist() != engine_metadata.artist) {
       set_artist(engine_metadata.artist);
       minor = false;
     }
-    if (album() != engine_metadata.album && !engine_metadata.album.isEmpty()) {
+    if ((isradio || !engine_metadata.album.isEmpty()) && album() != engine_metadata.album) {
       set_album(engine_metadata.album);
       minor = false;
     }
@@ -2075,6 +2083,20 @@ void Song::MergeUserSetData(const Song &other, const bool merge_playcount, const
 
 QString Song::AlbumKey() const {
   return QStringLiteral("%1|%2|%3").arg(is_compilation() ? u"_compilation"_s : effective_albumartist(), has_cue() ? cue_path() : ""_L1, effective_album());
+}
+
+QString Song::GroupingKey() const {
+  if (d->grouping_.isEmpty()) {
+    // We don't have grouping data, when we want to shuffle individual tracks
+    // The goal with grouping shuffle is to keep the introduction and the song (that may be on two distinct tracks)
+    // as if they were on the same track, and play the shuffle on individual track
+    return QStringLiteral("%1|%2|%3").arg(d->album_.isEmpty() ? d->artist_ : d->album_, d->title_, QString::number(d->id_));
+  }
+  // We have some grouping data, we want to regroup this track with the tracks that belongs :
+  // to the same album (as defined by AlbumKey, including compilation/album-artist and cue identity)
+  // to the same grouping value
+  // to the same file type
+  return QStringLiteral("%1|%2|%3").arg(AlbumKey(), d->grouping_, QString::number(static_cast<int>(d->filetype_)));
 }
 
 size_t qHash(const Song &song) {
@@ -2163,13 +2185,11 @@ QString Song::GetNameForNewPlaylist(const SongList &songs) {
     result = QObject::tr("Various artists");
   }
   else {
-    QStringList artist_names = artists.values();
-    result = artist_names.first();
+    result = *artists.cbegin();
   }
 
   if (!various_artists && albums.size() == 1) {
-    QStringList album_names = albums.values();
-    result += " - "_L1 + album_names.first();
+    result += " - "_L1 + *albums.cbegin();
   }
 
   return result;

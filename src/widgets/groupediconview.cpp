@@ -80,6 +80,46 @@ void GroupedIconView::AddSortSpec(const int role, const Qt::SortOrder order) {
   proxy_model_->AddSortSpec(role, order);
 }
 
+void GroupedIconView::set_header_spacing(const int value) {
+
+  if (header_spacing_ == value) return;
+
+  header_spacing_ = value;
+
+  Q_EMIT HeaderSpacingChanged(header_spacing_);
+
+}
+
+void GroupedIconView::set_header_indent(const int value) {
+
+  if (header_indent_ == value) return;
+
+  header_indent_ = value;
+
+  Q_EMIT HeaderIndentChanged(header_indent_);
+
+}
+
+void GroupedIconView::set_item_indent(const int value) {
+
+  if (item_indent_ == value) return;
+
+  item_indent_ = value;
+
+  Q_EMIT ItemIndentChanged(item_indent_);
+
+}
+
+void GroupedIconView::set_header_text(const QString &value) {
+
+  if (header_text_ == value) return;
+
+  header_text_ = value;
+
+  Q_EMIT HeaderTextChanged(header_text_);
+
+}
+
 void GroupedIconView::setModel(QAbstractItemModel *model) {
 
   proxy_model_->setSourceModel(model);
@@ -346,7 +386,8 @@ QList<QModelIndex> GroupedIconView::IntersectingItems(const QRect rect) const {
   const int count = static_cast<int>(visual_rects_.count());
   for (int i = 0; i < count; ++i) {
     if (rect.intersects(visual_rects_[i])) {
-      ret.append(model()->index(i, 0));
+      const QModelIndex index = model()->index(i, 0);
+      if (index.isValid()) ret.append(index);
     }
   }
 
@@ -359,7 +400,9 @@ QRegion GroupedIconView::visualRegionForSelection(const QItemSelection &selectio
   QRegion ret;
   const QModelIndexList indexes = selection.indexes();
   for (const QModelIndex &idx : indexes) {
-    ret += visual_rects_[idx.row()];
+    if (idx.row() >= 0 && idx.row() < visual_rects_.count()) {
+      ret += visual_rects_[idx.row()];
+    }
   }
   return ret;
 
@@ -391,11 +434,13 @@ QModelIndex GroupedIconView::moveCursor(CursorAction action, const Qt::KeyboardM
     case MoveEnd:   ret = model()->rowCount() - 1; break;
   }
 
-  return model()->index(qBound(0, ret, model()->rowCount()), 0);
+  return model()->index(qBound(0, ret, model()->rowCount() - 1), 0);
 
 }
 
 int GroupedIconView::IndexAboveOrBelow(int index, const int d) const {
+
+  if (index < 0 || index >= visual_rects_.count()) return index;
 
   const QRect orig_rect(visual_rects_[index]);
 

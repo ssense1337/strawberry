@@ -35,7 +35,7 @@ class SearchField : public QWidget {
   Q_OBJECT
 
   Q_PROPERTY(QString text READ text WRITE setText NOTIFY textChanged USER true)
-  Q_PROPERTY(QString placeholderText READ placeholderText WRITE setPlaceholderText)
+  Q_PROPERTY(QString placeholderText READ placeholderText WRITE setPlaceholderText NOTIFY placeholderTextChanged)
 
  public:
   explicit SearchField(QWidget *parent);
@@ -48,7 +48,7 @@ class SearchField : public QWidget {
 #ifndef Q_OS_MACOS
   bool hasFocus() const;
 #endif
-  void setFocus(Qt::FocusReason);
+  void setFocus(Qt::FocusReason reason);
 
  public Q_SLOTS:
   void setText(const QString &new_text);
@@ -59,6 +59,7 @@ class SearchField : public QWidget {
 
  Q_SIGNALS:
   void textChanged(const QString &text);
+  void placeholderTextChanged(const QString &text);
   void editingFinished();
   void returnPressed();
 

@@ -33,10 +33,11 @@ enum class Style {
   StyleCount
 };
 
-constexpr char kEnabled[] = "enabled";
-constexpr char kShow[] = "show";
 constexpr char kStyle[] = "style";
 constexpr char kSave[] = "save";
+
+constexpr Style kDefaultStyle = Style::Normal;
+constexpr bool kDefaultSave = false;
 
 }  // namespace MoodbarSettings
 

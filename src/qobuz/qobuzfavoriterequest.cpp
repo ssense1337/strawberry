@@ -23,7 +23,6 @@
 #include <QString>
 #include <QStringList>
 #include <QUrl>
-#include <QUrlQuery>
 #include <QNetworkReply>
 
 #include "includes/shared_ptr.h"
@@ -47,9 +46,10 @@ QString QobuzFavoriteRequest::FavoriteText(const FavoriteType type) {
     case FavoriteType::Albums:
       return u"albums"_s;
     case FavoriteType::Songs:
-    default:
       return u"tracks"_s;
   }
+
+  return QString();
 
 }
 
@@ -123,14 +123,8 @@ void QobuzFavoriteRequest::AddFavoritesRequest(const FavoriteType type, const QS
                                        << Param(u"user_auth_token"_s, service_->user_auth_token())
                                        << Param(FavoriteMethod(type), ids_list.join(u','));
 
-  QUrlQuery url_query;
-  for (const Param &param : params) {
-    url_query.addQueryItem(QString::fromLatin1(QUrl::toPercentEncoding(param.first)), QString::fromLatin1(QUrl::toPercentEncoding(param.second)));
-  }
-
   QNetworkReply *reply = CreateRequest(u"favorite/create"_s, params);
   QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, type, songs]() { AddFavoritesReply(reply, type, songs); });
-  replies_ << reply;
 
 }
 
@@ -138,6 +132,7 @@ void QobuzFavoriteRequest::AddFavoritesReply(QNetworkReply *reply, const Favorit
 
   if (replies_.contains(reply)) {
     replies_.removeAll(reply);
+    QObject::disconnect(reply, nullptr, this, nullptr);
     reply->deleteLater();
   }
   else {
@@ -218,14 +213,8 @@ void QobuzFavoriteRequest::RemoveFavoritesRequest(const FavoriteType type, const
                                        << Param(u"user_auth_token"_s, service_->user_auth_token())
                                        << Param(FavoriteMethod(type), ids_list.join(u','));
 
-  QUrlQuery url_query;
-  for (const Param &param : params) {
-    url_query.addQueryItem(QString::fromLatin1(QUrl::toPercentEncoding(param.first)), QString::fromLatin1(QUrl::toPercentEncoding(param.second)));
-  }
-
   QNetworkReply *reply = CreateRequest(u"favorite/delete"_s, params);
   QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, type, songs]() { RemoveFavoritesReply(reply, type, songs); });
-  replies_ << reply;
 
 }
 
@@ -233,6 +222,7 @@ void QobuzFavoriteRequest::RemoveFavoritesReply(QNetworkReply *reply, const Favo
 
   if (replies_.contains(reply)) {
     replies_.removeAll(reply);
+    QObject::disconnect(reply, nullptr, this, nullptr);
     reply->deleteLater();
   }
   else {

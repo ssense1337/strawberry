@@ -50,17 +50,19 @@ SongLoaderInserter::SongLoaderInserter(const SharedPtr<TaskManager> task_manager
       row_(-1),
       play_now_(true),
       enqueue_(false),
-      enqueue_next_(false) {}
+      enqueue_next_(false),
+      signal_(false) {}
 
 SongLoaderInserter::~SongLoaderInserter() { qDeleteAll(pending_); }
 
-void SongLoaderInserter::Load(Playlist *destination, const int row, const bool play_now, const bool enqueue, const bool enqueue_next, const QList<QUrl> &urls) {
+void SongLoaderInserter::Load(Playlist *destination, const int row, const bool play_now, const bool enqueue, const bool enqueue_next, const QList<QUrl> &urls, const bool signal) {
 
   destination_ = destination;
   row_ = row;
   play_now_ = play_now;
   enqueue_ = enqueue;
   enqueue_next_ = enqueue_next;
+  signal_ = signal;
 
   QObject::connect(destination, &Playlist::destroyed, this, &SongLoaderInserter::DestinationDestroyed);
   QObject::connect(this, &SongLoaderInserter::PreloadFinished, this, &SongLoaderInserter::InsertSongs);
@@ -176,7 +178,7 @@ void SongLoaderInserter::InsertSongs() {
 
   // Insert songs (that haven't been completely loaded) to allow user to see and play them while not loaded completely
   if (destination_) {
-    destination_->InsertSongsOrCollectionItems(songs_, playlist_name_, row_, play_now_, enqueue_, enqueue_next_);
+    destination_->InsertSongsOrCollectionItems(songs_, playlist_name_, row_, play_now_, enqueue_, enqueue_next_, signal_);
   }
 
 }
@@ -188,6 +190,7 @@ void SongLoaderInserter::AsyncLoad() {
   int async_load_id = task_manager_->StartTask(tr("Loading tracks"));
   task_manager_->SetTaskProgress(async_load_id, static_cast<quint64>(async_progress), static_cast<quint64>(pending_.count()));
   bool first_loaded = false;
+  int first_loaded_index = -1;
   for (int i = 0; i < pending_.count(); ++i) {
     SongLoader *loader = pending_.value(i);
     const SongLoader::Result result = loader->LoadFilenamesBlocking();
@@ -208,6 +211,7 @@ void SongLoaderInserter::AsyncLoad() {
       // It'll start playing as soon as we emit PreloadFinished, so it needs to have the duration set to show properly in the UI.
       loader->LoadMetadataBlocking();
       first_loaded = true;
+      first_loaded_index = i;
     }
 
     songs_ << loader->songs();
@@ -224,8 +228,8 @@ void SongLoaderInserter::AsyncLoad() {
   SongList songs;
   for (int i = 0; i < pending_.count(); ++i) {
     SongLoader *loader = pending_.value(i);
-    if (i != 0) {
-      // We already did this earlier for the first song.
+    if (i != first_loaded_index) {
+      // We already did this earlier for the first successfully-loaded song.
       loader->LoadMetadataBlocking();
     }
     songs << loader->songs();

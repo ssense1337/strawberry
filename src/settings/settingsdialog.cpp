@@ -49,6 +49,7 @@
 
 #include "core/settings.h"
 #include "core/player.h"
+#include "core/appearance.h"
 #include "utilities/screenutils.h"
 #include "widgets/groupediconview.h"
 #include "collection/collectionlibrary.h"
@@ -74,6 +75,9 @@
 #ifdef HAVE_MOODBAR
 #  include "moodbarsettingspage.h"
 #endif
+#ifdef HAVE_WAVEFORM
+#  include "waveformsettingspage.h"
+#endif
 #ifdef HAVE_SUBSONIC
 #  include "subsonic/subsonicservice.h"
 #  include "subsonicsettingspage.h"
@@ -91,12 +95,15 @@
 #  include "qobuzsettingspage.h"
 #endif
 
+#include "radiosettingspage.h"
+
 #include "ui_settingsdialog.h"
 
 using namespace Qt::Literals::StringLiterals;
 
 namespace {
 constexpr char kSettingsGroup[] = "SettingsDialog";
+constexpr char kGeometry[] = "geometry";
 }
 
 SettingsDialog::SettingsDialog(const SharedPtr<Player> player,
@@ -106,6 +113,7 @@ SettingsDialog::SettingsDialog(const SharedPtr<Player> player,
                                const SharedPtr<LyricsProviders> lyrics_providers,
                                const SharedPtr<AudioScrobbler> scrobbler,
                                const SharedPtr<StreamingServices> streaming_services,
+                               const SharedPtr<Appearance> appearance,
 #ifdef HAVE_GLOBALSHORTCUTS
                                GlobalShortcutsManager *global_shortcuts_manager,
 #endif
@@ -132,7 +140,7 @@ SettingsDialog::SettingsDialog(const SharedPtr<Player> player,
   AddPage(Page::Proxy, new NetworkProxySettingsPage(this, this), general);
 
   QTreeWidgetItem *iface = AddCategory(tr("User interface"));
-  AddPage(Page::Appearance, new AppearanceSettingsPage(this, this), iface);
+  AddPage(Page::Appearance, new AppearanceSettingsPage(this, appearance, this), iface);
   AddPage(Page::Context, new ContextSettingsPage(this, this), iface);
   AddPage(Page::Notifications, new NotificationsSettingsPage(this, osd, this), iface);
 
@@ -143,11 +151,13 @@ SettingsDialog::SettingsDialog(const SharedPtr<Player> player,
 #ifdef HAVE_MOODBAR
   AddPage(Page::Moodbar, new MoodbarSettingsPage(this, this), iface);
 #endif
-
-#if defined(HAVE_SUBSONIC) || defined(HAVE_TIDAL) || defined(HAVE_SPOTIFY) || defined(HAVE_QOBUZ)
-  QTreeWidgetItem *streaming = AddCategory(tr("Streaming"));
+#ifdef HAVE_WAVEFORM
+  AddPage(Page::Waveform, new WaveformSettingsPage(this, this), iface);
 #endif
 
+  QTreeWidgetItem *streaming = AddCategory(tr("Streaming"));
+
+  (void)streaming_services;
 #ifdef HAVE_SUBSONIC
   AddPage(Page::Subsonic, new SubsonicSettingsPage(this, streaming_services->Service<SubsonicService>(), this), streaming);
 #endif
@@ -161,9 +171,11 @@ SettingsDialog::SettingsDialog(const SharedPtr<Player> player,
   AddPage(Page::Qobuz, new QobuzSettingsPage(this, streaming_services->Service<QobuzService>(), this), streaming);
 #endif
 
+  AddPage(Page::Radio, new RadioSettingsPage(this, this), streaming);
+
   // List box
   QObject::connect(ui_->list, &QTreeWidget::currentItemChanged, this, &SettingsDialog::CurrentItemChanged);
-  ui_->list->setCurrentItem(pages_[Page::Behaviour].item_);
+  ui_->list->setCurrentItem(pages_.value(Page::Behaviour).item_);
 
   // Make sure the list is big enough to show all the items
   ui_->list->setMinimumWidth(qobject_cast<QAbstractItemView*>(ui_->list)->sizeHintForColumn(0));  // clazy:exclude=unneeded-cast
@@ -234,8 +246,8 @@ void SettingsDialog::LoadGeometry() {
 
   Settings s;
   s.beginGroup(QLatin1String(kSettingsGroup));
-  if (s.contains("geometry")) {
-    restoreGeometry(s.value("geometry").toByteArray());
+  if (s.contains(kGeometry)) {
+    restoreGeometry(s.value(kGeometry).toByteArray());
   }
   s.endGroup();
 
@@ -248,7 +260,7 @@ void SettingsDialog::SaveGeometry() {
 
   Settings s;
   s.beginGroup(QLatin1String(kSettingsGroup));
-  s.setValue("geometry", saveGeometry());
+  s.setValue(kGeometry, saveGeometry());
   s.endGroup();
 
 }
@@ -336,12 +348,14 @@ void SettingsDialog::OpenAtPage(const Page page) {
     return;
   }
 
-  ui_->list->setCurrentItem(pages_[page].item_);
+  ui_->list->setCurrentItem(pages_.value(page).item_);
   show();
 
 }
 
 void SettingsDialog::CurrentItemChanged(QTreeWidgetItem *item) {
+
+  if (!item) return;
 
   if (!(item->flags() & Qt::ItemIsSelectable)) {
     return;

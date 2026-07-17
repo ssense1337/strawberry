@@ -47,9 +47,6 @@ class AnalyzerContainer : public QWidget {
 
   void SetEngine(SharedPtr<EngineBase> engine);
 
-  static const char *kSettingsGroup;
-  static const char *kSettingsFramerate;
-
  Q_SIGNALS:
   void WheelEvent(const int delta);
 
@@ -94,7 +91,7 @@ class AnalyzerContainer : public QWidget {
 template<typename T>
 void AnalyzerContainer::AddAnalyzerType() {
 
-  int id = analyzer_types_.count();
+  const int id = static_cast<int>(analyzer_types_.count());
   analyzer_types_ << &T::staticMetaObject;
 
   QAction *action = context_menu_->addAction(tr(T::kName));

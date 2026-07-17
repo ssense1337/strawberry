@@ -25,17 +25,19 @@
 #include "ui_radioviewcontainer.h"
 
 class RadioView;
+class RadioBrowserSearchView;
 
 class RadioViewContainer : public QWidget {
   Q_OBJECT
 
  public:
   explicit RadioViewContainer(QWidget *parent = nullptr);
-  ~RadioViewContainer();
+  ~RadioViewContainer() override;
 
   void ReloadSettings();
 
   RadioView *view() const { return ui_->view; }
+  RadioBrowserSearchView *search_view() const { return ui_->search_view; }
 
  Q_SIGNALS:
   void Refresh();

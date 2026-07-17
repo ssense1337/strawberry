@@ -2,6 +2,17 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="cs_CZ" sourcelanguage="en-US">
   <context>
+    <name>ASXParser</name>
+    <message>
+      <source>ASX playlist is too large</source>
+      <translation type="unfinished">ASX playlist is too large</translation>
+    </message>
+    <message>
+      <source>Failed to write ASX playlist</source>
+      <translation type="unfinished">Failed to write ASX playlist</translation>
+    </message>
+  </context>
+  <context>
     <name>About</name>
     <message>
       <source>About</source>
@@ -36,8 +47,8 @@
       <translation>Líbí se a vyhovuje vám-li Strawberry, zvažte příspěvek.</translation>
     </message>
     <message>
-      <source>You can sponsor the author on %1. You can also make a one-time payment through %2.</source>
-      <translation>Můžete podpořit autora na %1. Také můžete jednorázově přispět pomocí %2.</translation>
+      <source>You can sponsor the author on %1 or %2. You can also make a one-time payment through %3.</source>
+      <translation>Můžete podpořit autora na %1 nebo %2. Také můžete jednorázově přispět pomocí %3.</translation>
     </message>
     <message>
       <source>Author and maintainer</source>
@@ -361,14 +372,6 @@
       <translation type="unfinished">Style</translation>
     </message>
     <message>
-      <source>Use system theme icons</source>
-      <translation>Použít ikony ze systémového motivu</translation>
-    </message>
-    <message>
-      <source>Settings require restart.</source>
-      <translation type="unfinished">Settings require restart.</translation>
-    </message>
-    <message>
       <source>Tabbar colors</source>
       <translation type="unfinished">Tabbar colors</translation>
     </message>
@@ -517,8 +520,104 @@
       <translation type="unfinished">Select playlist playing song color:</translation>
     </message>
     <message>
+      <source>Window</source>
+      <translation type="unfinished">Window</translation>
+    </message>
+    <message>
+      <source>Window text</source>
+      <translation type="unfinished">Window text</translation>
+    </message>
+    <message>
+      <source>Base</source>
+      <translation type="unfinished">Base</translation>
+    </message>
+    <message>
+      <source>Alternate base</source>
+      <translation type="unfinished">Alternate base</translation>
+    </message>
+    <message>
+      <source>Tooltip base</source>
+      <translation type="unfinished">Tooltip base</translation>
+    </message>
+    <message>
+      <source>Tooltip text</source>
+      <translation type="unfinished">Tooltip text</translation>
+    </message>
+    <message>
+      <source>Placeholder text</source>
+      <translation type="unfinished">Placeholder text</translation>
+    </message>
+    <message>
+      <source>Text</source>
+      <translation type="unfinished">Text</translation>
+    </message>
+    <message>
+      <source>Button</source>
+      <translation type="unfinished">Button</translation>
+    </message>
+    <message>
+      <source>Button text</source>
+      <translation type="unfinished">Button text</translation>
+    </message>
+    <message>
+      <source>Bright text</source>
+      <translation type="unfinished">Bright text</translation>
+    </message>
+    <message>
+      <source>Select color</source>
+      <translation type="unfinished">Select color</translation>
+    </message>
+    <message>
       <source>Select background image</source>
       <translation>Vybrat obrázek na pozadí</translation>
+    </message>
+    <message>
+      <source>Colors</source>
+      <translation type="unfinished">Colors</translation>
+    </message>
+    <message>
+      <source>&amp;Use the system default color set</source>
+      <translation type="unfinished">&amp;Use the system default color set</translation>
+    </message>
+    <message>
+      <source>Use a custom color set</source>
+      <translation type="unfinished">Use a custom color set</translation>
+    </message>
+    <message>
+      <source>Set a custom color set suitable for a dark theme</source>
+      <translation type="unfinished">Set a custom color set suitable for a dark theme</translation>
+    </message>
+    <message>
+      <source>Dark mode</source>
+      <translation type="unfinished">Dark mode</translation>
+    </message>
+    <message>
+      <source>Reset the custom color set to the system default colors</source>
+      <translation type="unfinished">Reset the custom color set to the system default colors</translation>
+    </message>
+    <message>
+      <source>Reset to default</source>
+      <translation type="unfinished">Reset to default</translation>
+    </message>
+    <message>
+      <source>You might need to restart Strawberry for this setting to fully apply</source>
+      <translation type="unfinished">You might need to restart Strawberry for this setting to fully apply</translation>
+    </message>
+    <message>
+      <source>You need to restart Strawberry for this setting to take affect</source>
+      <translation type="unfinished">You need to restart Strawberry for this setting to take affect</translation>
+    </message>
+    <message>
+      <source>System icons</source>
+      <translation type="unfinished">System icons</translation>
+    </message>
+    <message>
+      <source>Changing colors is only supported with some styles</source>
+      <translation type="unfinished">Changing colors is only supported with some styles</translation>
+    </message>
+    <message>
+      <source>Dark colors</source>
+      <translation type="unfinished">Dark colors</translation>
     </message>
   </context>
   <context>
@@ -578,6 +677,10 @@
     <message>
       <source>Improve headphone listening of stereo audio records (bs2b)</source>
       <translation type="unfinished">Improve headphone listening of stereo audio records (bs2b)</translation>
+    </message>
+    <message>
+      <source>Use playbin3 when available</source>
+      <translation type="unfinished">Use playbin3 when available</translation>
     </message>
     <message>
       <source>Enable HTTP/2 for streaming</source>
@@ -690,6 +793,26 @@
     <message>
       <source>Fade out on pause / fade in on resume</source>
       <translation>Zeslabení při pozastavení/Zesílení při obnovení přehrávání</translation>
+    </message>
+    <message>
+      <source>You need to restart Strawberry for this setting to take affect</source>
+      <translation type="unfinished">You need to restart Strawberry for this setting to take affect</translation>
+    </message>
+    <message>
+      <source>Map the volume slider to a decibel scale so that perceived loudness changes evenly. Each 1% step equals 0.5 dB, 100% is 0 dB and 0% is silence.</source>
+      <translation type="unfinished">Map the volume slider to a decibel scale so that perceived loudness changes evenly. Each 1% step equals 0.5 dB, 100% is 0 dB and 0% is silence.</translation>
+    </message>
+    <message>
+      <source>Exponential volume scaling</source>
+      <translation type="unfinished">Exponential volume scaling</translation>
+    </message>
+    <message>
+      <source>Device warm-up</source>
+      <translation type="unfinished">Device warm-up</translation>
+    </message>
+    <message>
+      <source>Delay between opening the audio device and starting playback, to avoid the start of the track being cut off while the device (DAC) is still becoming ready.  Set to 0 to disable.</source>
+      <translation type="unfinished">Delay between opening the audio device and starting playback, to avoid the start of the track being cut off while the device (DAC) is still becoming ready.  Set to 0 to disable.</translation>
     </message>
   </context>
   <context>
@@ -832,18 +955,26 @@
     </message>
   </context>
   <context>
-    <name>CddaSongLoader</name>
+    <name>CDDASongLoader</name>
+    <message>
+      <source>Could not create cdiocddasrc</source>
+      <translation type="unfinished">Could not create cdiocddasrc</translation>
+    </message>
     <message>
       <source>Error while setting CDDA device to ready state.</source>
-      <translation>Chyba při přenastavování CCDA zařízení do připraveného stavu.</translation>
+      <translation type="unfinished">Error while setting CDDA device to ready state.</translation>
     </message>
     <message>
       <source>Error while setting CDDA device to pause state.</source>
-      <translation>Chyba při přenastavování CCDA zařízení do pozastaveného stavu.</translation>
+      <translation type="unfinished">Error while setting CDDA device to pause state.</translation>
+    </message>
+    <message>
+      <source>The &apos;track&apos; format is not supported by GStreamer.</source>
+      <translation type="unfinished">The &apos;track&apos; format is not supported by GStreamer.</translation>
     </message>
     <message>
       <source>Error while querying CDDA tracks.</source>
-      <translation>Chyba při dotazování na CDDA stopy.</translation>
+      <translation type="unfinished">Error while querying CDDA tracks.</translation>
     </message>
   </context>
   <context>
@@ -908,12 +1039,40 @@
       <translation>Spravovat uložená seskupení</translation>
     </message>
     <message>
-      <source>Show</source>
-      <translation>Ukázat</translation>
+      <source>Any rating</source>
+      <translation type="unfinished">Any rating</translation>
+    </message>
+    <message>
+      <source>Rating non null</source>
+      <translation type="unfinished">Rating non null</translation>
+    </message>
+    <message>
+      <source>Rating greater than 1 star</source>
+      <translation type="unfinished">Rating greater than 1 star</translation>
+    </message>
+    <message>
+      <source>Rating greater than 2 stars</source>
+      <translation type="unfinished">Rating greater than 2 stars</translation>
+    </message>
+    <message>
+      <source>Rating greater than 3 stars</source>
+      <translation type="unfinished">Rating greater than 3 stars</translation>
+    </message>
+    <message>
+      <source>Rating greater than 4 stars</source>
+      <translation type="unfinished">Rating greater than 4 stars</translation>
     </message>
     <message>
       <source>Group by</source>
       <translation>Seskupovat podle</translation>
+    </message>
+    <message>
+      <source>Filter by age</source>
+      <translation type="unfinished">Filter by age</translation>
+    </message>
+    <message>
+      <source>Filter by rating</source>
+      <translation type="unfinished">Filter by rating</translation>
     </message>
     <message>
       <source>Display options</source>
@@ -990,6 +1149,10 @@
   </context>
   <context>
     <name>CollectionLibrary</name>
+    <message>
+      <source>Support for sort tags artist, album, album artist, title, composer and performer</source>
+      <translation type="unfinished">Support for sort tags artist, album, album artist, title, composer and performer</translation>
+    </message>
     <message>
       <source>Saving playcounts and ratings</source>
       <translation type="unfinished">Saving playcounts and ratings</translation>
@@ -1091,8 +1254,16 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
       <translation type="unfinished">Use various artists for compilation albums</translation>
     </message>
     <message>
-      <source>Skip leading articles (&quot;the&quot;, &quot;a&quot;, &quot;an&quot;) when sorting artist names</source>
-      <translation type="unfinished">Skip leading articles (&quot;the&quot;, &quot;a&quot;, &quot;an&quot;) when sorting artist names</translation>
+      <source>Skip leading articles (&quot;the&quot;, &quot;a&quot;, &quot;an&quot;) when sorting artists, composers and performers</source>
+      <translation type="unfinished">Skip leading articles (&quot;the&quot;, &quot;a&quot;, &quot;an&quot;) when sorting artists, composers and performers</translation>
+    </message>
+    <message>
+      <source>Skip leading articles (&quot;the&quot;, &quot;a&quot;, &quot;an&quot;) when sorting albums</source>
+      <translation type="unfinished">Skip leading articles (&quot;the&quot;, &quot;a&quot;, &quot;an&quot;) when sorting albums</translation>
+    </message>
+    <message>
+      <source>Use sort tags for sorting when available</source>
+      <translation type="unfinished">Use sort tags for sorting when available</translation>
     </message>
     <message>
       <source>Album cover pixmap cache</source>
@@ -1430,12 +1601,32 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
       <translation>Přidat hodnocení písně</translation>
     </message>
     <message>
-      <source>%originalyear%</source>
-      <translation type="unfinished">%originalyear%</translation>
-    </message>
-    <message>
       <source>Add song original year tag</source>
       <translation type="unfinished">Add song original year tag</translation>
+    </message>
+    <message>
+      <source>Add song artistsort tag</source>
+      <translation type="unfinished">Add song artistsort tag</translation>
+    </message>
+    <message>
+      <source>Add song albumartistsort tag</source>
+      <translation type="unfinished">Add song albumartistsort tag</translation>
+    </message>
+    <message>
+      <source>Add song titlesort tag</source>
+      <translation type="unfinished">Add song titlesort tag</translation>
+    </message>
+    <message>
+      <source>Add song composersort tag</source>
+      <translation type="unfinished">Add song composersort tag</translation>
+    </message>
+    <message>
+      <source>Add song performersort tag</source>
+      <translation type="unfinished">Add song performersort tag</translation>
+    </message>
+    <message>
+      <source>Add song albumsort tag</source>
+      <translation type="unfinished">Add song albumsort tag</translation>
     </message>
   </context>
   <context>
@@ -1459,14 +1650,6 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
     <message>
       <source>Bitrate</source>
       <translation>Datový tok</translation>
-    </message>
-    <message>
-      <source>EBU R 128 Integrated Loudness</source>
-      <translation type="unfinished">EBU R 128 Integrated Loudness</translation>
-    </message>
-    <message>
-      <source>EBU R 128 Loudness Range</source>
-      <translation type="unfinished">EBU R 128 Loudness Range</translation>
     </message>
     <message>
       <source>Show album cover</source>
@@ -1977,6 +2160,13 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
     </message>
   </context>
   <context>
+    <name>DiscordRichPresence</name>
+    <message>
+      <source>on </source>
+      <translation type="unfinished">on </translation>
+    </message>
+  </context>
+  <context>
     <name>DynamicPlaylistControls</name>
     <message>
       <source>Dynamic mode is on</source>
@@ -2286,6 +2476,42 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
       <source>Could not write metadata to %1: %2</source>
       <translation type="unfinished">Could not write metadata to %1: %2</translation>
     </message>
+    <message>
+      <source>ID3v2 version:</source>
+      <translation type="unfinished">ID3v2 version:</translation>
+    </message>
+    <message>
+      <source>2.3</source>
+      <translation type="unfinished">2.3</translation>
+    </message>
+    <message>
+      <source>2.4</source>
+      <translation type="unfinished">2.4</translation>
+    </message>
+    <message>
+      <source>Performer sort</source>
+      <translation type="unfinished">Performer sort</translation>
+    </message>
+    <message>
+      <source>Title sort</source>
+      <translation type="unfinished">Title sort</translation>
+    </message>
+    <message>
+      <source>Album artist sort</source>
+      <translation type="unfinished">Album artist sort</translation>
+    </message>
+    <message>
+      <source>Artist sort</source>
+      <translation type="unfinished">Artist sort</translation>
+    </message>
+    <message>
+      <source>Album sort</source>
+      <translation type="unfinished">Album sort</translation>
+    </message>
+    <message>
+      <source>Composer sort</source>
+      <translation type="unfinished">Composer sort</translation>
+    </message>
   </context>
   <context>
     <name>Equalizer</name>
@@ -2413,6 +2639,10 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
       <source>Are you sure you want to delete the &quot;%1&quot; preset?</source>
       <translation>Opravdu chcete smazat nastavení &quot;%1&quot;?</translation>
     </message>
+    <message>
+      <source>You need to restart playback for this setting to take affect.</source>
+      <translation type="unfinished">You need to restart playback for this setting to take affect.</translation>
+    </message>
   </context>
   <context>
     <name>EqualizerSlider</name>
@@ -2472,6 +2702,22 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
       <source>Form</source>
       <translation>Formulář</translation>
     </message>
+    <message>
+      <source>Add root directory</source>
+      <translation type="unfinished">Add root directory</translation>
+    </message>
+    <message>
+      <source>Remove selected root directory</source>
+      <translation type="unfinished">Remove selected root directory</translation>
+    </message>
+    <message>
+      <source>Toggle between list and tree view</source>
+      <translation type="unfinished">Toggle between list and tree view</translation>
+    </message>
+    <message>
+      <source>Select folder to add as tree root</source>
+      <translation type="unfinished">Select folder to add as tree root</translation>
+    </message>
   </context>
   <context>
     <name>FileViewList</name>
@@ -2510,6 +2756,49 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
     <message>
       <source>Show in file browser...</source>
       <translation>Ukázat v prohlížeči souborů...</translation>
+    </message>
+  </context>
+  <context>
+    <name>FileViewTree</name>
+    <message>
+      <source>Append to current playlist</source>
+      <translation type="unfinished">Append to current playlist</translation>
+    </message>
+    <message>
+      <source>Replace current playlist</source>
+      <translation type="unfinished">Replace current playlist</translation>
+    </message>
+    <message>
+      <source>Open in new playlist</source>
+      <translation type="unfinished">Open in new playlist</translation>
+    </message>
+    <message>
+      <source>Copy to collection...</source>
+      <translation type="unfinished">Copy to collection...</translation>
+    </message>
+    <message>
+      <source>Move to collection...</source>
+      <translation type="unfinished">Move to collection...</translation>
+    </message>
+    <message>
+      <source>Copy to device...</source>
+      <translation type="unfinished">Copy to device...</translation>
+    </message>
+    <message>
+      <source>Delete from disk...</source>
+      <translation type="unfinished">Delete from disk...</translation>
+    </message>
+    <message>
+      <source>Edit track information...</source>
+      <translation type="unfinished">Edit track information...</translation>
+    </message>
+    <message>
+      <source>Show in file browser...</source>
+      <translation type="unfinished">Show in file browser...</translation>
+    </message>
+    <message>
+      <source>Files</source>
+      <translation type="unfinished">Files</translation>
     </message>
   </context>
   <context>
@@ -2555,29 +2844,6 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
     <message>
       <source>An error occurred loading the iTunes database</source>
       <translation>Při nahrávání databáze iTunes nastala chyba</translation>
-    </message>
-  </context>
-  <context>
-    <name>GeniusLyricsProvider</name>
-    <message>
-      <source>Genius Authentication</source>
-      <translation type="unfinished">Genius Authentication</translation>
-    </message>
-    <message>
-      <source>Please open this URL in your browser</source>
-      <translation>Prosím navštivte tuto adresu URL ve vašem prohlížeči.</translation>
-    </message>
-    <message>
-      <source>Redirect missing token code!</source>
-      <translation>Přesměrování chybí kód tokenu!</translation>
-    </message>
-    <message>
-      <source>Received invalid reply from web browser.</source>
-      <translation>Obdržena špatná odpověď od prohlížeče.</translation>
-    </message>
-    <message>
-      <source>Redirect from Genius is missing query items code or state.</source>
-      <translation>Přesměrování z Genius chybí kód položek dotazu nebo stav.</translation>
     </message>
   </context>
   <context>
@@ -2855,6 +3121,10 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
       <source>Separate albums by grouping tag</source>
       <translation type="unfinished">Separate albums by grouping tag</translation>
     </message>
+    <message>
+      <source>Original year - Album - Disc</source>
+      <translation type="unfinished">Original year - Album - Disc</translation>
+    </message>
   </context>
   <context>
     <name>GstEngine</name>
@@ -2864,73 +3134,38 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
     </message>
   </context>
   <context>
-    <name>LastFMImport</name>
+    <name>LastFMScrobbler</name>
     <message>
-      <source>Missing username, please login to last.fm first!</source>
-      <translation>Chybějící jméno, prosím, nejdříve se přihlašte k last.fm!</translation>
-    </message>
-  </context>
-  <context>
-    <name>LastFMImportDialog</name>
-    <message>
-      <source>Import data from last.fm</source>
-      <translation>Importovat data z last.fm</translation>
+      <source>%1 Scrobbler Authentication</source>
+      <translation type="unfinished">%1 Scrobbler Authentication</translation>
     </message>
     <message>
-      <source>Choose data to import from last.fm</source>
-      <translation>Zvolte data pro import z last.fm</translation>
+      <source>Open URL in web browser?</source>
+      <translation type="unfinished">Open URL in web browser?</translation>
     </message>
     <message>
-      <source>Last played</source>
-      <translation type="unfinished">Last played</translation>
+      <source>Press &quot;Save&quot; to copy the URL to clipboard and manually open it in a web browser.</source>
+      <translation type="unfinished">Press &quot;Save&quot; to copy the URL to clipboard and manually open it in a web browser.</translation>
     </message>
     <message>
-      <source>Play counts</source>
-      <translation type="unfinished">Play counts</translation>
+      <source>Could not open URL. Please open this URL in your browser</source>
+      <translation type="unfinished">Could not open URL. Please open this URL in your browser</translation>
     </message>
     <message>
-      <source>Warning: Play counts and last played from last.fm will completely replace the same data for the matched songs. Play counts will replace the data based on artist and song title for the same albums! Please backup your database before you start.</source>
-      <translation type="unfinished">Warning: Play counts and last played from last.fm will completely replace the same data for the matched songs. Play counts will replace the data based on artist and song title for the same albums! Please backup your database before you start.</translation>
+      <source>Invalid reply from web browser. Missing token.</source>
+      <translation type="unfinished">Invalid reply from web browser. Missing token.</translation>
     </message>
     <message>
-      <source>Go!</source>
-      <translation>Importovat!</translation>
+      <source>Received invalid reply from web browser. Try another browser.</source>
+      <translation type="unfinished">Received invalid reply from web browser. Try another browser.</translation>
     </message>
     <message>
-      <source>Close</source>
-      <translation>Zavřít</translation>
+      <source>Scrobbler %1 is not authenticated!</source>
+      <translation type="unfinished">Scrobbler %1 is not authenticated!</translation>
     </message>
     <message>
-      <source>Cancel</source>
-      <translation>Zrušit</translation>
-    </message>
-    <message>
-      <source>Receiving initial data from last.fm...</source>
-      <translation type="unfinished">Receiving initial data from last.fm...</translation>
-    </message>
-    <message>
-      <source>Receiving playcount for %1 songs and last played for %2 songs.</source>
-      <translation type="unfinished">Receiving playcount for %1 songs and last played for %2 songs.</translation>
-    </message>
-    <message>
-      <source>Receiving last played for %1 songs.</source>
-      <translation type="unfinished">Receiving last played for %1 songs.</translation>
-    </message>
-    <message>
-      <source>Receiving playcounts for %1 songs.</source>
-      <translation type="unfinished">Receiving playcounts for %1 songs.</translation>
-    </message>
-    <message>
-      <source>Playcounts for %1 songs and last played for %2 songs received.</source>
-      <translation type="unfinished">Playcounts for %1 songs and last played for %2 songs received.</translation>
-    </message>
-    <message>
-      <source>Last played for %1 songs received.</source>
-      <translation>Hodnota &quot;Naposledy přehráno&quot; pro %1 skladeb bylo přijato.</translation>
-    </message>
-    <message>
-      <source>Playcounts for %1 songs received.</source>
-      <translation>Hodnota &quot;Počet přehrání&quot; pro %1 skladeb byla přijata.</translation>
+      <source>Scrobbler %1 error: %2</source>
+      <translation type="unfinished">Scrobbler %1 error: %2</translation>
     </message>
   </context>
   <context>
@@ -2949,22 +3184,6 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
   </context>
   <context>
     <name>ListenBrainzScrobbler</name>
-    <message>
-      <source>ListenBrainz Authentication</source>
-      <translation>Přihlášení na ListenBrainz</translation>
-    </message>
-    <message>
-      <source>Please open this URL in your browser</source>
-      <translation>Prosím navštivte tuto adresu URL ve vašem prohlížeči.</translation>
-    </message>
-    <message>
-      <source>Redirect missing token code!</source>
-      <translation>Přesměrování chybí kód tokenu!</translation>
-    </message>
-    <message>
-      <source>Received invalid reply from web browser.</source>
-      <translation>Obdržena špatná odpověď od prohlížeče.</translation>
-    </message>
     <message>
       <source>Unable to scrobble %1 - %2 because of error: %3</source>
       <translation type="unfinished">Unable to scrobble %1 - %2 because of error: %3</translation>
@@ -3179,10 +3398,6 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
       <translation>Z&amp;amíchat seznam skladeb</translation>
     </message>
     <message>
-      <source>Ctrl+H</source>
-      <translation type="unfinished">Ctrl+H</translation>
-    </message>
-    <message>
       <source>&amp;Add file...</source>
       <translation>&amp;Přidat soubor...</translation>
     </message>
@@ -3335,10 +3550,6 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
       <translation>Zobrazovat boční panel</translation>
     </message>
     <message>
-      <source>Import data from last.fm...</source>
-      <translation>Importovat data z last.fm...</translation>
-    </message>
-    <message>
       <source>Context</source>
       <translation>Kontext</translation>
     </message>
@@ -3421,6 +3632,10 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
     <message>
       <source>Rescan song(s)...</source>
       <translation type="unfinished">Rescan song(s)...</translation>
+    </message>
+    <message>
+      <source>Fetch metadata from service</source>
+      <translation type="unfinished">Fetch metadata from service</translation>
     </message>
     <message>
       <source>Copy URL(s)...</source>
@@ -3566,6 +3781,22 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
       <source>Collection rescan notice</source>
       <translation>Zpráva o prohledání sbírky</translation>
     </message>
+    <message>
+      <source>Ctrl+Shift+H</source>
+      <translation type="unfinished">Ctrl+Shift+H</translation>
+    </message>
+    <message>
+      <source>Go to last playlist tab</source>
+      <translation type="unfinished">Go to last playlist tab</translation>
+    </message>
+    <message>
+      <source>Go to active playlist tab</source>
+      <translation type="unfinished">Go to active playlist tab</translation>
+    </message>
+    <message>
+      <source>Close current playlist tab</source>
+      <translation type="unfinished">Close current playlist tab</translation>
+    </message>
   </context>
   <context>
     <name>MessageDialog</name>
@@ -3586,25 +3817,10 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
     </message>
   </context>
   <context>
-    <name>MoodbarProxyStyle</name>
-    <message>
-      <source>Show moodbar</source>
-      <translation>Zobrazit ukazatel nálady</translation>
-    </message>
-    <message>
-      <source>Moodbar style</source>
-      <translation>Styl Ukazatele nálady</translation>
-    </message>
-  </context>
-  <context>
     <name>MoodbarSettingsPage</name>
     <message>
       <source>Moodbar</source>
       <translation>Ukazatel nálady</translation>
-    </message>
-    <message>
-      <source>Show a moodbar in the track progress bar</source>
-      <translation type="unfinished">Show a moodbar in the track progress bar</translation>
     </message>
     <message>
       <source>Moodbar style</source>
@@ -3613,10 +3829,6 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
     <message>
       <source>Save the .mood files directly in the songs folders</source>
       <translation>Ukládat .mood soubory přímo ve složkách skladeb</translation>
-    </message>
-    <message>
-      <source>Enabled</source>
-      <translation>Povoleno</translation>
     </message>
   </context>
   <context>
@@ -3698,6 +3910,10 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
     <message>
       <source>Use proxy settings for streaming</source>
       <translation type="unfinished">Use proxy settings for streaming</translation>
+    </message>
+    <message>
+      <source>Only HTTP proxy is supported for streaming.</source>
+      <translation type="unfinished">Only HTTP proxy is supported for streaming.</translation>
     </message>
   </context>
   <context>
@@ -3927,6 +4143,61 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
       <source>Drag to reposition</source>
       <translation>Tažením přemístěte</translation>
     </message>
+    <message>
+      <source>Discord</source>
+      <translation type="unfinished">Discord</translation>
+    </message>
+    <message>
+      <source>Enable Rich Presence</source>
+      <translation type="unfinished">Enable Rich Presence</translation>
+    </message>
+    <message>
+      <source>&quot;Listening to...&quot;</source>
+      <translation type="unfinished">&quot;Listening to...&quot;</translation>
+    </message>
+    <message>
+      <source>Strawberry</source>
+      <translation type="unfinished">Strawberry</translation>
+    </message>
+    <message>
+      <source>Artist name</source>
+      <translation type="unfinished">Artist name</translation>
+    </message>
+    <message>
+      <source>Song title</source>
+      <translation type="unfinished">Song title</translation>
+    </message>
+  </context>
+  <context>
+    <name>OAuthenticator</name>
+    <message>
+      <source>Authentication</source>
+      <translation type="unfinished">Authentication</translation>
+    </message>
+    <message>
+      <source>Please open this URL in your browser</source>
+      <translation type="unfinished">Please open this URL in your browser</translation>
+    </message>
+    <message>
+      <source>Received invalid reply from web browser.</source>
+      <translation type="unfinished">Received invalid reply from web browser.</translation>
+    </message>
+    <message>
+      <source>Redirect URL is missing query.</source>
+      <translation type="unfinished">Redirect URL is missing query.</translation>
+    </message>
+    <message>
+      <source>Request URL is missing code!</source>
+      <translation type="unfinished">Request URL is missing code!</translation>
+    </message>
+    <message>
+      <source>Request URL is missing state!</source>
+      <translation type="unfinished">Request URL is missing state!</translation>
+    </message>
+    <message>
+      <source>Request URL has wrong state %1 != %2</source>
+      <translation type="unfinished">Request URL has wrong state %1 != %2</translation>
+    </message>
   </context>
   <context>
     <name>OSDBase</name>
@@ -3981,6 +4252,10 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
     <message>
       <source>Shuffle albums</source>
       <translation>Zamíchat alba</translation>
+    </message>
+    <message>
+      <source>Shuffle grouping</source>
+      <translation>Zamíchat seskupování</translation>
     </message>
     <message>
       <source>Don&apos;t repeat</source>
@@ -4195,6 +4470,14 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
       <source>Don&apos;t know how to handle %1</source>
       <translation type="unfinished">Don&apos;t know how to handle %1</translation>
     </message>
+    <message>
+      <source>File %1 does not exist</source>
+      <translation type="unfinished">File %1 does not exist</translation>
+    </message>
+    <message>
+      <source>Could not read file %1: %2</source>
+      <translation type="unfinished">Could not read file %1: %2</translation>
+    </message>
   </context>
   <context>
     <name>PlayingWidget</name>
@@ -4230,12 +4513,24 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
       <translation>Název</translation>
     </message>
     <message>
+      <source>Title Sort</source>
+      <translation type="unfinished">Title Sort</translation>
+    </message>
+    <message>
       <source>Artist</source>
       <translation>Umělec</translation>
     </message>
     <message>
+      <source>Artist Sort</source>
+      <translation type="unfinished">Artist Sort</translation>
+    </message>
+    <message>
       <source>Album</source>
       <translation type="unfinished">Album</translation>
+    </message>
+    <message>
+      <source>Album Sort</source>
+      <translation type="unfinished">Album Sort</translation>
     </message>
     <message>
       <source>Track</source>
@@ -4266,12 +4561,24 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
       <translation type="unfinished">Album Artist</translation>
     </message>
     <message>
+      <source>Album Artist Sort</source>
+      <translation type="unfinished">Album Artist Sort</translation>
+    </message>
+    <message>
       <source>Composer</source>
       <translation>Skladatel</translation>
     </message>
     <message>
+      <source>Composer Sort</source>
+      <translation type="unfinished">Composer Sort</translation>
+    </message>
+    <message>
       <source>Performer</source>
       <translation>Účinkující</translation>
+    </message>
+    <message>
+      <source>Performer Sort</source>
+      <translation type="unfinished">Performer Sort</translation>
     </message>
     <message>
       <source>Grouping</source>
@@ -4302,8 +4609,8 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
       <translation>Datový tok</translation>
     </message>
     <message>
-      <source>File Name</source>
-      <translation type="unfinished">File Name</translation>
+      <source>Initial key</source>
+      <translation type="unfinished">Initial key</translation>
     </message>
     <message>
       <source>File Name (without path)</source>
@@ -4334,12 +4641,24 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
       <translation>Zdroj</translation>
     </message>
     <message>
+      <source>Moodbar</source>
+      <translation type="unfinished">Moodbar</translation>
+    </message>
+    <message>
+      <source>BPM</source>
+      <translation type="unfinished">BPM</translation>
+    </message>
+    <message>
       <source>Mood</source>
       <translation>Nálada</translation>
     </message>
     <message>
       <source>Rating</source>
       <translation>Hodnocení</translation>
+    </message>
+    <message>
+      <source>URL</source>
+      <translation type="unfinished">URL</translation>
     </message>
     <message>
       <source>CUE</source>
@@ -4464,6 +4783,10 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
     <message>
       <source>Playlist</source>
       <translation>Seznam skladeb</translation>
+    </message>
+    <message>
+      <source>Copy songs to playlist</source>
+      <translation type="unfinished">Copy songs to playlist</translation>
     </message>
     <message>
       <source>Copy to device</source>
@@ -4637,6 +4960,10 @@ Pokud nenajde žádné, které by se shodovaly, potom použije největší obrá
     <message>
       <source>Shuffle albums</source>
       <translation>Zamíchat alba</translation>
+    </message>
+    <message>
+      <source>Shuffle grouping</source>
+      <translation>Zamíchat seskupování</translation>
     </message>
   </context>
   <context>
@@ -4937,6 +5264,10 @@ Opravdu chcete pokračovat?</translation>
       <translation>Vypsat informaci o verzi</translation>
     </message>
     <message>
+      <source>Create fingerprint</source>
+      <translation type="unfinished">Create fingerprint</translation>
+    </message>
+    <message>
       <source>Failed to create directory %1.</source>
       <translation type="unfinished">Failed to create directory %1.</translation>
     </message>
@@ -4963,10 +5294,6 @@ Opravdu chcete pokračovat?</translation>
     <message>
       <source>LU</source>
       <translation type="unfinished">LU</translation>
-    </message>
-    <message>
-      <source>File %1 is not recognized as a valid audio file.</source>
-      <translation>Soubor %1 nebyl rozpoznán jako platný zvukový soubor.</translation>
     </message>
     <message>
       <source>1 day</source>
@@ -5045,8 +5372,8 @@ Opravdu chcete pokračovat?</translation>
       <translation type="unfinished">Could not parse file</translation>
     </message>
     <message>
-      <source>Could save file</source>
-      <translation type="unfinished">Could save file</translation>
+      <source>Could not save file</source>
+      <translation type="unfinished">Could not save file</translation>
     </message>
     <message>
       <source>Unknown error</source>
@@ -5061,20 +5388,24 @@ Opravdu chcete pokračovat?</translation>
       <translation>umělec</translation>
     </message>
     <message>
-      <source>searches for all artists containing the word %1. </source>
-      <translation type="unfinished">searches for all artists containing the word %1. </translation>
+      <source>searches for all artists containing the word %1.</source>
+      <translation type="unfinished">searches for all artists containing the word %1.</translation>
     </message>
     <message>
       <source>Search terms for numerical fields can be prefixed with %1 or %2 to refine the search, e.g.: </source>
       <translation type="unfinished">Search terms for numerical fields can be prefixed with %1 or %2 to refine the search, e.g.: </translation>
     </message>
     <message>
+      <source>A word can be excluded with a preceding &quot;%1&quot;, if you need to search for a word including &quot;%1&quot;, place quotes around the word.</source>
+      <translation type="unfinished">A word can be excluded with a preceding &quot;%1&quot;, if you need to search for a word including &quot;%1&quot;, place quotes around the word.</translation>
+    </message>
+    <message>
       <source>rating</source>
       <translation type="unfinished">rating</translation>
     </message>
     <message>
-      <source>Multiple search terms can also be combined with &quot;%1&quot; (default) and &quot;%2&quot;, as well as grouped with parentheses. </source>
-      <translation type="unfinished">Multiple search terms can also be combined with &quot;%1&quot; (default) and &quot;%2&quot;, as well as grouped with parentheses. </translation>
+      <source>Multiple search terms can also be combined with &quot;%1&quot; (default) and &quot;%2&quot;, as well as grouped with parentheses.</source>
+      <translation type="unfinished">Multiple search terms can also be combined with &quot;%1&quot; (default) and &quot;%2&quot;, as well as grouped with parentheses.</translation>
     </message>
     <message>
       <source>Available fields</source>
@@ -5288,6 +5619,17 @@ Opravdu chcete pokračovat?</translation>
     </message>
   </context>
   <context>
+    <name>QobuzMetadataRequest</name>
+    <message>
+      <source>Not authenticated</source>
+      <translation type="unfinished">Not authenticated</translation>
+    </message>
+    <message>
+      <source>No track ID</source>
+      <translation type="unfinished">No track ID</translation>
+    </message>
+  </context>
+  <context>
     <name>QobuzRequest</name>
     <message>
       <source>Receiving artists...</source>
@@ -5341,24 +5683,44 @@ Opravdu chcete pokračovat?</translation>
   <context>
     <name>QobuzService</name>
     <message>
-      <source>Authenticating...</source>
-      <translation>Probíhá ověření...</translation>
-    </message>
-    <message>
-      <source>Maximum number of login attempts reached.</source>
-      <translation>Byl dosažen maximální počet pokusů o přihlášení.</translation>
-    </message>
-    <message>
       <source>Missing Qobuz app ID.</source>
       <translation>Chybějící ID aplikace Qobuz.</translation>
     </message>
     <message>
-      <source>Missing Qobuz username.</source>
-      <translation>Chybějící Qobuz uživatelské jméno.</translation>
+      <source>Missing app ID. Please fetch credentials first.</source>
+      <translation type="unfinished">Missing app ID. Please fetch credentials first.</translation>
     </message>
     <message>
-      <source>Missing Qobuz password.</source>
-      <translation>Chybějící Qobuz heslo.</translation>
+      <source>Missing app secret. Please fetch credentials first.</source>
+      <translation type="unfinished">Missing app secret. Please fetch credentials first.</translation>
+    </message>
+    <message>
+      <source>Missing private key. Please fetch credentials first.</source>
+      <translation type="unfinished">Missing private key. Please fetch credentials first.</translation>
+    </message>
+    <message>
+      <source>Failed to start local server for OAuth redirect: %1</source>
+      <translation type="unfinished">Failed to start local server for OAuth redirect: %1</translation>
+    </message>
+    <message>
+      <source>Failed to open the web browser. Please open this URL manually: %1</source>
+      <translation type="unfinished">Failed to open the web browser. Please open this URL manually: %1</translation>
+    </message>
+    <message>
+      <source>Waiting for browser authentication...</source>
+      <translation type="unfinished">Waiting for browser authentication...</translation>
+    </message>
+    <message>
+      <source>OAuth redirect failed: %1</source>
+      <translation type="unfinished">OAuth redirect failed: %1</translation>
+    </message>
+    <message>
+      <source>OAuth redirect is missing authorization code.</source>
+      <translation type="unfinished">OAuth redirect is missing authorization code.</translation>
+    </message>
+    <message>
+      <source>Exchanging authorization code...</source>
+      <translation type="unfinished">Exchanging authorization code...</translation>
     </message>
     <message>
       <source>Not authenticated with Qobuz.</source>
@@ -5367,6 +5729,10 @@ Opravdu chcete pokračovat?</translation>
     <message>
       <source>Missing Qobuz app ID or secret.</source>
       <translation>Chybějící ID aplikace, nebo tajemství služby Qobuz.</translation>
+    </message>
+    <message>
+      <source>Not authenticated. Please login to Qobuz in the settings.</source>
+      <translation type="unfinished">Not authenticated. Please login to Qobuz in the settings.</translation>
     </message>
   </context>
   <context>
@@ -5380,24 +5746,12 @@ Opravdu chcete pokračovat?</translation>
       <translation>Povolit</translation>
     </message>
     <message>
-      <source>Qobuz support is not official and requires an API app ID and secret from a registered application to work. We can&apos;t help you getting these.</source>
-      <translation type="unfinished">Qobuz support is not official and requires an API app ID and secret from a registered application to work. We can&apos;t help you getting these.</translation>
-    </message>
-    <message>
       <source>Authentication</source>
       <translation>Ověření</translation>
     </message>
     <message>
       <source>App ID</source>
       <translation>ID aplikace</translation>
-    </message>
-    <message>
-      <source>Username</source>
-      <translation>Uživatelské jméno</translation>
-    </message>
-    <message>
-      <source>Password</source>
-      <translation>Heslo</translation>
     </message>
     <message>
       <source>App Secret</source>
@@ -5440,28 +5794,56 @@ Opravdu chcete pokračovat?</translation>
       <translation>Stahovat obaly alb</translation>
     </message>
     <message>
-      <source>Base64 encoded secret</source>
-      <translation type="unfinished">Base64 encoded secret</translation>
-    </message>
-    <message>
       <source>Configuration incomplete</source>
       <translation>Konfigurace není hotová</translation>
     </message>
     <message>
-      <source>Missing app id.</source>
-      <translation>Chybějící ID aplikace.</translation>
+      <source>Missing app id. Please fetch credentials first.</source>
+      <translation type="unfinished">Missing app id. Please fetch credentials first.</translation>
     </message>
     <message>
-      <source>Missing username.</source>
-      <translation>Chybějící uživatelské jméno.</translation>
+      <source>Missing app secret. Please fetch credentials first.</source>
+      <translation type="unfinished">Missing app secret. Please fetch credentials first.</translation>
     </message>
     <message>
-      <source>Missing password.</source>
-      <translation>Chybějící heslo.</translation>
+      <source>Missing private key. Please fetch credentials first.</source>
+      <translation type="unfinished">Missing private key. Please fetch credentials first.</translation>
     </message>
     <message>
       <source>Authentication failed</source>
       <translation>Ověření selhalo</translation>
+    </message>
+    <message>
+      <source>Fetching...</source>
+      <translation type="unfinished">Fetching...</translation>
+    </message>
+    <message>
+      <source>Credentials fetched</source>
+      <translation type="unfinished">Credentials fetched</translation>
+    </message>
+    <message>
+      <source>Credentials have been successfully fetched. Click Login to authenticate via your browser.</source>
+      <translation type="unfinished">Credentials have been successfully fetched. Click Login to authenticate via your browser.</translation>
+    </message>
+    <message>
+      <source>Credential fetch failed</source>
+      <translation type="unfinished">Credential fetch failed</translation>
+    </message>
+    <message>
+      <source>Fetch Credentials</source>
+      <translation type="unfinished">Fetch Credentials</translation>
+    </message>
+    <message>
+      <source>Remove (Remastered), etc from song titles</source>
+      <translation type="unfinished">Remove (Remastered), etc from song titles</translation>
+    </message>
+    <message>
+      <source>Private key</source>
+      <translation type="unfinished">Private key</translation>
+    </message>
+    <message>
+      <source>Automatically fetch app ID, app secret and private key from Qobuz web player</source>
+      <translation type="unfinished">Automatically fetch app ID, app secret and private key from Qobuz web player</translation>
     </message>
   </context>
   <context>
@@ -5469,6 +5851,10 @@ Opravdu chcete pokračovat?</translation>
     <message>
       <source>Missing Qobuz app ID or secret.</source>
       <translation>Chybějící ID aplikace, nebo tajemství služby Qobuz.</translation>
+    </message>
+    <message>
+      <source>Not authenticated. Please log in on the Qobuz settings page.</source>
+      <translation type="unfinished">Not authenticated. Please log in on the Qobuz settings page.</translation>
     </message>
     <message>
       <source>Cancelled.</source>
@@ -5523,10 +5909,162 @@ Opravdu chcete pokračovat?</translation>
     </message>
   </context>
   <context>
+    <name>RadioBrowserSearchModel</name>
+    <message>
+      <source>Name</source>
+      <translation type="unfinished">Name</translation>
+    </message>
+    <message>
+      <source>Country</source>
+      <translation type="unfinished">Country</translation>
+    </message>
+    <message>
+      <source>Tags</source>
+      <translation type="unfinished">Tags</translation>
+    </message>
+    <message>
+      <source>Codec</source>
+      <translation type="unfinished">Codec</translation>
+    </message>
+  </context>
+  <context>
+    <name>RadioBrowserSearchView</name>
+    <message>
+      <source>Load more...</source>
+      <translation type="unfinished">Load more...</translation>
+    </message>
+    <message>
+      <source>Search for radio stations using radio-browser.info</source>
+      <translation type="unfinished">Search for radio stations using radio-browser.info</translation>
+    </message>
+    <message>
+      <source>Search radio stations...</source>
+      <translation type="unfinished">Search radio stations...</translation>
+    </message>
+    <message>
+      <source>All countries</source>
+      <translation type="unfinished">All countries</translation>
+    </message>
+    <message>
+      <source>By votes</source>
+      <translation type="unfinished">By votes</translation>
+    </message>
+    <message>
+      <source>By clicks</source>
+      <translation type="unfinished">By clicks</translation>
+    </message>
+    <message>
+      <source>By name</source>
+      <translation type="unfinished">By name</translation>
+    </message>
+    <message>
+      <source>By bitrate</source>
+      <translation type="unfinished">By bitrate</translation>
+    </message>
+    <message>
+      <source>Searching...</source>
+      <translation type="unfinished">Searching...</translation>
+    </message>
+    <message>
+      <source>No stations found.</source>
+      <translation type="unfinished">No stations found.</translation>
+    </message>
+    <message>
+      <source>%1 stations found</source>
+      <translation type="unfinished">%1 stations found</translation>
+    </message>
+    <message>
+      <source>Append to current playlist</source>
+      <translation type="unfinished">Append to current playlist</translation>
+    </message>
+  </context>
+  <context>
+    <name>RadioBrowserService</name>
+    <message>
+      <source>No Radio Browser server available.</source>
+      <translation type="unfinished">No Radio Browser server available.</translation>
+    </message>
+    <message>
+      <source>Searching Radio Browser</source>
+      <translation type="unfinished">Searching Radio Browser</translation>
+    </message>
+    <message>
+      <source>Radio Browser search failed: %1</source>
+      <translation type="unfinished">Radio Browser search failed: %1</translation>
+    </message>
+  </context>
+  <context>
     <name>RadioParadiseService</name>
     <message>
       <source>Getting %1 channels</source>
       <translation type="unfinished">Getting %1 channels</translation>
+    </message>
+  </context>
+  <context>
+    <name>RadioSettingsPage</name>
+    <message>
+      <source>Radios</source>
+      <translation type="unfinished">Radios</translation>
+    </message>
+    <message>
+      <source>SomaFM</source>
+      <translation type="unfinished">SomaFM</translation>
+    </message>
+    <message>
+      <source>Stream quality:</source>
+      <translation type="unfinished">Stream quality:</translation>
+    </message>
+    <message>
+      <source>Radio Browser</source>
+      <translation type="unfinished">Radio Browser</translation>
+    </message>
+    <message>
+      <source>Search results limit:</source>
+      <translation type="unfinished">Search results limit:</translation>
+    </message>
+    <message>
+      <source>Hide broken stations</source>
+      <translation type="unfinished">Hide broken stations</translation>
+    </message>
+    <message>
+      <source>Default sort order:</source>
+      <translation type="unfinished">Default sort order:</translation>
+    </message>
+    <message>
+      <source>Default country:</source>
+      <translation type="unfinished">Default country:</translation>
+    </message>
+    <message>
+      <source>All countries</source>
+      <translation type="unfinished">All countries</translation>
+    </message>
+    <message>
+      <source>Highest</source>
+      <translation type="unfinished">Highest</translation>
+    </message>
+    <message>
+      <source>High</source>
+      <translation type="unfinished">High</translation>
+    </message>
+    <message>
+      <source>Low</source>
+      <translation type="unfinished">Low</translation>
+    </message>
+    <message>
+      <source>By votes</source>
+      <translation type="unfinished">By votes</translation>
+    </message>
+    <message>
+      <source>By clicks</source>
+      <translation type="unfinished">By clicks</translation>
+    </message>
+    <message>
+      <source>By name</source>
+      <translation type="unfinished">By name</translation>
+    </message>
+    <message>
+      <source>By bitrate</source>
+      <translation type="unfinished">By bitrate</translation>
     </message>
   </context>
   <context>
@@ -5561,6 +6099,14 @@ Opravdu chcete pokračovat?</translation>
     <message>
       <source>Form</source>
       <translation>Formulář</translation>
+    </message>
+    <message>
+      <source>Channels</source>
+      <translation type="unfinished">Channels</translation>
+    </message>
+    <message>
+      <source>Radio Browser</source>
+      <translation type="unfinished">Radio Browser</translation>
     </message>
   </context>
   <context>
@@ -5800,10 +6346,6 @@ Opravdu chcete pokračovat?</translation>
       <translation>Přihlášení</translation>
     </message>
     <message>
-      <source>Libre.fm</source>
-      <translation type="unfinished">Libre.fm</translation>
-    </message>
-    <message>
       <source>Listenbrainz</source>
       <translation type="unfinished">Listenbrainz</translation>
     </message>
@@ -5830,41 +6372,6 @@ Opravdu chcete pokračovat?</translation>
     <message>
       <source>Spotify</source>
       <translation type="unfinished">Spotify</translation>
-    </message>
-  </context>
-  <context>
-    <name>ScrobblingAPI20</name>
-    <message>
-      <source>%1 Scrobbler Authentication</source>
-      <translation>%1 Ověření systému pro doporučování hudby (scrobbler)</translation>
-    </message>
-    <message>
-      <source>Open URL in web browser?</source>
-      <translation>Otevřít URL v prohlížeči?</translation>
-    </message>
-    <message>
-      <source>Press &quot;Save&quot; to copy the URL to clipboard and manually open it in a web browser.</source>
-      <translation>Klikněte na &quot;Uložit&quot; pro zkopírování URL do schránky a ruční otevření v prohlížeči.</translation>
-    </message>
-    <message>
-      <source>Could not open URL. Please open this URL in your browser</source>
-      <translation>Nelze otevřít adresu URL. Prosím otevřete tuto URL ve vašem prohlížeči</translation>
-    </message>
-    <message>
-      <source>Invalid reply from web browser. Missing token.</source>
-      <translation>Špatná odpověď od prohlížeče. Token chybí.</translation>
-    </message>
-    <message>
-      <source>Received invalid reply from web browser. Try another browser.</source>
-      <translation type="unfinished">Received invalid reply from web browser. Try another browser.</translation>
-    </message>
-    <message>
-      <source>Scrobbler %1 is not authenticated!</source>
-      <translation>Systém pro doporučování hudby %1 není přihlášen!</translation>
-    </message>
-    <message>
-      <source>Scrobbler %1 error: %2</source>
-      <translation type="unfinished">Scrobbler %1 error: %2</translation>
     </message>
   </context>
   <context>
@@ -6147,44 +6654,13 @@ Opravdu chcete pokračovat?</translation>
       <source>Edit smart playlist...</source>
       <translation>Upravit chytrý playlist...</translation>
     </message>
-  </context>
-  <context>
-    <name>SnapDialog</name>
     <message>
-      <source>Strawberry is running as a Snap</source>
-      <translation type="unfinished">Strawberry is running as a Snap</translation>
+      <source>Are you sure you want to restore the default smart playlists? This will remove all custom smart playlists</source>
+      <translation type="unfinished">Are you sure you want to restore the default smart playlists? This will remove all custom smart playlists</translation>
     </message>
     <message>
-      <source>It is detected that Strawberry is running as a Snap</source>
-      <translation>Bylo zjištěno, že Strawberry běží jako Snap</translation>
-    </message>
-    <message>
-      <source>Strawberry is slower, and has restrictions when running as a Snap. Accessing the root filesystem (/) will not work. There also might be other restrictions such as accessing certain devices or network shares.</source>
-      <translation type="unfinished">Strawberry is slower, and has restrictions when running as a Snap. Accessing the root filesystem (/) will not work. There also might be other restrictions such as accessing certain devices or network shares.</translation>
-    </message>
-    <message>
-      <source>For Ubuntu there is an official PPA repository available at %1.</source>
-      <translation>Pro Ubuntu je na %1 dostupné oficiální PPA.</translation>
-    </message>
-    <message>
-      <source>Official releases are available for Debian and Ubuntu which also work on most of their derivatives. See %1 for more information.</source>
-      <translation>Jsou dostupná oficiální vydání pro Debian a Ubuntu. Tato vydání také fungují s většinou jejich derivátů. Navštivte %1 pro více informací.</translation>
-    </message>
-    <message>
-      <source>For a better experience please consider the other options above.</source>
-      <translation>Pro lepší zážitek, prosím zvažte ostatní dostupné možnosti.</translation>
-    </message>
-    <message>
-      <source>Copy your strawberry.conf and strawberry.db from your ~/snap directory to avoid losing configuration before you uninstall the snap:</source>
-      <translation type="unfinished">Copy your strawberry.conf and strawberry.db from your ~/snap directory to avoid losing configuration before you uninstall the snap:</translation>
-    </message>
-    <message>
-      <source>Uninstall the snap with:</source>
-      <translation type="unfinished">Uninstall the snap with:</translation>
-    </message>
-    <message>
-      <source>Install strawberry through PPA:</source>
-      <translation type="unfinished">Install strawberry through PPA:</translation>
+      <source>Restore defaults</source>
+      <translation type="unfinished">Restore defaults</translation>
     </message>
   </context>
   <context>
@@ -6253,6 +6729,21 @@ Opravdu chcete pokračovat?</translation>
     </message>
   </context>
   <context>
+    <name>SpotifyMetadataRequest</name>
+    <message>
+      <source>Not authenticated</source>
+      <translation type="unfinished">Not authenticated</translation>
+    </message>
+    <message>
+      <source>No track ID</source>
+      <translation type="unfinished">No track ID</translation>
+    </message>
+    <message>
+      <source>No pending song for track ID</source>
+      <translation type="unfinished">No pending song for track ID</translation>
+    </message>
+  </context>
+  <context>
     <name>SpotifyRequest</name>
     <message>
       <source>Authenticating...</source>
@@ -6309,22 +6800,6 @@ Opravdu chcete pokračovat?</translation>
   </context>
   <context>
     <name>SpotifyService</name>
-    <message>
-      <source>Spotify Authentication</source>
-      <translation>Přihlášení ke Spotify</translation>
-    </message>
-    <message>
-      <source>Please open this URL in your browser</source>
-      <translation>Prosím navštivte tuto adresu URL ve vašem prohlížeči.</translation>
-    </message>
-    <message>
-      <source>Redirect missing token code or state!</source>
-      <translation>Přesměrování chybí kód tokenu nebo stav!</translation>
-    </message>
-    <message>
-      <source>Received invalid reply from web browser.</source>
-      <translation>Obdržena špatná odpověď od prohlížeče.</translation>
-    </message>
     <message>
       <source>Not authenticated with Spotify.</source>
       <translation type="unfinished">Not authenticated with Spotify.</translation>
@@ -6387,6 +6862,10 @@ Opravdu chcete pokračovat?</translation>
     <message>
       <source>Authentication failed</source>
       <translation>Ověření selhalo</translation>
+    </message>
+    <message>
+      <source>Remove (Remastered), etc from song titles</source>
+      <translation type="unfinished">Remove (Remastered), etc from song titles</translation>
     </message>
   </context>
   <context>
@@ -6709,6 +7188,14 @@ Opravdu chcete pokračovat?</translation>
   <context>
     <name>TagFetcher</name>
     <message>
+      <source>Stage: %1</source>
+      <translation type="unfinished">Stage: %1</translation>
+    </message>
+    <message>
+      <source>Reason: %1</source>
+      <translation type="unfinished">Reason: %1</translation>
+    </message>
+    <message>
       <source>Identifying song</source>
       <translation type="unfinished">Identifying song</translation>
     </message>
@@ -6717,16 +7204,40 @@ Opravdu chcete pokračovat?</translation>
       <translation type="unfinished">Fingerprinting song</translation>
     </message>
     <message>
+      <source>Generated fingerprint is empty or invalid</source>
+      <translation type="unfinished">Generated fingerprint is empty or invalid</translation>
+    </message>
+    <message>
+      <source>Fingerprinting</source>
+      <translation type="unfinished">Fingerprinting</translation>
+    </message>
+    <message>
+      <source>Fingerprint length: %1</source>
+      <translation type="unfinished">Fingerprint length: %1</translation>
+    </message>
+    <message>
+      <source>Minimum required length: %1</source>
+      <translation type="unfinished">Minimum required length: %1</translation>
+    </message>
+    <message>
       <source>Downloading metadata</source>
       <translation type="unfinished">Downloading metadata</translation>
+    </message>
+    <message>
+      <source>No MusicBrainz metadata was found for this track</source>
+      <translation type="unfinished">No MusicBrainz metadata was found for this track</translation>
+    </message>
+    <message>
+      <source>MusicBrainz metadata</source>
+      <translation type="unfinished">MusicBrainz metadata</translation>
+    </message>
+    <message>
+      <source>Candidate metadata rows: 0</source>
+      <translation type="unfinished">Candidate metadata rows: 0</translation>
     </message>
   </context>
   <context>
     <name>TidalRequest</name>
-    <message>
-      <source>Authenticating...</source>
-      <translation>Probíhá ověření...</translation>
-    </message>
     <message>
       <source>Receiving artists...</source>
       <translation type="unfinished">Receiving artists...</translation>
@@ -6775,32 +7286,8 @@ Opravdu chcete pokračovat?</translation>
   <context>
     <name>TidalService</name>
     <message>
-      <source>Reply from Tidal is missing query items.</source>
-      <translation>Odpověď od Tidal neobsahuje dotazové položky.</translation>
-    </message>
-    <message>
-      <source>Missing Tidal API token.</source>
-      <translation>Chybějící API token pro Tidal.</translation>
-    </message>
-    <message>
-      <source>Missing Tidal username.</source>
-      <translation>Chybějící uživatelské jméno k Tidal.</translation>
-    </message>
-    <message>
-      <source>Missing Tidal password.</source>
-      <translation>Chybějící heslo k Tidal.</translation>
-    </message>
-    <message>
-      <source>Not authenticated with Tidal and reached maximum number of login attempts.</source>
-      <translation>Nejste přihlášeni k Tidal a byl dosažen maximální počet pokusů o přihlášení.</translation>
-    </message>
-    <message>
       <source>Not authenticated with Tidal.</source>
       <translation>Nejste přihlášeni k Tidal.</translation>
-    </message>
-    <message>
-      <source>Missing Tidal API token, username or password.</source>
-      <translation>Chybějící API token, uživatelské jméno nebo heslo pro Tidal.</translation>
     </message>
   </context>
   <context>
@@ -6822,24 +7309,8 @@ Opravdu chcete pokračovat?</translation>
       <translation>Ověření</translation>
     </message>
     <message>
-      <source>Use OAuth</source>
-      <translation>Použijte OAuth</translation>
-    </message>
-    <message>
       <source>Client ID</source>
       <translation>ID Klienta</translation>
-    </message>
-    <message>
-      <source>API Token</source>
-      <translation type="unfinished">API Token</translation>
-    </message>
-    <message>
-      <source>Username</source>
-      <translation>Uživatelské jméno</translation>
-    </message>
-    <message>
-      <source>Password</source>
-      <translation>Heslo</translation>
     </message>
     <message>
       <source>Login</source>
@@ -6902,20 +7373,12 @@ Opravdu chcete pokračovat?</translation>
       <translation>Chybějící ID klienta pro Tidal.</translation>
     </message>
     <message>
-      <source>Missing API token.</source>
-      <translation>Chybějící API token.</translation>
-    </message>
-    <message>
-      <source>Missing username.</source>
-      <translation>Chybějící uživatelské jméno.</translation>
-    </message>
-    <message>
-      <source>Missing password.</source>
-      <translation>Chybějící heslo.</translation>
-    </message>
-    <message>
       <source>Authentication failed</source>
       <translation>Ověření selhalo</translation>
+    </message>
+    <message>
+      <source>Remove (Remastered), etc from song titles</source>
+      <translation type="unfinished">Remove (Remastered), etc from song titles</translation>
     </message>
   </context>
   <context>
@@ -6923,10 +7386,6 @@ Opravdu chcete pokračovat?</translation>
     <message>
       <source>Not authenticated with Tidal.</source>
       <translation>Nejste přihlášeni k Tidal.</translation>
-    </message>
-    <message>
-      <source>Missing Tidal API token, username or password.</source>
-      <translation>Chybějící API token, uživatelské jméno nebo heslo pro Tidal.</translation>
     </message>
     <message>
       <source>Cancelled.</source>
@@ -6946,10 +7405,6 @@ Opravdu chcete pokračovat?</translation>
     <message>
       <source>Tag fetcher</source>
       <translation>Stahování značek</translation>
-    </message>
-    <message>
-      <source>Sorry</source>
-      <translation>Promiňte</translation>
     </message>
     <message>
       <source>Strawberry was unable to find results for this file</source>
@@ -6988,6 +7443,10 @@ Opravdu chcete pokračovat?</translation>
       <translation>Další</translation>
     </message>
     <message>
+      <source>Error</source>
+      <translation type="unfinished">Error</translation>
+    </message>
+    <message>
       <source>Original tags</source>
       <translation>Původní značky</translation>
     </message>
@@ -6998,6 +7457,14 @@ Opravdu chcete pokračovat?</translation>
     <message>
       <source>Saving tracks</source>
       <translation>Ukládají se skladby</translation>
+    </message>
+    <message>
+      <source>Album artist</source>
+      <translation type="unfinished">Album artist</translation>
+    </message>
+    <message>
+      <source>No results</source>
+      <translation type="unfinished">No results</translation>
     </message>
   </context>
   <context>
@@ -7013,6 +7480,22 @@ Opravdu chcete pokračovat?</translation>
     <message>
       <source>Click to toggle between remaining time and total time</source>
       <translation>Klepněte pro přepnutí mezi zbývajícím časem a celkovým časem</translation>
+    </message>
+    <message>
+      <source>Normal</source>
+      <translation type="unfinished">Normal</translation>
+    </message>
+    <message>
+      <source>Moodbar</source>
+      <translation type="unfinished">Moodbar</translation>
+    </message>
+    <message>
+      <source>Moodbar style</source>
+      <translation type="unfinished">Moodbar style</translation>
+    </message>
+    <message>
+      <source>Waveform</source>
+      <translation type="unfinished">Waveform</translation>
     </message>
   </context>
   <context>
@@ -7541,6 +8024,32 @@ Opravdu chcete pokračovat?</translation>
     <message>
       <source>Password</source>
       <translation>Heslo</translation>
+    </message>
+  </context>
+  <context>
+    <name>WaveformSettingsPage</name>
+    <message>
+      <source>Waveform</source>
+      <translation type="unfinished">Waveform</translation>
+    </message>
+    <message>
+      <source>Color</source>
+      <translation type="unfinished">Color</translation>
+    </message>
+    <message>
+      <source>Select waveform color</source>
+      <translation type="unfinished">Select waveform color</translation>
+    </message>
+    <message>
+      <source>Save the .waveform files directly in the songs folders</source>
+      <translation type="unfinished">Save the .waveform files directly in the songs folders</translation>
+    </message>
+  </context>
+  <context>
+    <name>XSPFParser</name>
+    <message>
+      <source>Failed to write XSPF playlist</source>
+      <translation type="unfinished">Failed to write XSPF playlist</translation>
     </message>
   </context>
 </TS>

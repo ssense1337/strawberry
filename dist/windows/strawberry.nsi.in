@@ -260,13 +260,13 @@ Section "Strawberry" Strawberry
 
 !ifdef arch_x86
   File "libgcc_s_sjlj-1.dll"
-  File "libcrypto-3.dll"
-  File "libssl-3.dll"
+  File "libcrypto-4.dll"
+  File "libssl-4.dll"
 !endif
 !ifdef arch_x64
   File "libgcc_s_seh-1.dll"
-  File "libcrypto-3-x64.dll"
-  File "libssl-3-x64.dll"
+  File "libcrypto-4-x64.dll"
+  File "libssl-4-x64.dll"
 !endif
 
   File "libFLAC-14.dll"
@@ -313,7 +313,7 @@ Section "Strawberry" Strawberry
   File "libgsturidownloader-1.0-0.dll"
   File "libgstvideo-1.0-0.dll"
   File "libharfbuzz-0.dll"
-  File "libhogweed-6.dll"
+  File "libhogweed-7.dll"
   File "libiconv-2.dll"
   File "libidn2-0.dll"
   File "libintl-8.dll"
@@ -324,7 +324,7 @@ Section "Strawberry" Strawberry
   File "libmp3lame-0.dll"
   File "libmpcdec.dll"
   File "libmpg123-0.dll"
-  File "libnettle-8.dll"
+  File "libnettle-9.dll"
   File "libnghttp2.dll"
   File "libogg-0.dll"
   File "libopenmpt-0.dll"
@@ -374,16 +374,16 @@ Section "Strawberry" Strawberry
 !ifdef msvc
 
 !ifdef arch_x86
-  File "libcrypto-3.dll"
-  File "libssl-3.dll"
+  File "libcrypto-4.dll"
+  File "libssl-4.dll"
 !endif
 !ifdef arch_x64
-  File "libcrypto-3-x64.dll"
-  File "libssl-3-x64.dll"
+  File "libcrypto-4-x64.dll"
+  File "libssl-4-x64.dll"
 !endif
 !ifdef arch_arm64
-  File "libcrypto-3-arm64.dll"
-  File "libssl-3-arm64.dll"
+  File "libcrypto-4-arm64.dll"
+  File "libssl-4-arm64.dll"
 !endif
 
   File "FLAC.dll"
@@ -391,6 +391,7 @@ Section "Strawberry" Strawberry
   File "brotlidec.dll"
   File "chromaprint.dll"
   File "ebur128.dll"
+  File "faac-0.dll"
   File "faad-2.dll"
   File "fdk-aac.dll"
   File "ffi-7.dll"
@@ -447,30 +448,29 @@ Section "Strawberry" Strawberry
   File "vorbisfile.dll"
   File "wavpackdll.dll"
 
-!ifndef arch_arm64
-  File "gnutls.dll"
-  File "libfaac_dll.dll"
-!endif
+  File /nonfatal "gnutls.dll"
 
 !ifdef release
+  File "bz2.dll"
   File "freetype.dll"
   File "libpng16.dll"
   File "libspeex.dll"
   File "pcre2-8.dll"
   File "pcre2-16.dll"
-  File "zlib1.dll"
+  File "z.dll"
   File "tiff.dll"
 !ifndef arch_arm64
   File "twolame.dll"
 !endif
 !endif
 !ifdef debug
+  File "bz2d.dll"
   File "freetyped.dll"
   File "libpng16d.dll"
   File "libspeexd.dll"
   File "pcre2-8d.dll"
   File "pcre2-16d.dll"
-  File "zlibd1.dll"
+  File "zd.dll"
   File "tiffd.dll"
 !ifndef arch_arm64
   File "twolamed.dll"
@@ -570,11 +570,8 @@ Section "GIO modules" gio-modules
   File "/oname=libgiognutls.dll" "gio-modules\libgiognutls.dll"
 !endif
 !ifdef msvc
-!ifdef arch_arm64
   File "/oname=gioopenssl.dll" "gio-modules\gioopenssl.dll"
-!else
-  File "/oname=giognutls.dll" "gio-modules\giognutls.dll"
-!endif
+  File /nonfatal "/oname=giognutls.dll" "gio-modules\giognutls.dll"
 !endif
 SectionEnd
 
@@ -671,6 +668,7 @@ Section "Gstreamer plugins" gstreamer-plugins
   File "/oname=libgstisomp4.dll" "gstreamer-plugins\libgstisomp4.dll"
   File "/oname=libgstlame.dll" "gstreamer-plugins\libgstlame.dll"
   File "/oname=libgstlibav.dll" "gstreamer-plugins\libgstlibav.dll"
+  File "/oname=libgstmatroska.dll" "gstreamer-plugins\libgstmatroska.dll"
   File "/oname=libgstmpegpsdemux.dll" "gstreamer-plugins\libgstmpegpsdemux.dll"
   File "/oname=libgstmpegpsmux.dll" "gstreamer-plugins\libgstmpegpsmux.dll"
   File "/oname=libgstmpegtsdemux.dll" "gstreamer-plugins\libgstmpegtsdemux.dll"
@@ -725,6 +723,7 @@ Section "Gstreamer plugins" gstreamer-plugins
   File "/oname=gstdirectsound.dll" "gstreamer-plugins\gstdirectsound.dll"
   File "/oname=gstdsd.dll" "gstreamer-plugins\gstdsd.dll"
   File "/oname=gstequalizer.dll" "gstreamer-plugins\gstequalizer.dll"
+  File "/oname=gstfaac.dll" "gstreamer-plugins\gstfaac.dll"
   File "/oname=gstfaad.dll" "gstreamer-plugins\gstfaad.dll"
   File "/oname=gstfdkaac.dll" "gstreamer-plugins\gstfdkaac.dll"
   File "/oname=gstflac.dll" "gstreamer-plugins\gstflac.dll"
@@ -737,6 +736,7 @@ Section "Gstreamer plugins" gstreamer-plugins
   File "/oname=gstisomp4.dll" "gstreamer-plugins\gstisomp4.dll"
   File "/oname=gstlame.dll" "gstreamer-plugins\gstlame.dll"
   File "/oname=gstlibav.dll" "gstreamer-plugins\gstlibav.dll"
+  File "/oname=gstmatroska.dll" "gstreamer-plugins\gstmatroska.dll"
   File "/oname=gstmpegpsdemux.dll" "gstreamer-plugins\gstmpegpsdemux.dll"
   File "/oname=gstmpegpsmux.dll" "gstreamer-plugins\gstmpegpsmux.dll"
   File "/oname=gstmpegtsdemux.dll" "gstreamer-plugins\gstmpegtsdemux.dll"
@@ -769,7 +769,6 @@ Section "Gstreamer plugins" gstreamer-plugins
   File "/oname=gstwavparse.dll" "gstreamer-plugins\gstwavparse.dll"
   File "/oname=gstxingmux.dll" "gstreamer-plugins\gstxingmux.dll"
 !ifndef arch_arm64
-  File "/oname=gstfaac.dll" "gstreamer-plugins\gstfaac.dll"
   File "/oname=gsttwolame.dll" "gstreamer-plugins\gsttwolame.dll"
 !endif
 !ifdef arch_x64
@@ -827,14 +826,14 @@ Section "Uninstall"
 
 !ifdef arch_x86
   Delete "$INSTDIR\libgcc_s_sjlj-1.dll"
-  Delete "$INSTDIR\libcrypto-3.dll"
-  Delete "$INSTDIR\libssl-3.dll"
+  Delete "$INSTDIR\libcrypto-4.dll"
+  Delete "$INSTDIR\libssl-4.dll"
 !endif
 
 !ifdef arch_x64
   Delete "$INSTDIR\libgcc_s_seh-1.dll"
-  Delete "$INSTDIR\libcrypto-3-x64.dll"
-  Delete "$INSTDIR\libssl-3-x64.dll"
+  Delete "$INSTDIR\libcrypto-4-x64.dll"
+  Delete "$INSTDIR\libssl-4-x64.dll"
 !endif
 
   Delete "$INSTDIR\libFLAC-14.dll"
@@ -881,7 +880,7 @@ Section "Uninstall"
   Delete "$INSTDIR\libgsturidownloader-1.0-0.dll"
   Delete "$INSTDIR\libgstvideo-1.0-0.dll"
   Delete "$INSTDIR\libharfbuzz-0.dll"
-  Delete "$INSTDIR\libhogweed-6.dll"
+  Delete "$INSTDIR\libhogweed-7.dll"
   Delete "$INSTDIR\libiconv-2.dll"
   Delete "$INSTDIR\libidn2-0.dll"
   Delete "$INSTDIR\libintl-8.dll"
@@ -892,7 +891,7 @@ Section "Uninstall"
   Delete "$INSTDIR\libmp3lame-0.dll"
   Delete "$INSTDIR\libmpcdec.dll"
   Delete "$INSTDIR\libmpg123-0.dll"
-  Delete "$INSTDIR\libnettle-8.dll"
+  Delete "$INSTDIR\libnettle-9.dll"
   Delete "$INSTDIR\libnghttp2.dll"
   Delete "$INSTDIR\libogg-0.dll"
   Delete "$INSTDIR\libopenmpt-0.dll"
@@ -942,16 +941,16 @@ Section "Uninstall"
 !ifdef msvc
 
 !ifdef arch_x86
-  Delete "$INSTDIR\libcrypto-3.dll"
-  Delete "$INSTDIR\libssl-3.dll"
+  Delete "$INSTDIR\libcrypto-4.dll"
+  Delete "$INSTDIR\libssl-4.dll"
 !endif
 !ifdef arch_x64
-  Delete "$INSTDIR\libcrypto-3-x64.dll"
-  Delete "$INSTDIR\libssl-3-x64.dll"
+  Delete "$INSTDIR\libcrypto-4-x64.dll"
+  Delete "$INSTDIR\libssl-4-x64.dll"
 !endif
 !ifdef arch_arm64
-  Delete "$INSTDIR\libcrypto-3-arm64.dll"
-  Delete "$INSTDIR\libssl-3-arm64.dll"
+  Delete "$INSTDIR\libcrypto-4-arm64.dll"
+  Delete "$INSTDIR\libssl-4-arm64.dll"
 !endif
 
   Delete "$INSTDIR\FLAC.dll"
@@ -959,6 +958,7 @@ Section "Uninstall"
   Delete "$INSTDIR\brotlidec.dll"
   Delete "$INSTDIR\chromaprint.dll"
   Delete "$INSTDIR\ebur128.dll"
+  Delete "$INSTDIR\faac-0.dll"
   Delete "$INSTDIR\faad-2.dll"
   Delete "$INSTDIR\fdk-aac.dll"
   Delete "$INSTDIR\ffi-7.dll"
@@ -1015,30 +1015,29 @@ Section "Uninstall"
   Delete "$INSTDIR\vorbisfile.dll"
   Delete "$INSTDIR\wavpackdll.dll"
 
-!ifndef arch_arm64
   Delete "$INSTDIR\gnutls.dll"
-  Delete "$INSTDIR\libfaac_dll.dll"
-!endif
 
 !ifdef release
+  Delete "$INSTDIR\bz2.dll"
   Delete "$INSTDIR\freetype.dll"
   Delete "$INSTDIR\libpng16.dll"
   Delete "$INSTDIR\libspeex.dll"
   Delete "$INSTDIR\pcre2-8.dll"
   Delete "$INSTDIR\pcre2-16.dll"
-  Delete "$INSTDIR\zlib1.dll"
+  Delete "$INSTDIR\z.dll"
   Delete "$INSTDIR\tiff.dll"
 !ifndef arch_arm64
   Delete "$INSTDIR\twolame.dll"
 !endif
 !endif
 !ifdef debug
+  Delete "$INSTDIR\bz2d.dll"
   Delete "$INSTDIR\freetyped.dll"
   Delete "$INSTDIR\libpng16d.dll"
   Delete "$INSTDIR\libspeexd.dll"
   Delete "$INSTDIR\pcre2-8d.dll"
   Delete "$INSTDIR\pcre2-16d.dll"
-  Delete "$INSTDIR\zlibd1.dll"
+  Delete "$INSTDIR\zd.dll"
   Delete "$INSTDIR\tiffd.dll"
 !ifndef arch_arm64
   Delete "$INSTDIR\twolamed.dll"
@@ -1103,11 +1102,8 @@ Section "Uninstall"
   Delete "$INSTDIR\gio-modules\libgiognutls.dll"
 !endif
 !ifdef msvc
-!ifdef arch_arm64
   Delete "$INSTDIR\gio-modules\gioopenssl.dll"
-!else
   Delete "$INSTDIR\gio-modules\giognutls.dll"
-!endif
 !endif
 
 !ifdef msvc && debug
@@ -1121,6 +1117,7 @@ Section "Uninstall"
   Delete "$INSTDIR\imageformats\qjpegd.dll"
   Delete "$INSTDIR\imageformats\qtiffd.dll"
   Delete "$INSTDIR\imageformats\qjp2d.dll"
+  Delete "$INSTDIR\imageformats\qwebpd.dll"
 !else
   Delete "$INSTDIR\platforms\qwindows.dll"
   Delete "$INSTDIR\styles\qmodernwindowsstyle.dll"
@@ -1132,6 +1129,7 @@ Section "Uninstall"
   Delete "$INSTDIR\imageformats\qjpeg.dll"
   Delete "$INSTDIR\imageformats\qtiff.dll"
   Delete "$INSTDIR\imageformats\qjp2.dll"
+  Delete "$INSTDIR\imageformats\qwebp.dll"
 !endif
 
   ; MinGW GStreamer plugins
@@ -1169,6 +1167,7 @@ Section "Uninstall"
   Delete "$INSTDIR\gstreamer-plugins\libgstisomp4.dll"
   Delete "$INSTDIR\gstreamer-plugins\libgstlame.dll"
   Delete "$INSTDIR\gstreamer-plugins\libgstlibav.dll"
+  Delete "$INSTDIR\gstreamer-plugins\libgstmatroska.dll"
   Delete "$INSTDIR\gstreamer-plugins\libgstmpegpsdemux.dll"
   Delete "$INSTDIR\gstreamer-plugins\libgstmpegpsmux.dll"
   Delete "$INSTDIR\gstreamer-plugins\libgstmpegtsdemux.dll"
@@ -1225,6 +1224,7 @@ Section "Uninstall"
   Delete "$INSTDIR\gstreamer-plugins\gstdirectsound.dll"
   Delete "$INSTDIR\gstreamer-plugins\gstdsd.dll"
   Delete "$INSTDIR\gstreamer-plugins\gstequalizer.dll"
+  Delete "$INSTDIR\gstreamer-plugins\gstfaac.dll"
   Delete "$INSTDIR\gstreamer-plugins\gstfaad.dll"
   Delete "$INSTDIR\gstreamer-plugins\gstfdkaac.dll"
   Delete "$INSTDIR\gstreamer-plugins\gstflac.dll"
@@ -1237,6 +1237,7 @@ Section "Uninstall"
   Delete "$INSTDIR\gstreamer-plugins\gstisomp4.dll"
   Delete "$INSTDIR\gstreamer-plugins\gstlame.dll"
   Delete "$INSTDIR\gstreamer-plugins\gstlibav.dll"
+  Delete "$INSTDIR\gstreamer-plugins\gstmatroska.dll"
   Delete "$INSTDIR\gstreamer-plugins\gstmpegpsdemux.dll"
   Delete "$INSTDIR\gstreamer-plugins\gstmpegpsmux.dll"
   Delete "$INSTDIR\gstreamer-plugins\gstmpegtsdemux.dll"
@@ -1269,7 +1270,6 @@ Section "Uninstall"
   Delete "$INSTDIR\gstreamer-plugins\gstwavparse.dll"
   Delete "$INSTDIR\gstreamer-plugins\gstxingmux.dll"
 !ifndef arch_arm64
-  Delete "$INSTDIR\gstreamer-plugins\gstfaac.dll"
   Delete "$INSTDIR\gstreamer-plugins\gsttwolame.dll"
 !endif
   !ifdef arch_x64

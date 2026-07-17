@@ -2,7 +2,7 @@
  * Strawberry Music Player
  * This file was part of Clementine.
  * Copyright 2010, David Sansome <me@davidsansome.com>
- * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2026, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 #include "config.h"
 
+#include <QUuid>
 #include <QUrl>
 
 #include "core/logging.h"
@@ -30,24 +31,26 @@
 #include "playlistitem.h"
 #include "songplaylistitem.h"
 
-SongPlaylistItem::SongPlaylistItem(const Song::Source source) : PlaylistItem(source) {}
-SongPlaylistItem::SongPlaylistItem(const Song &song) : PlaylistItem(song.source()), song_(song) {}
+SongPlaylistItem::SongPlaylistItem(const Song::Source source, const QUuid &uuid) : PlaylistItem(source, uuid) {}
+SongPlaylistItem::SongPlaylistItem(const Song &song, const bool signal) : PlaylistItem(song.source(), QUuid(), signal), song_(song) {}
 
 bool SongPlaylistItem::InitFromQuery(const SqlRow &query) {
   song_.InitFromQuery(query, false, static_cast<int>(Song::kRowIdColumns.count()));
   return true;
 }
 
-void SongPlaylistItem::Reload() {
+Song SongPlaylistItem::Reload() {
 
-  if (!song_.url().isLocalFile()) return;
+  if (!song_.url().isLocalFile()) return Song();
 
-  const TagReaderResult result = TagReaderClient::Instance()->ReadFileBlocking(song_.url().toLocalFile(), &song_);
-  if (!result.success()) {
-    qLog(Error) << "Could not reload file" << song_.url() << result.error_string();
+  Song result = song_;
+  const TagReaderResult tag_result = TagReaderClient::Instance()->ReadFileBlocking(result.url().toLocalFile(), &result);
+  if (!tag_result.success()) {
+    qLog(Error) << "Could not reload file" << result.url() << tag_result.error_string();
+    return Song();
   }
 
-  UpdateStreamMetadata(song_);
+  return result;
 
 }
 

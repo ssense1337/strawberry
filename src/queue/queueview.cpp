@@ -92,7 +92,7 @@ void QueueView::ReloadSettings() {
 
   Settings s;
   s.beginGroup(AppearanceSettings::kSettingsGroup);
-  int iconsize = s.value(AppearanceSettings::kIconSizeLeftPanelButtons, 22).toInt();
+  int iconsize = s.value(AppearanceSettings::kIconSizeLeftPanelButtons, AppearanceSettings::kDefaultIconSizeLeftPanelButtons).toInt();
   s.endGroup();
 
   ui_->move_down->setIconSize(QSize(iconsize, iconsize));
@@ -110,6 +110,11 @@ void QueueView::CurrentPlaylistChanged(Playlist *playlist) {
     QObject::disconnect(current_playlist_->queue(), &Queue::layoutChanged, this, &QueueView::UpdateButtonState);
     QObject::disconnect(current_playlist_->queue(), &Queue::SummaryTextChanged, ui_->summary, &QLabel::setText);
     QObject::disconnect(current_playlist_, &Playlist::destroyed, this, &QueueView::PlaylistDestroyed);
+  }
+
+  if (!playlist) {
+    current_playlist_ = nullptr;
+    return;
   }
 
   current_playlist_ = playlist;

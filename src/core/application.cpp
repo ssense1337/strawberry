@@ -3,7 +3,7 @@
  * This file was part of Clementine.
  * Copyright 2012, David Sansome <me@davidsansome.com>
  * Copyright 2012, 2014, John Maguire <john.maguire@gmail.com>
- * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2026, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,21 +38,20 @@
 #include <QAbstractEventDispatcher>
 #include <QTimer>
 
-#include "core/logging.h"
-
 #include "includes/shared_ptr.h"
 #include "includes/lazy.h"
+#include "core/logging.h"
 #include "core/database.h"
 #include "core/taskmanager.h"
 #include "core/networkaccessmanager.h"
 #include "core/player.h"
-#include "tagreader/tagreaderclient.h"
-#include "engine/devicefinders.h"
 #include "core/urlhandlers.h"
-#include "device/devicemanager.h"
+#include "engine/devicefinders.h"
+#include "tagreader/tagreaderclient.h"
 #include "collection/collectionlibrary.h"
 #include "playlist/playlistbackend.h"
 #include "playlist/playlistmanager.h"
+#include "device/devicemanager.h"
 #include "covermanager/albumcoverloader.h"
 #include "covermanager/coverproviders.h"
 #include "covermanager/currentalbumcoverloader.h"
@@ -66,20 +65,16 @@
 #include "lyrics/lyricsproviders.h"
 #include "lyrics/geniuslyricsprovider.h"
 #include "lyrics/ovhlyricsprovider.h"
-#include "lyrics/lololyricsprovider.h"
 #include "lyrics/musixmatchlyricsprovider.h"
-#include "lyrics/chartlyricsprovider.h"
 #include "lyrics/songlyricscomlyricsprovider.h"
 #include "lyrics/azlyricscomlyricsprovider.h"
 #include "lyrics/elyricsnetlyricsprovider.h"
 #include "lyrics/letraslyricsprovider.h"
-#include "lyrics/lyricfindlyricsprovider.h"
 #include "lyrics/lrcliblyricsprovider.h"
 
 #include "scrobbler/audioscrobbler.h"
 #include "scrobbler/lastfmscrobbler.h"
 #include "scrobbler/listenbrainzscrobbler.h"
-#include "scrobbler/lastfmimport.h"
 #ifdef HAVE_SUBSONIC
 #  include "scrobbler/subsonicscrobbler.h"
 #endif
@@ -108,6 +103,11 @@
 #ifdef HAVE_MOODBAR
 #  include "moodbar/moodbarcontroller.h"
 #  include "moodbar/moodbarloader.h"
+#endif
+
+#ifdef HAVE_WAVEFORM
+#  include "waveform/waveformcontroller.h"
+#  include "waveform/waveformloader.h"
 #endif
 
 #include "radios/radioservices.h"
@@ -175,14 +175,11 @@ class ApplicationImpl {
           // Initialize the repository of lyrics providers.
           lyrics_providers->AddProvider(new GeniusLyricsProvider(lyrics_providers->network()));
           lyrics_providers->AddProvider(new OVHLyricsProvider(lyrics_providers->network()));
-          lyrics_providers->AddProvider(new LoloLyricsProvider(lyrics_providers->network()));
           lyrics_providers->AddProvider(new MusixmatchLyricsProvider(lyrics_providers->network()));
-          lyrics_providers->AddProvider(new ChartLyricsProvider(lyrics_providers->network()));
           lyrics_providers->AddProvider(new SongLyricsComLyricsProvider(lyrics_providers->network()));
           lyrics_providers->AddProvider(new AzLyricsComLyricsProvider(lyrics_providers->network()));
           lyrics_providers->AddProvider(new ElyricsNetLyricsProvider(lyrics_providers->network()));
           lyrics_providers->AddProvider(new LetrasLyricsProvider(lyrics_providers->network()));
-          lyrics_providers->AddProvider(new LyricFindLyricsProvider(lyrics_providers->network()));
           lyrics_providers->AddProvider(new LrcLibLyricsProvider(lyrics_providers->network()));
           lyrics_providers->ReloadSettings();
           return lyrics_providers;
@@ -204,6 +201,14 @@ class ApplicationImpl {
           return streaming_services;
         }),
         radio_services_([app]() { return new RadioServices(app->task_manager(), app->network(), app->database(), app->albumcover_loader()); }),
+#ifdef HAVE_MOODBAR
+        moodbar_loader_([app]() { return new MoodbarLoader(app); }),
+        moodbar_controller_([app]() { return new MoodbarController(app->player(), app->moodbar_loader()); }),
+#endif
+#ifdef HAVE_WAVEFORM
+        waveform_loader_([app]() { return new WaveformLoader(app); }),
+        waveform_controller_([app]() { return new WaveformController(app->player(), app->waveform_loader()); }),
+#endif
         scrobbler_([app]() {
           AudioScrobbler *scrobbler = new AudioScrobbler(app);
           scrobbler->AddService(make_shared<LastFMScrobbler>(scrobbler->settings(), app->network()));
@@ -212,12 +217,7 @@ class ApplicationImpl {
           scrobbler->AddService(make_shared<SubsonicScrobbler>(scrobbler->settings(), app->network(), app->streaming_services()->Service<SubsonicService>(), app));
 #endif
           return scrobbler;
-        }),
-#ifdef HAVE_MOODBAR
-        moodbar_loader_([app]() { return new MoodbarLoader(app); }),
-        moodbar_controller_([app]() { return new MoodbarController(app->player(), app->moodbar_loader()); }),
-#endif
-        lastfm_import_([app]() { return new LastFMImport(app->network()); })
+        })
   {}
 
   Lazy<TagReaderClient> tagreader_client_;
@@ -237,12 +237,15 @@ class ApplicationImpl {
   Lazy<LyricsProviders> lyrics_providers_;
   Lazy<StreamingServices> streaming_services_;
   Lazy<RadioServices> radio_services_;
-  Lazy<AudioScrobbler> scrobbler_;
 #ifdef HAVE_MOODBAR
   Lazy<MoodbarLoader> moodbar_loader_;
   Lazy<MoodbarController> moodbar_controller_;
 #endif
-  Lazy<LastFMImport> lastfm_import_;
+#ifdef HAVE_WAVEFORM
+  Lazy<WaveformLoader> waveform_loader_;
+  Lazy<WaveformController> waveform_controller_;
+#endif
+  Lazy<AudioScrobbler> scrobbler_;
 
 };
 
@@ -384,9 +387,12 @@ SharedPtr<PlaylistBackend> Application::playlist_backend() const { return p_->pl
 SharedPtr<PlaylistManager> Application::playlist_manager() const { return p_->playlist_manager_.ptr(); }
 SharedPtr<StreamingServices> Application::streaming_services() const { return p_->streaming_services_.ptr(); }
 SharedPtr<RadioServices> Application::radio_services() const { return p_->radio_services_.ptr(); }
-SharedPtr<AudioScrobbler> Application::scrobbler() const { return p_->scrobbler_.ptr(); }
-SharedPtr<LastFMImport> Application::lastfm_import() const { return p_->lastfm_import_.ptr(); }
 #ifdef HAVE_MOODBAR
 SharedPtr<MoodbarController> Application::moodbar_controller() const { return p_->moodbar_controller_.ptr(); }
 SharedPtr<MoodbarLoader> Application::moodbar_loader() const { return p_->moodbar_loader_.ptr(); }
 #endif
+#ifdef HAVE_WAVEFORM
+SharedPtr<WaveformController> Application::waveform_controller() const { return p_->waveform_controller_.ptr(); }
+SharedPtr<WaveformLoader> Application::waveform_loader() const { return p_->waveform_loader_.ptr(); }
+#endif
+SharedPtr<AudioScrobbler> Application::scrobbler() const { return p_->scrobbler_.ptr(); }

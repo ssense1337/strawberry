@@ -22,6 +22,8 @@
 #ifndef MOODBARPIPELINE_H
 #define MOODBARPIPELINE_H
 
+#include <atomic>
+
 #include <QObject>
 #include <QByteArray>
 #include <QString>
@@ -48,6 +50,7 @@ class MoodbarPipeline : public QObject {
   const QByteArray &data() const { return data_; }
 
   Q_INVOKABLE void Start();
+  Q_INVOKABLE void Shutdown();
 
  Q_SIGNALS:
   void Finished(const bool success);
@@ -72,7 +75,7 @@ class MoodbarPipeline : public QObject {
   ScopedPtr<MoodbarBuilder> builder_;
 
   bool success_;
-  bool running_;
+  std::atomic<bool> running_;
   QByteArray data_;
 };
 

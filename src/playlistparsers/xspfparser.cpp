@@ -30,6 +30,7 @@
 #include <QXmlStreamWriter>
 
 #include "includes/shared_ptr.h"
+#include "core/logging.h"
 #include "core/settings.h"
 #include "utilities/xmlutils.h"
 #include "constants/timeconstants.h"
@@ -130,6 +131,7 @@ Song XSPFParser::ParseTrack(QXmlStreamReader *reader, const QDir &dir, const boo
         if (name == "track"_L1) {
           goto return_song;
         }
+        break;
       }
       default:
         break;
@@ -167,7 +169,7 @@ void XSPFParser::Save(const QString &playlist_name, const SongList &songs, QIODe
 
   Settings s;
   s.beginGroup(PlaylistSettings::kSettingsGroup);
-  bool write_metadata = s.value(PlaylistSettings::kWriteMetadata, true).toBool();
+  bool write_metadata = s.value(PlaylistSettings::kWriteMetadata, PlaylistSettings::kDefaultWriteMetadata).toBool();
   s.endGroup();
 
   StreamElement tracklist(u"trackList"_s, &writer);
@@ -205,6 +207,11 @@ void XSPFParser::Save(const QString &playlist_name, const SongList &songs, QIODe
   }
 
   writer.writeEndDocument();
+
+  if (writer.hasError()) {
+    qLog(Error) << "Error writing XSPF playlist to device";
+    Q_EMIT Error(tr("Failed to write XSPF playlist"));
+  }
 
 }
 

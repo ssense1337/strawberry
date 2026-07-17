@@ -101,8 +101,8 @@ PlaylistView::PlaylistView(QWidget *parent)
       background_image_stretch_(false),
       background_image_do_not_cut_(true),
       background_image_keep_aspect_ratio_(true),
-      blur_radius_(AppearanceSettings::kDefaultBlurRadius),
-      opacity_level_(AppearanceSettings::kDefaultOpacityLevel),
+      blur_radius_(AppearanceSettings::kDefaultBackgroundImageBlurRadius),
+      opacity_level_(AppearanceSettings::kDefaultBackgroundImageOpacityLevel),
       background_initialized_(false),
       set_initial_header_layout_(false),
       header_state_loaded_(false),
@@ -312,7 +312,7 @@ void PlaylistView::LoadHeaderState() {
   Settings s;
   s.beginGroup(PlaylistSettings::kSettingsGroup);
   // Since we use serialized internal data structures, we cannot read anything but the current version
-  const int header_state_version = s.value(PlaylistSettings::kStateVersion, 0).toInt();
+  const int header_state_version = s.value(PlaylistSettings::kStateVersion, PlaylistSettings::kDefaultStateVersion).toInt();
   if (s.contains(PlaylistSettings::kState)) {
     if (header_state_version == kHeaderStateVersion) {
       header_state_ = s.value(PlaylistSettings::kState).toByteArray();
@@ -735,8 +735,22 @@ void PlaylistView::keyPressEvent(QKeyEvent *event) {
 }
 
 void PlaylistView::contextMenuEvent(QContextMenuEvent *e) {
-  Q_EMIT RightClicked(e->globalPos(), indexAt(e->pos()));
+
+  QModelIndex index;
+  QPoint global_pos = e->globalPos();
+  if (e->reason() == QContextMenuEvent::Keyboard) {
+    index = currentIndex();
+    if (index.isValid()) {
+      global_pos = viewport()->mapToGlobal(visualRect(index).center());
+    }
+  }
+  else {
+    index = indexAt(e->pos());
+  }
+
+  Q_EMIT ShowPlaylistContextMenu(global_pos, index);
   e->accept();
+
 }
 
 void PlaylistView::RemoveSelected() {
@@ -767,7 +781,8 @@ void PlaylistView::RemoveSelected() {
   if (new_idx.isValid()) {
     // Workaround to update keyboard selected row, if it's not the first row (this also triggers selection)
     if (new_row != 0) {
-      keyPressEvent(new QKeyEvent(QEvent::KeyPress, Qt::Key_Down, Qt::NoModifier));
+      QKeyEvent key_event(QEvent::KeyPress, Qt::Key_Down, Qt::NoModifier);
+      keyPressEvent(&key_event);
     }
     // Update visual selection with the entire row
     selectionModel()->select(new_idx, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
@@ -1210,17 +1225,17 @@ void PlaylistView::ReloadSettings() {
   Settings s;
 
   s.beginGroup(PlaylistSettings::kSettingsGroup);
-  bars_enabled_ = s.value(PlaylistSettings::kShowBars, true).toBool();
+  bars_enabled_ = s.value(PlaylistSettings::kShowBars, PlaylistSettings::kDefaultShowBars).toBool();
 #ifdef Q_OS_MACOS
   bool glow_effect = false;
 #else
   bool glow_effect = true;
 #endif
   glow_enabled_ = bars_enabled_ && s.value(PlaylistSettings::kGlowEffect, glow_effect).toBool();
-  bool editmetadatainline = s.value(PlaylistSettings::kEditMetadataInline, false).toBool();
-  select_track_ = s.value(PlaylistSettings::kSelectTrack, false).toBool();
-  auto_sort_ = s.value(PlaylistSettings::kAutoSort, false).toBool();
-  setAlternatingRowColors(s.value(PlaylistSettings::kAlternatingRowColors, true).toBool());
+  bool editmetadatainline = s.value(PlaylistSettings::kEditMetadataInline, PlaylistSettings::kDefaultEditMetadataInline).toBool();
+  select_track_ = s.value(PlaylistSettings::kSelectTrack, PlaylistSettings::kDefaultSelectTrack).toBool();
+  auto_sort_ = s.value(PlaylistSettings::kAutoSort, PlaylistSettings::kDefaultAutoSort).toBool();
+  setAlternatingRowColors(s.value(PlaylistSettings::kAlternatingRowColors, PlaylistSettings::kDefaultAlternatingRowColors).toBool());
   s.endGroup();
 
   s.beginGroup(AppearanceSettings::kSettingsGroup);
@@ -1229,11 +1244,11 @@ void PlaylistView::ReloadSettings() {
   int background_image_maxsize = s.value(AppearanceSettings::kBackgroundImageMaxSize).toInt();
   if (background_image_maxsize <= 10) background_image_maxsize = 9000;
   QString background_image_filename = s.value(AppearanceSettings::kBackgroundImageFilename).toString();
-  bool background_image_stretch = s.value(AppearanceSettings::kBackgroundImageStretch, false).toBool();
-  bool background_image_do_not_cut = s.value(AppearanceSettings::kBackgroundImageDoNotCut, true).toBool();
-  bool background_image_keep_aspect_ratio = s.value(AppearanceSettings::kBackgroundImageKeepAspectRatio, true).toBool();
-  int blur_radius = s.value(AppearanceSettings::kBlurRadius, AppearanceSettings::kDefaultBlurRadius).toInt();
-  int opacity_level = s.value(AppearanceSettings::kOpacityLevel, AppearanceSettings::kDefaultOpacityLevel).toInt();
+  bool background_image_stretch = s.value(AppearanceSettings::kBackgroundImageStretch, AppearanceSettings::kDefaultBackgroundImageStretch).toBool();
+  bool background_image_do_not_cut = s.value(AppearanceSettings::kBackgroundImageDoNotCut, AppearanceSettings::kDefaultBackgroundImageDoNotCut).toBool();
+  bool background_image_keep_aspect_ratio = s.value(AppearanceSettings::kBackgroundImageKeepAspectRatio, AppearanceSettings::kDefaultBackgroundImageKeepAspectRatio).toBool();
+  int blur_radius = s.value(AppearanceSettings::kBackgroundImageBlurRadius, AppearanceSettings::kDefaultBackgroundImageBlurRadius).toInt();
+  int opacity_level = s.value(AppearanceSettings::kBackgroundImageOpacityLevel, AppearanceSettings::kDefaultBackgroundImageOpacityLevel).toInt();
   QColor playlist_playing_song_color = s.value(AppearanceSettings::kPlaylistPlayingSongColor).value<QColor>();
   if (playlist_playing_song_color != playlist_playing_song_color_) {
     row_height_ = -1;
@@ -1245,20 +1260,20 @@ void PlaylistView::ReloadSettings() {
   if (!glow_enabled_) StopGlowing();
 
   // Background:
-  AppearanceSettings::BackgroundImageType background_image_type(AppearanceSettings::BackgroundImageType::Default);
+  AppearanceSettings::BackgroundImageType background_image_type(AppearanceSettings::kDefaultBackgroundImageType);
   if (background_image_type_var.isValid()) {
     background_image_type = static_cast<AppearanceSettings::BackgroundImageType>(background_image_type_var.toInt());
   }
   else {
-    background_image_type = AppearanceSettings::BackgroundImageType::Default;
+    background_image_type = AppearanceSettings::kDefaultBackgroundImageType;
   }
 
-  AppearanceSettings::BackgroundImagePosition background_image_position(AppearanceSettings::BackgroundImagePosition::BottomRight);
+  AppearanceSettings::BackgroundImagePosition background_image_position(AppearanceSettings::kDefaultBackgroundImagePosition);
   if (background_image_position_var.isValid()) {
     background_image_position = static_cast<AppearanceSettings::BackgroundImagePosition>(background_image_position_var.toInt());
   }
   else {
-    background_image_position = AppearanceSettings::BackgroundImagePosition::BottomRight;
+    background_image_position = AppearanceSettings::kDefaultBackgroundImagePosition;
   }
 
   // Check if background properties have changed.

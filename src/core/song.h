@@ -76,9 +76,11 @@ class Song {
     Qobuz = 8,
     SomaFM = 9,
     RadioParadise = 10,
-    Spotify = 11
+    Spotify = 11,
+    RadioBrowser = 12
   };
   static const int kSourceCount = 16;
+  static_assert(static_cast<int>(Source::RadioBrowser) < kSourceCount, "kSourceCount must exceed the largest Song::Source value");
 
   enum class FileType {
     Unknown = 0,
@@ -515,7 +517,7 @@ class Song {
   static QString ImageCacheDir(const Source source);
 
   // Sort songs alphabetically using their pretty title
-  static int CompareSongsName(const Song &song1, const Song &song2);
+  static bool CompareSongsName(const Song &song1, const Song &song2);
   static void SortSongsListAlphabetically(QList<Song> *songs);
 
   // Constructors
@@ -544,6 +546,8 @@ class Song {
   void ToXesam(QVariantMap *map) const;
 #endif
 
+  // Returns true if only minor fields changed, and false if a major field (title, artist or album) was updated from the engine metadata.
+  // Note the inverted polarity: true does NOT mean "merged successfully".
   bool MergeFromEngineMetadata(const EngineMetadata &engine_metadata);
 
   // Copies important statistics from the other song to this one, overwriting any data that already exists.
@@ -553,6 +557,7 @@ class Song {
   // Two songs that are on the same album will have the same AlbumKey.
   // It is more efficient to use IsOnSameAlbum, but this function can be used when you need to hash the key to do fast lookups.
   QString AlbumKey() const;
+  QString GroupingKey() const;
 
   static bool ContainsRegexList(const QString &str, const RegularExpressionList &regex_list);
   static QString StripRegexList(QString str, const RegularExpressionList &regex_list);
@@ -565,7 +570,7 @@ class Song {
   static QString GetNameForNewPlaylist(const QList<Song> &songs);
 
   static inline QString TagLibStringToQString(const TagLib::String &s) {
-    return QString::fromUtf8((s).toCString(true));
+    return QString::fromUtf8(s.toCString(true));
   }
 
  private:

@@ -45,7 +45,7 @@ class EngineBase : public QObject {
   Q_OBJECT
 
  protected:
-  EngineBase(QObject *parent = nullptr);
+  explicit EngineBase(QObject *parent = nullptr);
 
  public:
   ~EngineBase() override;
@@ -90,7 +90,7 @@ class EngineBase : public QObject {
 
   virtual bool Init() = 0;
   virtual State state() const = 0;
-  virtual void StartPreloading(const QUrl&, const QUrl&, const bool, const qint64, const qint64) {}
+  virtual void StartPreloading(const QUrl &media_url, const QUrl &stream_url, const bool force_stop_at_end, const qint64 beginning_offset_nanosec, const qint64 end_offset_nanosec);
   virtual bool Load(const QUrl &media_url, const QUrl &stream_url, const TrackChangeFlags track_change_flags, const bool force_stop_at_end, const quint64 beginning_offset_nanosec, const qint64 end_offset_nanosec, const std::optional<double> ebur128_integrated_loudness_lufs);
   virtual bool Play(const bool pause, const quint64 offset_nanosec) = 0;
   virtual void Stop(const bool stop_after = false) = 0;
@@ -132,23 +132,24 @@ class EngineBase : public QObject {
  public:
   // Simple accessors
   bool volume_control() const { return volume_control_; }
+  bool volume_exponential() const { return volume_exponential_; }
   inline uint volume() const { return volume_; }
 
   bool is_fadeout_enabled() const { return fadeout_enabled_; }
   bool is_crossfade_enabled() const { return crossfade_enabled_; }
   bool is_autocrossfade_enabled() const { return autocrossfade_enabled_; }
   bool crossfade_same_album() const { return crossfade_same_album_; }
-  bool IsEqualizerEnabled() { return equalizer_enabled_; }
+  bool IsEqualizerEnabled() const { return equalizer_enabled_; }
 
   static const int kScopeSize = 1024;
 
   QVariant device() { return device_; }
 
  public Q_SLOTS:
-  virtual void SetStereoBalancerEnabled(const bool) {}
-  virtual void SetStereoBalance(const float) {}
-  virtual void SetEqualizerEnabled(const bool) {}
-  virtual void SetEqualizerParameters(const int, const QList<int>&) {}
+  virtual void SetStereoBalancerEnabled(const bool enabled) { Q_UNUSED(enabled) }
+  virtual void SetStereoBalance(const float value) { Q_UNUSED(value) }
+  virtual void SetEqualizerEnabled(const bool enabled) { Q_UNUSED(enabled) }
+  virtual void SetEqualizerParameters(const int preamp, const QList<int> &band_gains) { Q_UNUSED(preamp) Q_UNUSED(band_gains) }
 
  Q_SIGNALS:
   // Emitted when crossfading is enabled and the track is crossfade_duration_ away from finishing
@@ -185,6 +186,7 @@ class EngineBase : public QObject {
   bool playbin3_enabled_;
   bool exclusive_mode_;
   bool volume_control_;
+  bool volume_exponential_;
   uint volume_;
   quint64 beginning_offset_nanosec_;
   qint64 end_offset_nanosec_;
@@ -214,6 +216,9 @@ class EngineBase : public QObject {
   quint64 buffer_duration_nanosec_;
   double buffer_low_watermark_;
   double buffer_high_watermark_;
+
+  // Audio device (DAC) warm-up delay in milliseconds inserted between preroll (PAUSED) and playback (PLAYING) to give the device time to become ready, avoiding the start of the track being cut off.
+  int device_warmup_duration_ms_;
 
   // Fadeout
   bool fadeout_enabled_;

@@ -2,7 +2,7 @@
  * Strawberry Music Player
  * This file was part of Clementine.
  * Copyright 2010, David Sansome <me@davidsansome.com>
- * Copyright 2020-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2020-2026, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,6 +85,7 @@ PlaylistSequence::PlaylistSequence(QWidget *parent, SettingsProvider *settings)
   shuffle_group->addAction(ui_->action_shuffle_all);
   shuffle_group->addAction(ui_->action_shuffle_inside_album);
   shuffle_group->addAction(ui_->action_shuffle_albums);
+  shuffle_group->addAction(ui_->action_shuffle_grouping);
   shuffle_menu_->addActions(shuffle_group->actions());
   ui_->shuffle->setMenu(shuffle_menu_);
 
@@ -119,22 +120,27 @@ void PlaylistSequence::Save() {
 
 QIcon PlaylistSequence::AddDesaturatedIcon(const QIcon &icon) {
 
-  QIcon ret;
-  const QList<QSize> sizes = icon.availableSizes();
-  for (const QSize &size : sizes) {
-    QPixmap on(icon.pixmap(size));
-    QPixmap off(DesaturatedPixmap(on));
-
-    ret.addPixmap(off, QIcon::Normal, QIcon::Off);
-    ret.addPixmap(on, QIcon::Normal, QIcon::On);
+  const QList<QSize> icon_sizes = icon.availableSizes();
+  if (icon_sizes.isEmpty()) {
+    return icon;
   }
-  return ret;
+
+  QIcon new_icon;
+  for (const QSize &icon_size : icon_sizes) {
+    QPixmap on_pixmap(icon.pixmap(icon_size));
+    QPixmap off_pixmap(DesaturatedPixmap(on_pixmap));
+    new_icon.addPixmap(off_pixmap, QIcon::Normal, QIcon::Off);
+    new_icon.addPixmap(on_pixmap, QIcon::Normal, QIcon::On);
+  }
+
+  return new_icon;
 
 }
 
 QPixmap PlaylistSequence::DesaturatedPixmap(const QPixmap &pixmap) {
 
   QPixmap ret(pixmap.size());
+  ret.setDevicePixelRatio(pixmap.devicePixelRatio());
   ret.fill(Qt::transparent);
 
   QPainter p(&ret);
@@ -165,6 +171,7 @@ void PlaylistSequence::ShuffleActionTriggered(QAction *action) {
   if (action == ui_->action_shuffle_all) mode = ShuffleMode::All;
   if (action == ui_->action_shuffle_inside_album) mode = ShuffleMode::InsideAlbum;
   if (action == ui_->action_shuffle_albums) mode = ShuffleMode::Albums;
+  if (action == ui_->action_shuffle_grouping) mode = ShuffleMode::Grouping;
 
   SetShuffleMode(mode);
 
@@ -202,6 +209,7 @@ void PlaylistSequence::SetShuffleMode(const ShuffleMode mode) {
     case ShuffleMode::All:         ui_->action_shuffle_all->setChecked(true);          break;
     case ShuffleMode::InsideAlbum: ui_->action_shuffle_inside_album->setChecked(true); break;
     case ShuffleMode::Albums:      ui_->action_shuffle_albums->setChecked(true);       break;
+    case ShuffleMode::Grouping:    ui_->action_shuffle_grouping->setChecked(true);     break;
   }
 
   if (mode != shuffle_mode_) {
@@ -230,7 +238,8 @@ void PlaylistSequence::CycleShuffleMode() {
     case ShuffleMode::Off:         mode = ShuffleMode::All;           break;
     case ShuffleMode::All:         mode = ShuffleMode::InsideAlbum;   break;
     case ShuffleMode::InsideAlbum: mode = ShuffleMode::Albums;        break;
-    case ShuffleMode::Albums: break;
+    case ShuffleMode::Albums:      mode = ShuffleMode::Grouping;      break;
+    case ShuffleMode::Grouping: break;
   }
 
   SetShuffleMode(mode);

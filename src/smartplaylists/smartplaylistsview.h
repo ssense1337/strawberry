@@ -32,7 +32,7 @@ class SmartPlaylistsView : public QListView {
 
  public:
   explicit SmartPlaylistsView(QWidget *parent = nullptr);
-  ~SmartPlaylistsView();
+  ~SmartPlaylistsView() override;
 
  protected:
   void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) override;
@@ -40,7 +40,7 @@ class SmartPlaylistsView : public QListView {
 
  Q_SIGNALS:
   void ItemsSelectedChanged();
-  void RightClicked(const QPoint global_pos, const QModelIndex idx);
+  void ShowSmartPlaylistContextMenu(const QPoint global_pos, const QModelIndex idx);
 };
 
 #endif  // SMARTPLAYLISTSVIEW_H

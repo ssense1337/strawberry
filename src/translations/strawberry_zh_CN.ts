@@ -2,6 +2,17 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_CN" sourcelanguage="en-US">
   <context>
+    <name>ASXParser</name>
+    <message>
+      <source>ASX playlist is too large</source>
+      <translation type="unfinished">ASX playlist is too large</translation>
+    </message>
+    <message>
+      <source>Failed to write ASX playlist</source>
+      <translation type="unfinished">Failed to write ASX playlist</translation>
+    </message>
+  </context>
+  <context>
     <name>About</name>
     <message>
       <source>About</source>
@@ -36,8 +47,8 @@
       <translation>如果您喜欢 Strawberry 并能用得上它，请考虑赞助或捐赠。</translation>
     </message>
     <message>
-      <source>You can sponsor the author on %1. You can also make a one-time payment through %2.</source>
-      <translation>您可以在 %1 赞助作者。您也可以通过 %2 进行一次性付款。</translation>
+      <source>You can sponsor the author on %1 or %2. You can also make a one-time payment through %3.</source>
+      <translation>您可以在 %1 或 %2 赞助作者。您也可以通过 %3 进行一次性付款。</translation>
     </message>
     <message>
       <source>Author and maintainer</source>
@@ -327,19 +338,19 @@
     </message>
     <message>
       <source>No analyzer</source>
-      <translation>无均衡器</translation>
+      <translation>无频谱显示</translation>
     </message>
     <message>
       <source>Block analyzer</source>
-      <translation>块状分析器</translation>
+      <translation>块状频谱</translation>
     </message>
     <message>
       <source>Boom analyzer</source>
-      <translation>轰鸣音分析器</translation>
+      <translation>律动频谱</translation>
     </message>
     <message>
       <source>Turbine</source>
-      <translation>涡轮</translation>
+      <translation>涡轮频谱</translation>
     </message>
     <message>
       <source>Sonogram</source>
@@ -347,7 +358,7 @@
     </message>
     <message>
       <source>WaveRubber</source>
-      <translation>WaveRubber</translation>
+      <translation>胶拉波形</translation>
     </message>
   </context>
   <context>
@@ -359,14 +370,6 @@
     <message>
       <source>Style</source>
       <translation>风格</translation>
-    </message>
-    <message>
-      <source>Use system theme icons</source>
-      <translation>使用系统主题图标</translation>
-    </message>
-    <message>
-      <source>Settings require restart.</source>
-      <translation>设置需要重启。</translation>
     </message>
     <message>
       <source>Tabbar colors</source>
@@ -517,8 +520,104 @@
       <translation>选择播放列表正在播放歌曲的颜色：</translation>
     </message>
     <message>
+      <source>Window</source>
+      <translation type="unfinished">Window</translation>
+    </message>
+    <message>
+      <source>Window text</source>
+      <translation type="unfinished">Window text</translation>
+    </message>
+    <message>
+      <source>Base</source>
+      <translation type="unfinished">Base</translation>
+    </message>
+    <message>
+      <source>Alternate base</source>
+      <translation type="unfinished">Alternate base</translation>
+    </message>
+    <message>
+      <source>Tooltip base</source>
+      <translation type="unfinished">Tooltip base</translation>
+    </message>
+    <message>
+      <source>Tooltip text</source>
+      <translation type="unfinished">Tooltip text</translation>
+    </message>
+    <message>
+      <source>Placeholder text</source>
+      <translation type="unfinished">Placeholder text</translation>
+    </message>
+    <message>
+      <source>Text</source>
+      <translation type="unfinished">Text</translation>
+    </message>
+    <message>
+      <source>Button</source>
+      <translation type="unfinished">Button</translation>
+    </message>
+    <message>
+      <source>Button text</source>
+      <translation type="unfinished">Button text</translation>
+    </message>
+    <message>
+      <source>Bright text</source>
+      <translation type="unfinished">Bright text</translation>
+    </message>
+    <message>
+      <source>Select color</source>
+      <translation type="unfinished">Select color</translation>
+    </message>
+    <message>
       <source>Select background image</source>
       <translation>选择背景图片</translation>
+    </message>
+    <message>
+      <source>Colors</source>
+      <translation type="unfinished">Colors</translation>
+    </message>
+    <message>
+      <source>&amp;Use the system default color set</source>
+      <translation type="unfinished">&amp;Use the system default color set</translation>
+    </message>
+    <message>
+      <source>Use a custom color set</source>
+      <translation type="unfinished">Use a custom color set</translation>
+    </message>
+    <message>
+      <source>Set a custom color set suitable for a dark theme</source>
+      <translation type="unfinished">Set a custom color set suitable for a dark theme</translation>
+    </message>
+    <message>
+      <source>Dark mode</source>
+      <translation type="unfinished">Dark mode</translation>
+    </message>
+    <message>
+      <source>Reset the custom color set to the system default colors</source>
+      <translation type="unfinished">Reset the custom color set to the system default colors</translation>
+    </message>
+    <message>
+      <source>Reset to default</source>
+      <translation type="unfinished">Reset to default</translation>
+    </message>
+    <message>
+      <source>You might need to restart Strawberry for this setting to fully apply</source>
+      <translation type="unfinished">You might need to restart Strawberry for this setting to fully apply</translation>
+    </message>
+    <message>
+      <source>You need to restart Strawberry for this setting to take affect</source>
+      <translation type="unfinished">You need to restart Strawberry for this setting to take affect</translation>
+    </message>
+    <message>
+      <source>System icons</source>
+      <translation type="unfinished">System icons</translation>
+    </message>
+    <message>
+      <source>Changing colors is only supported with some styles</source>
+      <translation type="unfinished">Changing colors is only supported with some styles</translation>
+    </message>
+    <message>
+      <source>Dark colors</source>
+      <translation type="unfinished">Dark colors</translation>
     </message>
   </context>
   <context>
@@ -580,6 +679,10 @@
       <translation>改善立体声音频唱片的耳机聆听（bs2b）</translation>
     </message>
     <message>
+      <source>Use playbin3 when available</source>
+      <translation>可用时使用 playbin3</translation>
+    </message>
+    <message>
       <source>Enable HTTP/2 for streaming</source>
       <translation>启用 HTTP/2 流媒体</translation>
     </message>
@@ -601,11 +704,11 @@
     </message>
     <message>
       <source>High watermark</source>
-      <translation>高水位</translation>
+      <translation>缓冲上限</translation>
     </message>
     <message>
       <source>Low watermark</source>
-      <translation>低水位</translation>
+      <translation>缓冲下限</translation>
     </message>
     <message>
       <source>Defaults</source>
@@ -613,11 +716,11 @@
     </message>
     <message>
       <source>Audio normalization</source>
-      <translation>音频归一化</translation>
+      <translation>响度标准化</translation>
     </message>
     <message>
       <source>No audio normalization</source>
-      <translation>无音频归一化</translation>
+      <translation>无响度处理</translation>
     </message>
     <message>
       <source>Replay Gain</source>
@@ -653,15 +756,15 @@
     </message>
     <message>
       <source>EBU R 128 Loudness Normalization</source>
-      <translation>EBU R 128 响度归一化</translation>
+      <translation>EBU R 128 响度标准</translation>
     </message>
     <message>
       <source>Perform track loudness normalization</source>
-      <translation>执行曲目响度归一化</translation>
+      <translation>按单曲应用响度校准</translation>
     </message>
     <message>
       <source>Target Level</source>
-      <translation>目标级别</translation>
+      <translation>目标响度</translation>
     </message>
     <message>
       <source>Fading</source>
@@ -681,7 +784,7 @@
     </message>
     <message>
       <source>Except between tracks on the same album or in the same CUE sheet</source>
-      <translation>同一专辑歌曲或者同一 CUE sheet 不淡出</translation>
+      <translation>同一专辑歌曲或者同一 CUE不淡出</translation>
     </message>
     <message>
       <source>Fading duration</source>
@@ -691,12 +794,32 @@
       <source>Fade out on pause / fade in on resume</source>
       <translation>暂停时淡出/恢复时淡入</translation>
     </message>
+    <message>
+      <source>You need to restart Strawberry for this setting to take affect</source>
+      <translation>您需要重启 Strawberry 才能使此设置生效</translation>
+    </message>
+    <message>
+      <source>Map the volume slider to a decibel scale so that perceived loudness changes evenly. Each 1% step equals 0.5 dB, 100% is 0 dB and 0% is silence.</source>
+      <translation type="unfinished">Map the volume slider to a decibel scale so that perceived loudness changes evenly. Each 1% step equals 0.5 dB, 100% is 0 dB and 0% is silence.</translation>
+    </message>
+    <message>
+      <source>Exponential volume scaling</source>
+      <translation type="unfinished">Exponential volume scaling</translation>
+    </message>
+    <message>
+      <source>Device warm-up</source>
+      <translation type="unfinished">Device warm-up</translation>
+    </message>
+    <message>
+      <source>Delay between opening the audio device and starting playback, to avoid the start of the track being cut off while the device (DAC) is still becoming ready.  Set to 0 to disable.</source>
+      <translation type="unfinished">Delay between opening the audio device and starting playback, to avoid the start of the track being cut off while the device (DAC) is still becoming ready.  Set to 0 to disable.</translation>
+    </message>
   </context>
   <context>
     <name>BehaviourSettingsPage</name>
     <message>
       <source>Behavior</source>
-      <translation>行为</translation>
+      <translation>常规</translation>
     </message>
     <message>
       <source>Show system tray icon</source>
@@ -724,7 +847,7 @@
     </message>
     <message>
       <source>On startup</source>
-      <translation>在启动时</translation>
+      <translation>初始窗口状态</translation>
     </message>
     <message>
       <source>Remember from &amp;last time</source>
@@ -740,11 +863,11 @@
     </message>
     <message>
       <source>Show the main window maximized</source>
-      <translation>显示最大化主窗口</translation>
+      <translation>最大化显示</translation>
     </message>
     <message>
       <source>Show the main window minimized</source>
-      <translation>显示最小化主窗口</translation>
+      <translation>最小化显示</translation>
     </message>
     <message>
       <source>Language</source>
@@ -832,18 +955,26 @@
     </message>
   </context>
   <context>
-    <name>CddaSongLoader</name>
+    <name>CDDASongLoader</name>
+    <message>
+      <source>Could not create cdiocddasrc</source>
+      <translation>无法创建 cdiocddasrc</translation>
+    </message>
     <message>
       <source>Error while setting CDDA device to ready state.</source>
-      <translation>设置 CDDA 设备为就绪状态时出错。</translation>
+      <translation>将 CDDA 设备设置为就绪状态时出错。</translation>
     </message>
     <message>
       <source>Error while setting CDDA device to pause state.</source>
-      <translation>设置 CDDA 设备为暂停状态时出错。</translation>
+      <translation>将 CDDA 设备设置为暂停状态时出错。</translation>
+    </message>
+    <message>
+      <source>The &apos;track&apos; format is not supported by GStreamer.</source>
+      <translation type="unfinished">The &apos;track&apos; format is not supported by GStreamer.</translation>
     </message>
     <message>
       <source>Error while querying CDDA tracks.</source>
-      <translation>查询 CDDA 曲目时出错。</translation>
+      <translation>查询 CDDA 音轨时出错。</translation>
     </message>
   </context>
   <context>
@@ -908,12 +1039,40 @@
       <translation>管理已保存的分组</translation>
     </message>
     <message>
-      <source>Show</source>
-      <translation>显示</translation>
+      <source>Any rating</source>
+      <translation>任意评分</translation>
+    </message>
+    <message>
+      <source>Rating non null</source>
+      <translation>评分不为空</translation>
+    </message>
+    <message>
+      <source>Rating greater than 1 star</source>
+      <translation>评分高于 1 星</translation>
+    </message>
+    <message>
+      <source>Rating greater than 2 stars</source>
+      <translation>评分高于 2 星</translation>
+    </message>
+    <message>
+      <source>Rating greater than 3 stars</source>
+      <translation>评分高于 3 星</translation>
+    </message>
+    <message>
+      <source>Rating greater than 4 stars</source>
+      <translation>评分高于 4 星</translation>
     </message>
     <message>
       <source>Group by</source>
       <translation>分组</translation>
+    </message>
+    <message>
+      <source>Filter by age</source>
+      <translation>按时长筛选</translation>
+    </message>
+    <message>
+      <source>Filter by rating</source>
+      <translation>按评分筛选</translation>
     </message>
     <message>
       <source>Display options</source>
@@ -991,6 +1150,10 @@
   <context>
     <name>CollectionLibrary</name>
     <message>
+      <source>Support for sort tags artist, album, album artist, title, composer and performer</source>
+      <translation type="unfinished">Support for sort tags artist, album, album artist, title, composer and performer</translation>
+    </message>
+    <message>
       <source>Saving playcounts and ratings</source>
       <translation>保存播放次数和评分</translation>
     </message>
@@ -1050,7 +1213,7 @@
     </message>
     <message>
       <source>Perform song EBU R 128 analysis (required for EBU R 128 loudness normalization)</source>
-      <translation>执行歌曲 EBU R 128 分析（EBU R 128 响度归一化所需）</translation>
+      <translation>执行单曲 EBU R 128 响度分析 (开启响度标准化功能必选)</translation>
     </message>
     <message>
       <source>Expire unavailable songs after</source>
@@ -1076,11 +1239,11 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Automatically open single categories in the collection tree</source>
-      <translation>自动打开媒体库树重的单个分类</translation>
+      <translation>自动展开媒体库中的单一分类</translation>
     </message>
     <message>
       <source>Show dividers</source>
-      <translation>显示分频器</translation>
+      <translation>显示分隔线</translation>
     </message>
     <message>
       <source>Show album cover art in collection</source>
@@ -1088,11 +1251,19 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Use various artists for compilation albums</source>
-      <translation>合辑使用各种艺术家</translation>
+      <translation>合辑艺术家显示为“群星”</translation>
     </message>
     <message>
-      <source>Skip leading articles (&quot;the&quot;, &quot;a&quot;, &quot;an&quot;) when sorting artist names</source>
-      <translation>排序艺术家名称时跳过前导冠词（“the”，“a”，“an”）</translation>
+      <source>Skip leading articles (&quot;the&quot;, &quot;a&quot;, &quot;an&quot;) when sorting artists, composers and performers</source>
+      <translation>排序艺术家、作曲家及演奏者时跳过前导冠词（&quot;the&quot;, &quot;a&quot;, &quot;an&quot;）</translation>
+    </message>
+    <message>
+      <source>Skip leading articles (&quot;the&quot;, &quot;a&quot;, &quot;an&quot;) when sorting albums</source>
+      <translation>排序专辑时跳过前导冠词（&quot;the&quot;, &quot;a&quot;, &quot;an&quot;）</translation>
+    </message>
+    <message>
+      <source>Use sort tags for sorting when available</source>
+      <translation>可用时使用排序标签进行排序</translation>
     </message>
     <message>
       <source>Album cover pixmap cache</source>
@@ -1223,11 +1394,11 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Show in various artists</source>
-      <translation>在群星中显示</translation>
+      <translation>显示在“群星”下</translation>
     </message>
     <message>
       <source>Don&apos;t show in various artists</source>
-      <translation>不在群星中显示</translation>
+      <translation>不显示在“群星”下</translation>
     </message>
     <message>
       <source>There are other songs in this album</source>
@@ -1235,7 +1406,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Would you like to move the other songs on this album to Various Artists as well?</source>
-      <translation>您是否也想将此专辑中的其他歌曲移动到“各种艺术家”中？</translation>
+      <translation>是否将此专辑的其他单曲也归入“群星”？</translation>
     </message>
     <message>
       <source>Error</source>
@@ -1279,7 +1450,7 @@ If there are no matches then it will use the largest image in the directory.</so
     <name>ContextSettingsPage</name>
     <message>
       <source>Context</source>
-      <translation>上下文</translation>
+      <translation>正在播放</translation>
     </message>
     <message>
       <source>Custom text settings</source>
@@ -1307,7 +1478,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Technical Data</source>
-      <translation>技术规格</translation>
+      <translation>音频参数</translation>
     </message>
     <message>
       <source>Song Lyrics</source>
@@ -1430,19 +1601,39 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>添加歌曲评级</translation>
     </message>
     <message>
-      <source>%originalyear%</source>
-      <translation>%originalyear%</translation>
-    </message>
-    <message>
       <source>Add song original year tag</source>
       <translation>添加歌曲的原始年份标签</translation>
+    </message>
+    <message>
+      <source>Add song artistsort tag</source>
+      <translation>添加歌曲艺术家排序标签</translation>
+    </message>
+    <message>
+      <source>Add song albumartistsort tag</source>
+      <translation>添加歌曲专辑艺术家排序标签</translation>
+    </message>
+    <message>
+      <source>Add song titlesort tag</source>
+      <translation>添加歌曲标题排序标签</translation>
+    </message>
+    <message>
+      <source>Add song composersort tag</source>
+      <translation>添加歌曲作曲家排序标签</translation>
+    </message>
+    <message>
+      <source>Add song performersort tag</source>
+      <translation>添加歌曲演奏者排序标签</translation>
+    </message>
+    <message>
+      <source>Add song albumsort tag</source>
+      <translation>添加歌曲专辑排序标签</translation>
     </message>
   </context>
   <context>
     <name>ContextView</name>
     <message>
       <source>Filetype</source>
-      <translation>文件类型</translation>
+      <translation>编码格式</translation>
     </message>
     <message>
       <source>Length</source>
@@ -1461,20 +1652,12 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>比特率</translation>
     </message>
     <message>
-      <source>EBU R 128 Integrated Loudness</source>
-      <translation>EBU R 128 综合响度</translation>
-    </message>
-    <message>
-      <source>EBU R 128 Loudness Range</source>
-      <translation>EBU R 128 响度范围</translation>
-    </message>
-    <message>
       <source>Show album cover</source>
       <translation>显示专辑封面</translation>
     </message>
     <message>
       <source>Show song technical data</source>
-      <translation>显示歌曲技术规格</translation>
+      <translation>显示音频参数</translation>
     </message>
     <message>
       <source>Show song lyrics</source>
@@ -1903,7 +2086,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>This device must be connected and opened before Strawberry can see what file formats it supports.</source>
-      <translation>此设备必须在连接并打开之前，Strawberry 可以检测它支持什么文件格式。</translation>
+      <translation>必须连接并开启设备，Strawberry 才能查询其支持的格式。</translation>
     </message>
     <message>
       <source>Open device</source>
@@ -1930,7 +2113,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Forget device</source>
-      <translation>忘记设备</translation>
+      <translation>解除关联</translation>
     </message>
     <message>
       <source>Device properties...</source>
@@ -1942,7 +2125,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Replace current playlist</source>
-      <translation>移除当前播放列表</translation>
+      <translation>替换当前播放列表</translation>
     </message>
     <message>
       <source>Open in new playlist</source>
@@ -1958,7 +2141,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Forgetting a device will remove it from this list and Strawberry will have to rescan all the songs again next time you connect it.</source>
-      <translation>忘记设备将从列表删除该设备。如果下次您再次插入该设备，Strawberry 将重新扫描所有歌曲。</translation>
+      <translation>解除关联将从列表中移除此设备。下次连接时，Strawberry 需重新扫描所有曲目。</translation>
     </message>
     <message>
       <source>Delete files</source>
@@ -1974,6 +2157,13 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Form</source>
       <translation>表格</translation>
+    </message>
+  </context>
+  <context>
+    <name>DiscordRichPresence</name>
+    <message>
+      <source>on </source>
+      <translation>开</translation>
     </message>
   </context>
   <context>
@@ -2286,6 +2476,42 @@ If there are no matches then it will use the largest image in the directory.</so
       <source>Could not write metadata to %1: %2</source>
       <translation>无法写入元数据到 %1：%2</translation>
     </message>
+    <message>
+      <source>ID3v2 version:</source>
+      <translation>ID3v2 版本：</translation>
+    </message>
+    <message>
+      <source>2.3</source>
+      <translation>2.3</translation>
+    </message>
+    <message>
+      <source>2.4</source>
+      <translation>2.4</translation>
+    </message>
+    <message>
+      <source>Performer sort</source>
+      <translation>演奏者排序</translation>
+    </message>
+    <message>
+      <source>Title sort</source>
+      <translation>标题排序</translation>
+    </message>
+    <message>
+      <source>Album artist sort</source>
+      <translation>专辑艺术家排序</translation>
+    </message>
+    <message>
+      <source>Artist sort</source>
+      <translation>艺术家排序</translation>
+    </message>
+    <message>
+      <source>Album sort</source>
+      <translation>专辑排序</translation>
+    </message>
+    <message>
+      <source>Composer sort</source>
+      <translation>作曲家排序</translation>
+    </message>
   </context>
   <context>
     <name>Equalizer</name>
@@ -2403,7 +2629,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Zero</source>
-      <translation>00</translation>
+      <translation>归零</translation>
     </message>
     <message>
       <source>Name</source>
@@ -2412,6 +2638,10 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Are you sure you want to delete the &quot;%1&quot; preset?</source>
       <translation>您确定要删除预设 %1 吗？</translation>
+    </message>
+    <message>
+      <source>You need to restart playback for this setting to take affect.</source>
+      <translation>您需要重新启动播放才能使此设置生效。</translation>
     </message>
   </context>
   <context>
@@ -2472,6 +2702,22 @@ If there are no matches then it will use the largest image in the directory.</so
       <source>Form</source>
       <translation>表格</translation>
     </message>
+    <message>
+      <source>Add root directory</source>
+      <translation>添加根目录</translation>
+    </message>
+    <message>
+      <source>Remove selected root directory</source>
+      <translation>移除选定的根目录</translation>
+    </message>
+    <message>
+      <source>Toggle between list and tree view</source>
+      <translation>在列表视图和树形视图之间切换</translation>
+    </message>
+    <message>
+      <source>Select folder to add as tree root</source>
+      <translation>选择要添加为树根的文件夹</translation>
+    </message>
   </context>
   <context>
     <name>FileViewList</name>
@@ -2510,6 +2756,49 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Show in file browser...</source>
       <translation>在文件管理器中显示...</translation>
+    </message>
+  </context>
+  <context>
+    <name>FileViewTree</name>
+    <message>
+      <source>Append to current playlist</source>
+      <translation>追加到当前播放列表</translation>
+    </message>
+    <message>
+      <source>Replace current playlist</source>
+      <translation>替换当前播放列表</translation>
+    </message>
+    <message>
+      <source>Open in new playlist</source>
+      <translation>在新播放列表中打开</translation>
+    </message>
+    <message>
+      <source>Copy to collection...</source>
+      <translation>复制到收藏集...</translation>
+    </message>
+    <message>
+      <source>Move to collection...</source>
+      <translation>移动到收藏集...</translation>
+    </message>
+    <message>
+      <source>Copy to device...</source>
+      <translation>复制到设备...</translation>
+    </message>
+    <message>
+      <source>Delete from disk...</source>
+      <translation>从磁盘删除...</translation>
+    </message>
+    <message>
+      <source>Edit track information...</source>
+      <translation>编辑音轨信息...</translation>
+    </message>
+    <message>
+      <source>Show in file browser...</source>
+      <translation>在文件浏览器中显示...</translation>
+    </message>
+    <message>
+      <source>Files</source>
+      <translation>文件</translation>
     </message>
   </context>
   <context>
@@ -2555,29 +2844,6 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>An error occurred loading the iTunes database</source>
       <translation>加载 iTunes 数据库时出错</translation>
-    </message>
-  </context>
-  <context>
-    <name>GeniusLyricsProvider</name>
-    <message>
-      <source>Genius Authentication</source>
-      <translation>Genius 身份验证</translation>
-    </message>
-    <message>
-      <source>Please open this URL in your browser</source>
-      <translation>请在浏览器中打开这个 URL</translation>
-    </message>
-    <message>
-      <source>Redirect missing token code!</source>
-      <translation>重定向缺少令牌代码！</translation>
-    </message>
-    <message>
-      <source>Received invalid reply from web browser.</source>
-      <translation>从网页浏览器收到无效回复。</translation>
-    </message>
-    <message>
-      <source>Redirect from Genius is missing query items code or state.</source>
-      <translation>来自 Genius 的重定向缺少查询项代码或状态。</translation>
     </message>
   </context>
   <context>
@@ -2674,7 +2940,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Change shuffle mode</source>
-      <translation>更改乱序模式</translation>
+      <translation>更改随机播放模式</translation>
     </message>
     <message>
       <source>Change repeat mode</source>
@@ -2855,6 +3121,10 @@ If there are no matches then it will use the largest image in the directory.</so
       <source>Separate albums by grouping tag</source>
       <translation>按分组标签分开专辑</translation>
     </message>
+    <message>
+      <source>Original year - Album - Disc</source>
+      <translation type="unfinished">Original year - Album - Disc</translation>
+    </message>
   </context>
   <context>
     <name>GstEngine</name>
@@ -2864,73 +3134,38 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
   </context>
   <context>
-    <name>LastFMImport</name>
+    <name>LastFMScrobbler</name>
     <message>
-      <source>Missing username, please login to last.fm first!</source>
-      <translation>缺失用户民，请先登录到 Last.fm！</translation>
-    </message>
-  </context>
-  <context>
-    <name>LastFMImportDialog</name>
-    <message>
-      <source>Import data from last.fm</source>
-      <translation>从 Last.fm 导入数据</translation>
+      <source>%1 Scrobbler Authentication</source>
+      <translation>%1 记录认证</translation>
     </message>
     <message>
-      <source>Choose data to import from last.fm</source>
-      <translation>选择从 Last.fm 导入的数据</translation>
+      <source>Open URL in web browser?</source>
+      <translation>在网页浏览器中打开 URL？</translation>
     </message>
     <message>
-      <source>Last played</source>
-      <translation>上次播放</translation>
+      <source>Press &quot;Save&quot; to copy the URL to clipboard and manually open it in a web browser.</source>
+      <translation>按“保存”将 URL 复制到剪贴板，然后手动在网页浏览器中打开。</translation>
     </message>
     <message>
-      <source>Play counts</source>
-      <translation>播放计数</translation>
+      <source>Could not open URL. Please open this URL in your browser</source>
+      <translation>无法打开 URL。请在浏览器中打开此 URL</translation>
     </message>
     <message>
-      <source>Warning: Play counts and last played from last.fm will completely replace the same data for the matched songs. Play counts will replace the data based on artist and song title for the same albums! Please backup your database before you start.</source>
-      <translation>警告：来自 last.fm 的播放次数和最后播放时间将完全替换匹配歌曲的相同数据。播放次数将基于艺术家和歌曲标题替换相同专辑的数据！请在开始前备份您的数据库。</translation>
+      <source>Invalid reply from web browser. Missing token.</source>
+      <translation>来自网页浏览器的回复无效。缺少令牌。</translation>
     </message>
     <message>
-      <source>Go!</source>
-      <translation>启动！</translation>
+      <source>Received invalid reply from web browser. Try another browser.</source>
+      <translation>收到来自网页浏览器的无效回复。请尝试其他浏览器。</translation>
     </message>
     <message>
-      <source>Close</source>
-      <translation>关闭</translation>
+      <source>Scrobbler %1 is not authenticated!</source>
+      <translation>记录器 %1 未通过认证！</translation>
     </message>
     <message>
-      <source>Cancel</source>
-      <translation>取消</translation>
-    </message>
-    <message>
-      <source>Receiving initial data from last.fm...</source>
-      <translation>正在接收来自 last.fm 的初始数据...</translation>
-    </message>
-    <message>
-      <source>Receiving playcount for %1 songs and last played for %2 songs.</source>
-      <translation>正在接收 %1 首歌曲的播放次数和 %2 首歌曲的最后播放时间。</translation>
-    </message>
-    <message>
-      <source>Receiving last played for %1 songs.</source>
-      <translation>正在接收 %1 首歌曲的最后播放时间。</translation>
-    </message>
-    <message>
-      <source>Receiving playcounts for %1 songs.</source>
-      <translation>正在接收 %1 首歌曲的播放次数。</translation>
-    </message>
-    <message>
-      <source>Playcounts for %1 songs and last played for %2 songs received.</source>
-      <translation>已接收 %1 首歌曲的播放次数和 %2 首歌曲的最后播放时间。</translation>
-    </message>
-    <message>
-      <source>Last played for %1 songs received.</source>
-      <translation>已接收 %1 首歌曲的上次播放时间。</translation>
-    </message>
-    <message>
-      <source>Playcounts for %1 songs received.</source>
-      <translation>已接收 %1 首歌曲的播放次数。</translation>
+      <source>Scrobbler %1 error: %2</source>
+      <translation>记录器 %1 错误：%2</translation>
     </message>
   </context>
   <context>
@@ -2949,22 +3184,6 @@ If there are no matches then it will use the largest image in the directory.</so
   </context>
   <context>
     <name>ListenBrainzScrobbler</name>
-    <message>
-      <source>ListenBrainz Authentication</source>
-      <translation>ListenBrainz 认证</translation>
-    </message>
-    <message>
-      <source>Please open this URL in your browser</source>
-      <translation>请在浏览器中打开这个 URL</translation>
-    </message>
-    <message>
-      <source>Redirect missing token code!</source>
-      <translation>重定向缺少令牌代码！</translation>
-    </message>
-    <message>
-      <source>Received invalid reply from web browser.</source>
-      <translation>从网页浏览器收到无效回复。</translation>
-    </message>
     <message>
       <source>Unable to scrobble %1 - %2 because of error: %3</source>
       <translation>无法提交 %1 - %2，错误原因：%3</translation>
@@ -3179,10 +3398,6 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>乱序播放列表(&amp;H)</translation>
     </message>
     <message>
-      <source>Ctrl+H</source>
-      <translation>Ctrl+H</translation>
-    </message>
-    <message>
       <source>&amp;Add file...</source>
       <translation>添加文件(&amp;A)...</translation>
     </message>
@@ -3335,12 +3550,8 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>显示侧边栏</translation>
     </message>
     <message>
-      <source>Import data from last.fm...</source>
-      <translation>从 Last.fm 导入数据...</translation>
-    </message>
-    <message>
       <source>Context</source>
-      <translation>上下文</translation>
+      <translation>歌词与详情</translation>
     </message>
     <message>
       <source>Collection</source>
@@ -3421,6 +3632,10 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Rescan song(s)...</source>
       <translation>重新扫描歌曲...</translation>
+    </message>
+    <message>
+      <source>Fetch metadata from service</source>
+      <translation>从服务获取元数据</translation>
     </message>
     <message>
       <source>Copy URL(s)...</source>
@@ -3566,6 +3781,22 @@ If there are no matches then it will use the largest image in the directory.</so
       <source>Collection rescan notice</source>
       <translation>重新扫描媒体库提示</translation>
     </message>
+    <message>
+      <source>Ctrl+Shift+H</source>
+      <translation type="unfinished">Ctrl+Shift+H</translation>
+    </message>
+    <message>
+      <source>Go to last playlist tab</source>
+      <translation type="unfinished">Go to last playlist tab</translation>
+    </message>
+    <message>
+      <source>Go to active playlist tab</source>
+      <translation type="unfinished">Go to active playlist tab</translation>
+    </message>
+    <message>
+      <source>Close current playlist tab</source>
+      <translation type="unfinished">Close current playlist tab</translation>
+    </message>
   </context>
   <context>
     <name>MessageDialog</name>
@@ -3586,25 +3817,10 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
   </context>
   <context>
-    <name>MoodbarProxyStyle</name>
-    <message>
-      <source>Show moodbar</source>
-      <translation>显示情绪栏</translation>
-    </message>
-    <message>
-      <source>Moodbar style</source>
-      <translation>情绪栏风格</translation>
-    </message>
-  </context>
-  <context>
     <name>MoodbarSettingsPage</name>
     <message>
       <source>Moodbar</source>
       <translation>情绪栏</translation>
-    </message>
-    <message>
-      <source>Show a moodbar in the track progress bar</source>
-      <translation>在曲目进度条中显示情绪栏</translation>
     </message>
     <message>
       <source>Moodbar style</source>
@@ -3613,10 +3829,6 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Save the .mood files directly in the songs folders</source>
       <translation>直接保存 .mood 文件到歌曲文件夹</translation>
-    </message>
-    <message>
-      <source>Enabled</source>
-      <translation>已启用</translation>
     </message>
   </context>
   <context>
@@ -3698,6 +3910,10 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Use proxy settings for streaming</source>
       <translation>使用串流代理设置</translation>
+    </message>
+    <message>
+      <source>Only HTTP proxy is supported for streaming.</source>
+      <translation type="unfinished">Only HTTP proxy is supported for streaming.</translation>
     </message>
   </context>
   <context>
@@ -3821,7 +4037,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Strawberry Red</source>
-      <translation>Strawberry Red</translation>
+      <translation>草莓红</translation>
     </message>
     <message>
       <source>Custom...</source>
@@ -3927,6 +4143,61 @@ If there are no matches then it will use the largest image in the directory.</so
       <source>Drag to reposition</source>
       <translation>拖拽以重新定位</translation>
     </message>
+    <message>
+      <source>Discord</source>
+      <translation>Discord</translation>
+    </message>
+    <message>
+      <source>Enable Rich Presence</source>
+      <translation>启用 Rich Presence</translation>
+    </message>
+    <message>
+      <source>&quot;Listening to...&quot;</source>
+      <translation>&quot;正在听…&quot;</translation>
+    </message>
+    <message>
+      <source>Strawberry</source>
+      <translation>Strawberry</translation>
+    </message>
+    <message>
+      <source>Artist name</source>
+      <translation>艺术家名称</translation>
+    </message>
+    <message>
+      <source>Song title</source>
+      <translation>歌曲标题</translation>
+    </message>
+  </context>
+  <context>
+    <name>OAuthenticator</name>
+    <message>
+      <source>Authentication</source>
+      <translation>认证</translation>
+    </message>
+    <message>
+      <source>Please open this URL in your browser</source>
+      <translation>请在浏览器中打开此 URL</translation>
+    </message>
+    <message>
+      <source>Received invalid reply from web browser.</source>
+      <translation>收到来自网页浏览器的无效回复。</translation>
+    </message>
+    <message>
+      <source>Redirect URL is missing query.</source>
+      <translation>重定向 URL 缺少查询参数。</translation>
+    </message>
+    <message>
+      <source>Request URL is missing code!</source>
+      <translation>请求 URL 缺少代码！</translation>
+    </message>
+    <message>
+      <source>Request URL is missing state!</source>
+      <translation>请求 URL 缺少状态！</translation>
+    </message>
+    <message>
+      <source>Request URL has wrong state %1 != %2</source>
+      <translation>请求 URL 状态错误 %1 != %2</translation>
+    </message>
   </context>
   <context>
     <name>OSDBase</name>
@@ -3972,15 +4243,19 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Shuffle all</source>
-      <translation>乱序全部</translation>
+      <translation>全部随机播放</translation>
     </message>
     <message>
       <source>Shuffle tracks in this album</source>
-      <translation>此专辑的曲目乱序播放</translation>
+      <translation>随机播放此专辑中的曲目</translation>
     </message>
     <message>
       <source>Shuffle albums</source>
-      <translation>乱序专辑</translation>
+      <translation>随机播放专辑</translation>
+    </message>
+    <message>
+      <source>Shuffle grouping</source>
+      <translation>随机播放分组</translation>
     </message>
     <message>
       <source>Don&apos;t repeat</source>
@@ -4155,7 +4430,7 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Bitrate</source>
       <comment>Refers to bitrate in file organize dialog.</comment>
-      <translation>Bitrate</translation>
+      <translation>比特率</translation>
     </message>
     <message>
       <source>Sample rate</source>
@@ -4195,6 +4470,14 @@ If there are no matches then it will use the largest image in the directory.</so
       <source>Don&apos;t know how to handle %1</source>
       <translation>不知道如何处理 %1</translation>
     </message>
+    <message>
+      <source>File %1 does not exist</source>
+      <translation>文件 %1 不存在</translation>
+    </message>
+    <message>
+      <source>Could not read file %1: %2</source>
+      <translation>无法读取文件 %1：%2</translation>
+    </message>
   </context>
   <context>
     <name>PlayingWidget</name>
@@ -4230,12 +4513,24 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>标题</translation>
     </message>
     <message>
+      <source>Title Sort</source>
+      <translation>标题排序</translation>
+    </message>
+    <message>
       <source>Artist</source>
       <translation>艺术家</translation>
     </message>
     <message>
+      <source>Artist Sort</source>
+      <translation>艺术家排序</translation>
+    </message>
+    <message>
       <source>Album</source>
       <translation>专辑</translation>
+    </message>
+    <message>
+      <source>Album Sort</source>
+      <translation>专辑排序</translation>
     </message>
     <message>
       <source>Track</source>
@@ -4266,12 +4561,24 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>专辑艺术家</translation>
     </message>
     <message>
+      <source>Album Artist Sort</source>
+      <translation>专辑艺术家排序</translation>
+    </message>
+    <message>
       <source>Composer</source>
       <translation>作曲家</translation>
     </message>
     <message>
+      <source>Composer Sort</source>
+      <translation>作曲家排序</translation>
+    </message>
+    <message>
       <source>Performer</source>
       <translation>表演者</translation>
+    </message>
+    <message>
+      <source>Performer Sort</source>
+      <translation>演奏者排序</translation>
     </message>
     <message>
       <source>Grouping</source>
@@ -4302,8 +4609,8 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>比特率</translation>
     </message>
     <message>
-      <source>File Name</source>
-      <translation>文件名</translation>
+      <source>Initial key</source>
+      <translation>初始调号</translation>
     </message>
     <message>
       <source>File Name (without path)</source>
@@ -4334,12 +4641,24 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>来源</translation>
     </message>
     <message>
+      <source>Moodbar</source>
+      <translation>Moodbar</translation>
+    </message>
+    <message>
+      <source>BPM</source>
+      <translation>BPM</translation>
+    </message>
+    <message>
       <source>Mood</source>
       <translation>情绪</translation>
     </message>
     <message>
       <source>Rating</source>
       <translation>评分</translation>
+    </message>
+    <message>
+      <source>URL</source>
+      <translation>URL</translation>
     </message>
     <message>
       <source>CUE</source>
@@ -4466,6 +4785,10 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>播放列表</translation>
     </message>
     <message>
+      <source>Copy songs to playlist</source>
+      <translation>将歌曲复制到播放列表</translation>
+    </message>
+    <message>
       <source>Copy to device</source>
       <translation>复制到设备</translation>
     </message>
@@ -4523,7 +4846,7 @@ If there are no matches then it will use the largest image in the directory.</so
     <message numerus="yes">
       <source>%n track(s)</source>
       <translation>
-        <numerusform>%n track(s)</numerusform>
+        <numerusform>%n 个音轨</numerusform>
       </translation>
     </message>
   </context>
@@ -4593,7 +4916,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Shuffle</source>
-      <translation>乱序</translation>
+      <translation>随机播放</translation>
     </message>
     <message>
       <source>Don&apos;t repeat</source>
@@ -4625,15 +4948,19 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Shuffle tracks in this album</source>
-      <translation>此专辑的曲目乱序播放</translation>
+      <translation>随机播放此专辑中的曲目</translation>
     </message>
     <message>
       <source>Shuffle all</source>
-      <translation>乱序全部</translation>
+      <translation>全部随机播放</translation>
     </message>
     <message>
       <source>Shuffle albums</source>
-      <translation>乱序专辑</translation>
+      <translation>随机播放专辑</translation>
+    </message>
+    <message>
+      <source>Shuffle grouping</source>
+      <translation>随机播放分组</translation>
     </message>
   </context>
   <context>
@@ -4934,6 +5261,10 @@ Are you sure you want to continue?</source>
       <translation>输出版本信息</translation>
     </message>
     <message>
+      <source>Create fingerprint</source>
+      <translation>创建指纹</translation>
+    </message>
+    <message>
       <source>Failed to create directory %1.</source>
       <translation>创建目录 %1 失败。</translation>
     </message>
@@ -4960,10 +5291,6 @@ Are you sure you want to continue?</source>
     <message>
       <source>LU</source>
       <translation>LU</translation>
-    </message>
-    <message>
-      <source>File %1 is not recognized as a valid audio file.</source>
-      <translation>文件 %1 未被识别为有效音频文件。</translation>
     </message>
     <message>
       <source>1 day</source>
@@ -5042,7 +5369,7 @@ Are you sure you want to continue?</source>
       <translation>无法解析文件</translation>
     </message>
     <message>
-      <source>Could save file</source>
+      <source>Could not save file</source>
       <translation>无法保存文件</translation>
     </message>
     <message>
@@ -5058,7 +5385,7 @@ Are you sure you want to continue?</source>
       <translation>艺术家</translation>
     </message>
     <message>
-      <source>searches for all artists containing the word %1. </source>
+      <source>searches for all artists containing the word %1.</source>
       <translation>搜索所有包含单词 %1 的艺术家。</translation>
     </message>
     <message>
@@ -5066,11 +5393,15 @@ Are you sure you want to continue?</source>
       <translation>数字字段的搜索词可以用 %1 或 %2 前缀来细化搜索，例如：</translation>
     </message>
     <message>
+      <source>A word can be excluded with a preceding &quot;%1&quot;, if you need to search for a word including &quot;%1&quot;, place quotes around the word.</source>
+      <translation>在单词前添加“%1”可排除某个词。如果需要搜索包含“%1”的词，请将该词加上英文引号。</translation>
+    </message>
+    <message>
       <source>rating</source>
       <translation>评分</translation>
     </message>
     <message>
-      <source>Multiple search terms can also be combined with &quot;%1&quot; (default) and &quot;%2&quot;, as well as grouped with parentheses. </source>
+      <source>Multiple search terms can also be combined with &quot;%1&quot; (default) and &quot;%2&quot;, as well as grouped with parentheses.</source>
       <translation>多个搜索词也可以与 &quot;%1&quot;（默认）和 &quot;%2&quot; 组合，以及用括号分组。</translation>
     </message>
     <message>
@@ -5232,19 +5563,19 @@ Are you sure you want to continue?</source>
     <message numerus="yes">
       <source>add %n songs</source>
       <translation>
-        <numerusform>add %n songs</numerusform>
+        <numerusform>添加 %n 首歌曲</numerusform>
       </translation>
     </message>
     <message numerus="yes">
       <source>remove %n songs</source>
       <translation>
-        <numerusform>remove %n songs</numerusform>
+        <numerusform>移除 %n 首歌曲</numerusform>
       </translation>
     </message>
     <message numerus="yes">
       <source>move %n songs</source>
       <translation>
-        <numerusform>move %n songs</numerusform>
+        <numerusform>移动 %n 首歌曲</numerusform>
       </translation>
     </message>
     <message>
@@ -5273,6 +5604,17 @@ Are you sure you want to continue?</source>
     <message>
       <source>Reset</source>
       <translation>重置</translation>
+    </message>
+  </context>
+  <context>
+    <name>QobuzMetadataRequest</name>
+    <message>
+      <source>Not authenticated</source>
+      <translation>未认证</translation>
+    </message>
+    <message>
+      <source>No track ID</source>
+      <translation>无音轨 ID</translation>
     </message>
   </context>
   <context>
@@ -5329,24 +5671,44 @@ Are you sure you want to continue?</source>
   <context>
     <name>QobuzService</name>
     <message>
-      <source>Authenticating...</source>
-      <translation>正在验证...</translation>
-    </message>
-    <message>
-      <source>Maximum number of login attempts reached.</source>
-      <translation>已达到最大登录尝试次数。</translation>
-    </message>
-    <message>
       <source>Missing Qobuz app ID.</source>
       <translation>缺失 Qobuz 应用 ID。</translation>
     </message>
     <message>
-      <source>Missing Qobuz username.</source>
-      <translation>缺失 Qobuz 用户名。</translation>
+      <source>Missing app ID. Please fetch credentials first.</source>
+      <translation>缺少应用 ID。请先获取凭据。</translation>
     </message>
     <message>
-      <source>Missing Qobuz password.</source>
-      <translation>缺失 Qobuz 密码。</translation>
+      <source>Missing app secret. Please fetch credentials first.</source>
+      <translation>缺少应用密钥。请先获取凭据。</translation>
+    </message>
+    <message>
+      <source>Missing private key. Please fetch credentials first.</source>
+      <translation>缺少私钥。请先获取凭据。</translation>
+    </message>
+    <message>
+      <source>Failed to start local server for OAuth redirect: %1</source>
+      <translation>启动 OAuth 重定向的本地服务器失败：%1</translation>
+    </message>
+    <message>
+      <source>Failed to open the web browser. Please open this URL manually: %1</source>
+      <translation>无法打开网页浏览器。请手动打开此 URL：%1</translation>
+    </message>
+    <message>
+      <source>Waiting for browser authentication...</source>
+      <translation>正在等待浏览器认证...</translation>
+    </message>
+    <message>
+      <source>OAuth redirect failed: %1</source>
+      <translation>OAuth 重定向失败：%1</translation>
+    </message>
+    <message>
+      <source>OAuth redirect is missing authorization code.</source>
+      <translation>OAuth 重定向缺少授权代码。</translation>
+    </message>
+    <message>
+      <source>Exchanging authorization code...</source>
+      <translation>正在交换授权代码...</translation>
     </message>
     <message>
       <source>Not authenticated with Qobuz.</source>
@@ -5355,6 +5717,10 @@ Are you sure you want to continue?</source>
     <message>
       <source>Missing Qobuz app ID or secret.</source>
       <translation>缺失 Qobuz 应用 ID 或密钥。</translation>
+    </message>
+    <message>
+      <source>Not authenticated. Please login to Qobuz in the settings.</source>
+      <translation>未认证。请在设置中登录 Qobuz。</translation>
     </message>
   </context>
   <context>
@@ -5368,24 +5734,12 @@ Are you sure you want to continue?</source>
       <translation>启用</translation>
     </message>
     <message>
-      <source>Qobuz support is not official and requires an API app ID and secret from a registered application to work. We can&apos;t help you getting these.</source>
-      <translation>Qobuz 支持不是官方的，需要从注册应用程序获取 API 应用 ID 和密钥才能工作。我们无法帮助您获取这些。</translation>
-    </message>
-    <message>
       <source>Authentication</source>
       <translation>验证</translation>
     </message>
     <message>
       <source>App ID</source>
       <translation>应用账号</translation>
-    </message>
-    <message>
-      <source>Username</source>
-      <translation>用户名</translation>
-    </message>
-    <message>
-      <source>Password</source>
-      <translation>密码</translation>
     </message>
     <message>
       <source>App Secret</source>
@@ -5428,28 +5782,56 @@ Are you sure you want to continue?</source>
       <translation>下载专辑封面</translation>
     </message>
     <message>
-      <source>Base64 encoded secret</source>
-      <translation>Base64 编码的密钥</translation>
-    </message>
-    <message>
       <source>Configuration incomplete</source>
       <translation>配置不完整</translation>
     </message>
     <message>
-      <source>Missing app id.</source>
-      <translation>缺失应用 ID。</translation>
+      <source>Missing app id. Please fetch credentials first.</source>
+      <translation>缺少应用 ID。请先获取凭据。</translation>
     </message>
     <message>
-      <source>Missing username.</source>
-      <translation>缺失用户名。</translation>
+      <source>Missing app secret. Please fetch credentials first.</source>
+      <translation>缺少应用密钥。请先获取凭据。</translation>
     </message>
     <message>
-      <source>Missing password.</source>
-      <translation>缺失密码。</translation>
+      <source>Missing private key. Please fetch credentials first.</source>
+      <translation>缺少私钥。请先获取凭据。</translation>
     </message>
     <message>
       <source>Authentication failed</source>
       <translation>认证失败</translation>
+    </message>
+    <message>
+      <source>Fetching...</source>
+      <translation>正在获取…</translation>
+    </message>
+    <message>
+      <source>Credentials fetched</source>
+      <translation>凭据已获取</translation>
+    </message>
+    <message>
+      <source>Credentials have been successfully fetched. Click Login to authenticate via your browser.</source>
+      <translation>凭据已成功获取。点击登录以通过浏览器进行认证。</translation>
+    </message>
+    <message>
+      <source>Credential fetch failed</source>
+      <translation>凭据获取失败</translation>
+    </message>
+    <message>
+      <source>Fetch Credentials</source>
+      <translation>获取凭据</translation>
+    </message>
+    <message>
+      <source>Remove (Remastered), etc from song titles</source>
+      <translation>从歌曲标题中移除 (Remastered) 等字样</translation>
+    </message>
+    <message>
+      <source>Private key</source>
+      <translation>私钥</translation>
+    </message>
+    <message>
+      <source>Automatically fetch app ID, app secret and private key from Qobuz web player</source>
+      <translation>从 Qobuz 网页播放器自动获取应用 ID、应用密钥和私钥</translation>
     </message>
   </context>
   <context>
@@ -5457,6 +5839,10 @@ Are you sure you want to continue?</source>
     <message>
       <source>Missing Qobuz app ID or secret.</source>
       <translation>缺失 Qobuz 应用 ID 或密钥。</translation>
+    </message>
+    <message>
+      <source>Not authenticated. Please log in on the Qobuz settings page.</source>
+      <translation>未认证。请在 Qobuz 设置页面登录。</translation>
     </message>
     <message>
       <source>Cancelled.</source>
@@ -5468,7 +5854,7 @@ Are you sure you want to continue?</source>
     <message numerus="yes">
       <source>%n track(s)</source>
       <translation>
-        <numerusform>%n track(s)</numerusform>
+        <numerusform>%n 个音轨</numerusform>
       </translation>
     </message>
   </context>
@@ -5508,10 +5894,162 @@ Are you sure you want to continue?</source>
     </message>
   </context>
   <context>
+    <name>RadioBrowserSearchModel</name>
+    <message>
+      <source>Name</source>
+      <translation type="unfinished">Name</translation>
+    </message>
+    <message>
+      <source>Country</source>
+      <translation type="unfinished">Country</translation>
+    </message>
+    <message>
+      <source>Tags</source>
+      <translation type="unfinished">Tags</translation>
+    </message>
+    <message>
+      <source>Codec</source>
+      <translation type="unfinished">Codec</translation>
+    </message>
+  </context>
+  <context>
+    <name>RadioBrowserSearchView</name>
+    <message>
+      <source>Load more...</source>
+      <translation type="unfinished">Load more...</translation>
+    </message>
+    <message>
+      <source>Search for radio stations using radio-browser.info</source>
+      <translation type="unfinished">Search for radio stations using radio-browser.info</translation>
+    </message>
+    <message>
+      <source>Search radio stations...</source>
+      <translation type="unfinished">Search radio stations...</translation>
+    </message>
+    <message>
+      <source>All countries</source>
+      <translation type="unfinished">All countries</translation>
+    </message>
+    <message>
+      <source>By votes</source>
+      <translation type="unfinished">By votes</translation>
+    </message>
+    <message>
+      <source>By clicks</source>
+      <translation type="unfinished">By clicks</translation>
+    </message>
+    <message>
+      <source>By name</source>
+      <translation type="unfinished">By name</translation>
+    </message>
+    <message>
+      <source>By bitrate</source>
+      <translation type="unfinished">By bitrate</translation>
+    </message>
+    <message>
+      <source>Searching...</source>
+      <translation type="unfinished">Searching...</translation>
+    </message>
+    <message>
+      <source>No stations found.</source>
+      <translation type="unfinished">No stations found.</translation>
+    </message>
+    <message>
+      <source>%1 stations found</source>
+      <translation type="unfinished">%1 stations found</translation>
+    </message>
+    <message>
+      <source>Append to current playlist</source>
+      <translation type="unfinished">Append to current playlist</translation>
+    </message>
+  </context>
+  <context>
+    <name>RadioBrowserService</name>
+    <message>
+      <source>No Radio Browser server available.</source>
+      <translation type="unfinished">No Radio Browser server available.</translation>
+    </message>
+    <message>
+      <source>Searching Radio Browser</source>
+      <translation type="unfinished">Searching Radio Browser</translation>
+    </message>
+    <message>
+      <source>Radio Browser search failed: %1</source>
+      <translation type="unfinished">Radio Browser search failed: %1</translation>
+    </message>
+  </context>
+  <context>
     <name>RadioParadiseService</name>
     <message>
       <source>Getting %1 channels</source>
       <translation>正在获取 %1 频道</translation>
+    </message>
+  </context>
+  <context>
+    <name>RadioSettingsPage</name>
+    <message>
+      <source>Radios</source>
+      <translation type="unfinished">Radios</translation>
+    </message>
+    <message>
+      <source>SomaFM</source>
+      <translation type="unfinished">SomaFM</translation>
+    </message>
+    <message>
+      <source>Stream quality:</source>
+      <translation type="unfinished">Stream quality:</translation>
+    </message>
+    <message>
+      <source>Radio Browser</source>
+      <translation type="unfinished">Radio Browser</translation>
+    </message>
+    <message>
+      <source>Search results limit:</source>
+      <translation type="unfinished">Search results limit:</translation>
+    </message>
+    <message>
+      <source>Hide broken stations</source>
+      <translation type="unfinished">Hide broken stations</translation>
+    </message>
+    <message>
+      <source>Default sort order:</source>
+      <translation type="unfinished">Default sort order:</translation>
+    </message>
+    <message>
+      <source>Default country:</source>
+      <translation type="unfinished">Default country:</translation>
+    </message>
+    <message>
+      <source>All countries</source>
+      <translation type="unfinished">All countries</translation>
+    </message>
+    <message>
+      <source>Highest</source>
+      <translation type="unfinished">Highest</translation>
+    </message>
+    <message>
+      <source>High</source>
+      <translation type="unfinished">High</translation>
+    </message>
+    <message>
+      <source>Low</source>
+      <translation type="unfinished">Low</translation>
+    </message>
+    <message>
+      <source>By votes</source>
+      <translation type="unfinished">By votes</translation>
+    </message>
+    <message>
+      <source>By clicks</source>
+      <translation type="unfinished">By clicks</translation>
+    </message>
+    <message>
+      <source>By name</source>
+      <translation type="unfinished">By name</translation>
+    </message>
+    <message>
+      <source>By bitrate</source>
+      <translation type="unfinished">By bitrate</translation>
     </message>
   </context>
   <context>
@@ -5546,6 +6084,14 @@ Are you sure you want to continue?</source>
     <message>
       <source>Form</source>
       <translation>表格</translation>
+    </message>
+    <message>
+      <source>Channels</source>
+      <translation type="unfinished">Channels</translation>
+    </message>
+    <message>
+      <source>Radio Browser</source>
+      <translation type="unfinished">Radio Browser</translation>
     </message>
   </context>
   <context>
@@ -5690,7 +6236,7 @@ Are you sure you want to continue?</source>
     <name>ScrobblerSettingsPage</name>
     <message>
       <source>Scrobbler</source>
-      <translation>Scrobbler</translation>
+      <translation>记录器</translation>
     </message>
     <message>
       <source>Enable</source>
@@ -5785,10 +6331,6 @@ Are you sure you want to continue?</source>
       <translation>登录</translation>
     </message>
     <message>
-      <source>Libre.fm</source>
-      <translation>Libre.fm</translation>
-    </message>
-    <message>
       <source>Listenbrainz</source>
       <translation>Listenbrainz</translation>
     </message>
@@ -5815,41 +6357,6 @@ Are you sure you want to continue?</source>
     <message>
       <source>Spotify</source>
       <translation>Spotify</translation>
-    </message>
-  </context>
-  <context>
-    <name>ScrobblingAPI20</name>
-    <message>
-      <source>%1 Scrobbler Authentication</source>
-      <translation>%1 Scrobbler 认证</translation>
-    </message>
-    <message>
-      <source>Open URL in web browser?</source>
-      <translation>要在网页浏览器中打开 URL 吗？</translation>
-    </message>
-    <message>
-      <source>Press &quot;Save&quot; to copy the URL to clipboard and manually open it in a web browser.</source>
-      <translation>按“保存”将 URL 复制到剪贴板，并手动在网页浏览器中打开它。</translation>
-    </message>
-    <message>
-      <source>Could not open URL. Please open this URL in your browser</source>
-      <translation>无法打开 URL。请在您的浏览器中打开此 URL</translation>
-    </message>
-    <message>
-      <source>Invalid reply from web browser. Missing token.</source>
-      <translation>来自网页浏览器的回复无效。缺少令牌。</translation>
-    </message>
-    <message>
-      <source>Received invalid reply from web browser. Try another browser.</source>
-      <translation>收到来自网页浏览器的无效回复。请尝试其他浏览器。</translation>
-    </message>
-    <message>
-      <source>Scrobbler %1 is not authenticated!</source>
-      <translation>Scrobbler %1 未经过身份验证！</translation>
-    </message>
-    <message>
-      <source>Scrobbler %1 error: %2</source>
-      <translation>Scrobbler %1 错误：%2</translation>
     </message>
   </context>
   <context>
@@ -6132,44 +6639,13 @@ Are you sure you want to continue?</source>
       <source>Edit smart playlist...</source>
       <translation>编辑智能播放列表...</translation>
     </message>
-  </context>
-  <context>
-    <name>SnapDialog</name>
     <message>
-      <source>Strawberry is running as a Snap</source>
-      <translation>Strawberry 正在作为 Snap 运行</translation>
+      <source>Are you sure you want to restore the default smart playlists? This will remove all custom smart playlists</source>
+      <translation>您确定要恢复默认智能播放列表吗？这将移除所有自定义智能播放列表</translation>
     </message>
     <message>
-      <source>It is detected that Strawberry is running as a Snap</source>
-      <translation>检测到 Strawberry 正在作为 Snap 运行</translation>
-    </message>
-    <message>
-      <source>Strawberry is slower, and has restrictions when running as a Snap. Accessing the root filesystem (/) will not work. There also might be other restrictions such as accessing certain devices or network shares.</source>
-      <translation>Strawberry 运行时速度较慢，并且作为 Snap 运行时有一些限制。访问根文件系统（/）将无法工作。可能还有其他限制，例如访问某些设备或网络共享。</translation>
-    </message>
-    <message>
-      <source>For Ubuntu there is an official PPA repository available at %1.</source>
-      <translation>对于 Ubuntu 来说，有一个官方的 PPA 仓库，可在 %1 上使用。</translation>
-    </message>
-    <message>
-      <source>Official releases are available for Debian and Ubuntu which also work on most of their derivatives. See %1 for more information.</source>
-      <translation>Debian 和 Ubuntu 有本软件的官方版本可用，同时也支持它们大多数的衍生发行版。参阅 %1 了解详情。</translation>
-    </message>
-    <message>
-      <source>For a better experience please consider the other options above.</source>
-      <translation>为了更好的体验，请考虑上述其他选项。</translation>
-    </message>
-    <message>
-      <source>Copy your strawberry.conf and strawberry.db from your ~/snap directory to avoid losing configuration before you uninstall the snap:</source>
-      <translation>在卸载 Snap 之前，请将您的 strawberry.conf 和 strawberry.db 从 ~/snap 目录复制，以避免丢失配置：</translation>
-    </message>
-    <message>
-      <source>Uninstall the snap with:</source>
-      <translation>使用以下命令卸载 Snap：</translation>
-    </message>
-    <message>
-      <source>Install strawberry through PPA:</source>
-      <translation>通过 PPA 安装 strawberry：</translation>
+      <source>Restore defaults</source>
+      <translation>恢复默认值</translation>
     </message>
   </context>
   <context>
@@ -6238,6 +6714,21 @@ Are you sure you want to continue?</source>
     </message>
   </context>
   <context>
+    <name>SpotifyMetadataRequest</name>
+    <message>
+      <source>Not authenticated</source>
+      <translation>未认证</translation>
+    </message>
+    <message>
+      <source>No track ID</source>
+      <translation>无音轨 ID</translation>
+    </message>
+    <message>
+      <source>No pending song for track ID</source>
+      <translation>音轨 ID 没有待处理的歌曲</translation>
+    </message>
+  </context>
+  <context>
     <name>SpotifyRequest</name>
     <message>
       <source>Authenticating...</source>
@@ -6294,22 +6785,6 @@ Are you sure you want to continue?</source>
   </context>
   <context>
     <name>SpotifyService</name>
-    <message>
-      <source>Spotify Authentication</source>
-      <translation>Spotify 认证</translation>
-    </message>
-    <message>
-      <source>Please open this URL in your browser</source>
-      <translation>请在浏览器中打开这个 URL</translation>
-    </message>
-    <message>
-      <source>Redirect missing token code or state!</source>
-      <translation>重定向缺少令牌代码或状态！</translation>
-    </message>
-    <message>
-      <source>Received invalid reply from web browser.</source>
-      <translation>从网页浏览器接收到无效回复。</translation>
-    </message>
     <message>
       <source>Not authenticated with Spotify.</source>
       <translation>未与 Spotify 进行身份验证。</translation>
@@ -6372,6 +6847,10 @@ Are you sure you want to continue?</source>
     <message>
       <source>Authentication failed</source>
       <translation>认证失败</translation>
+    </message>
+    <message>
+      <source>Remove (Remastered), etc from song titles</source>
+      <translation>从歌曲标题中移除 (Remastered) 等字样</translation>
     </message>
   </context>
   <context>
@@ -6694,6 +7173,14 @@ Are you sure you want to continue?</source>
   <context>
     <name>TagFetcher</name>
     <message>
+      <source>Stage: %1</source>
+      <translation type="unfinished">Stage: %1</translation>
+    </message>
+    <message>
+      <source>Reason: %1</source>
+      <translation type="unfinished">Reason: %1</translation>
+    </message>
+    <message>
       <source>Identifying song</source>
       <translation>正在识别歌曲</translation>
     </message>
@@ -6702,16 +7189,40 @@ Are you sure you want to continue?</source>
       <translation>歌曲指纹</translation>
     </message>
     <message>
+      <source>Generated fingerprint is empty or invalid</source>
+      <translation type="unfinished">Generated fingerprint is empty or invalid</translation>
+    </message>
+    <message>
+      <source>Fingerprinting</source>
+      <translation type="unfinished">Fingerprinting</translation>
+    </message>
+    <message>
+      <source>Fingerprint length: %1</source>
+      <translation type="unfinished">Fingerprint length: %1</translation>
+    </message>
+    <message>
+      <source>Minimum required length: %1</source>
+      <translation type="unfinished">Minimum required length: %1</translation>
+    </message>
+    <message>
       <source>Downloading metadata</source>
       <translation>正在下载元数据</translation>
+    </message>
+    <message>
+      <source>No MusicBrainz metadata was found for this track</source>
+      <translation type="unfinished">No MusicBrainz metadata was found for this track</translation>
+    </message>
+    <message>
+      <source>MusicBrainz metadata</source>
+      <translation type="unfinished">MusicBrainz metadata</translation>
+    </message>
+    <message>
+      <source>Candidate metadata rows: 0</source>
+      <translation type="unfinished">Candidate metadata rows: 0</translation>
     </message>
   </context>
   <context>
     <name>TidalRequest</name>
-    <message>
-      <source>Authenticating...</source>
-      <translation>正在验证...</translation>
-    </message>
     <message>
       <source>Receiving artists...</source>
       <translation>接收艺术家...</translation>
@@ -6760,32 +7271,8 @@ Are you sure you want to continue?</source>
   <context>
     <name>TidalService</name>
     <message>
-      <source>Reply from Tidal is missing query items.</source>
-      <translation>来自 Tidal 的回复缺少查询项。</translation>
-    </message>
-    <message>
-      <source>Missing Tidal API token.</source>
-      <translation>缺失 Tidal API 令牌。</translation>
-    </message>
-    <message>
-      <source>Missing Tidal username.</source>
-      <translation>缺失 Tidal 用户名。</translation>
-    </message>
-    <message>
-      <source>Missing Tidal password.</source>
-      <translation>缺失 Tidal 密码。</translation>
-    </message>
-    <message>
-      <source>Not authenticated with Tidal and reached maximum number of login attempts.</source>
-      <translation>未通过 Tidal 进行身份验证，且已达到最大登录尝试次数。</translation>
-    </message>
-    <message>
       <source>Not authenticated with Tidal.</source>
       <translation>未通过 Tidal 认证。</translation>
-    </message>
-    <message>
-      <source>Missing Tidal API token, username or password.</source>
-      <translation>缺失 Tidal API 令牌、用户名或密码。</translation>
     </message>
   </context>
   <context>
@@ -6807,24 +7294,8 @@ Are you sure you want to continue?</source>
       <translation>验证</translation>
     </message>
     <message>
-      <source>Use OAuth</source>
-      <translation>使用 OAuth</translation>
-    </message>
-    <message>
       <source>Client ID</source>
       <translation>客户端 ID</translation>
-    </message>
-    <message>
-      <source>API Token</source>
-      <translation>API 令牌</translation>
-    </message>
-    <message>
-      <source>Username</source>
-      <translation>用户名</translation>
-    </message>
-    <message>
-      <source>Password</source>
-      <translation>密码</translation>
     </message>
     <message>
       <source>Login</source>
@@ -6887,20 +7358,12 @@ Are you sure you want to continue?</source>
       <translation>缺失 Tidal 客户端 ID。</translation>
     </message>
     <message>
-      <source>Missing API token.</source>
-      <translation>缺失 API 令牌。</translation>
-    </message>
-    <message>
-      <source>Missing username.</source>
-      <translation>缺失用户名。</translation>
-    </message>
-    <message>
-      <source>Missing password.</source>
-      <translation>缺失密码。</translation>
-    </message>
-    <message>
       <source>Authentication failed</source>
       <translation>认证失败</translation>
+    </message>
+    <message>
+      <source>Remove (Remastered), etc from song titles</source>
+      <translation>从歌曲标题中移除 (Remastered) 等字样</translation>
     </message>
   </context>
   <context>
@@ -6908,10 +7371,6 @@ Are you sure you want to continue?</source>
     <message>
       <source>Not authenticated with Tidal.</source>
       <translation>未通过 Tidal 认证。</translation>
-    </message>
-    <message>
-      <source>Missing Tidal API token, username or password.</source>
-      <translation>缺失 Tidal API 令牌、用户名或密码。</translation>
     </message>
     <message>
       <source>Cancelled.</source>
@@ -6931,10 +7390,6 @@ Are you sure you want to continue?</source>
     <message>
       <source>Tag fetcher</source>
       <translation>标签提取程序</translation>
-    </message>
-    <message>
-      <source>Sorry</source>
-      <translation>抱歉</translation>
     </message>
     <message>
       <source>Strawberry was unable to find results for this file</source>
@@ -6973,6 +7428,10 @@ Are you sure you want to continue?</source>
       <translation>下一首</translation>
     </message>
     <message>
+      <source>Error</source>
+      <translation type="unfinished">Error</translation>
+    </message>
+    <message>
       <source>Original tags</source>
       <translation>原始标签</translation>
     </message>
@@ -6983,6 +7442,14 @@ Are you sure you want to continue?</source>
     <message>
       <source>Saving tracks</source>
       <translation>正在保存音轨</translation>
+    </message>
+    <message>
+      <source>Album artist</source>
+      <translation>专辑艺术家</translation>
+    </message>
+    <message>
+      <source>No results</source>
+      <translation type="unfinished">No results</translation>
     </message>
   </context>
   <context>
@@ -6998,6 +7465,22 @@ Are you sure you want to continue?</source>
     <message>
       <source>Click to toggle between remaining time and total time</source>
       <translation>单击切换剩余时间和总计时间模式</translation>
+    </message>
+    <message>
+      <source>Normal</source>
+      <translation type="unfinished">Normal</translation>
+    </message>
+    <message>
+      <source>Moodbar</source>
+      <translation type="unfinished">Moodbar</translation>
+    </message>
+    <message>
+      <source>Moodbar style</source>
+      <translation type="unfinished">Moodbar style</translation>
+    </message>
+    <message>
+      <source>Waveform</source>
+      <translation type="unfinished">Waveform</translation>
     </message>
   </context>
   <context>
@@ -7517,6 +8000,32 @@ Are you sure you want to continue?</source>
     <message>
       <source>Password</source>
       <translation>密码</translation>
+    </message>
+  </context>
+  <context>
+    <name>WaveformSettingsPage</name>
+    <message>
+      <source>Waveform</source>
+      <translation type="unfinished">Waveform</translation>
+    </message>
+    <message>
+      <source>Color</source>
+      <translation type="unfinished">Color</translation>
+    </message>
+    <message>
+      <source>Select waveform color</source>
+      <translation type="unfinished">Select waveform color</translation>
+    </message>
+    <message>
+      <source>Save the .waveform files directly in the songs folders</source>
+      <translation type="unfinished">Save the .waveform files directly in the songs folders</translation>
+    </message>
+  </context>
+  <context>
+    <name>XSPFParser</name>
+    <message>
+      <source>Failed to write XSPF playlist</source>
+      <translation type="unfinished">Failed to write XSPF playlist</translation>
     </message>
   </context>
 </TS>

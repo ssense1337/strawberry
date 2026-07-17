@@ -47,7 +47,6 @@
 #include "constants/subsonicsettings.h"
 
 using namespace Qt::Literals::StringLiterals;
-using std::make_shared;
 
 SubsonicBaseRequest::SubsonicBaseRequest(SubsonicService *service, QObject *parent)
     : QObject(parent),
@@ -112,6 +111,7 @@ QNetworkReply *SubsonicBaseRequest::CreateGetRequest(const QString &ressource_na
   network_request.setHeader(QNetworkRequest::ContentTypeHeader, u"application/x-www-form-urlencoded"_s);
   network_request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
   network_request.setAttribute(QNetworkRequest::Http2AllowedAttribute, http2());
+  network_request.setTransferTimeout(QNetworkRequest::DefaultTransferTimeoutConstant);
 
   QNetworkReply *reply = network_->get(network_request);
   QObject::connect(reply, &QNetworkReply::sslErrors, this, &SubsonicBaseRequest::HandleSSLErrors);
@@ -154,7 +154,7 @@ JsonBaseRequest::JsonObjectResult SubsonicBaseRequest::ParseJsonObject(QNetworkR
           const int code = object_error["code"_L1].toInt();
           const QString message = object_error["message"_L1].toString();
           result.error_code = ErrorCode::APIError;
-          result.error_message = QStringLiteral("%s (%s)").arg(message, code);
+          result.error_message = QStringLiteral("%1 (%2)").arg(message).arg(code);
         }
       }
       else {

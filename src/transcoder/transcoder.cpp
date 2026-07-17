@@ -46,6 +46,7 @@
 #include "core/standardpaths.h"
 #include "core/signalchecker.h"
 #include "core/settings.h"
+#include "constants/transcodersettings.h"
 #include "transcoder.h"
 
 using std::make_shared;
@@ -157,7 +158,10 @@ GstElement *Transcoder::CreateElementForMimeType(GstElementFactoryListType eleme
     }
 
     // Link the elements together
-    gst_element_link_many(lame, xing, id3v2, nullptr);
+    if (!gst_element_link_many(lame, xing, id3v2, nullptr)) {
+      qLog(Error) << "Failed to link lamemp3enc, xingmux and id3v2mux elements.";
+      return nullptr;
+    }
 
     // Link the bin's ghost pads to the elements on each end
     GstPad *pad = gst_element_get_static_pad(lame, "sink");
@@ -201,11 +205,11 @@ Transcoder::Transcoder(QObject *parent, const QString &settings_postfix)
   Settings s;
   s.beginGroup("Transcoder/lamemp3enc"_L1 + settings_postfix_);
 
-  if (s.value("target").isNull()) {
-    s.setValue("target", 1);  // 1 == bitrate
+  if (s.value(TranscoderSettings::LameMP3Settings::kTarget).isNull()) {
+    s.setValue(TranscoderSettings::LameMP3Settings::kTarget, 1);  // 1 == bitrate
   }
-  if (s.value("cbr").isNull()) {
-    s.setValue("cbr", false);
+  if (s.value(TranscoderSettings::LameMP3Settings::kCbr).isNull()) {
+    s.setValue(TranscoderSettings::LameMP3Settings::kCbr, false);
   }
 
   s.endGroup();
@@ -297,7 +301,7 @@ QString Transcoder::GetFile(const QString &input, const TranscoderPreset &preset
     QString path = fileinfo_output.path();
     QString filename = fileinfo_output.completeBaseName();
     QString suffix = fileinfo_output.suffix();
-    for (int i = 0;; ++i) {
+    for (int i = 0; i < 1000000; ++i) {
       QString new_filename = QStringLiteral("%1/%2-%3.%4").arg(path, filename).arg(i).arg(suffix);
       fileinfo_output.setFile(new_filename);
       if (!fileinfo_output.exists()) {
@@ -359,6 +363,7 @@ void Transcoder::NewPadCallback(GstElement *element, GstPad *pad, gpointer data)
 
   JobState *state = reinterpret_cast<JobState*>(data);
   GstPad *const audiopad = gst_element_get_static_pad(state->convert_element_, "sink");
+  if (!audiopad) return;
 
   if (GST_PAD_IS_LINKED(audiopad)) {
     qLog(Debug) << "Audiopad is already linked, unlinking old pad";
@@ -399,9 +404,11 @@ void Transcoder::JobState::ReportError(GstMessage *msg) const {
   gchar *debugs = nullptr;
 
   gst_message_parse_error(msg, &error, &debugs);
-  QString message = QString::fromLocal8Bit(error->message);
-
-  g_error_free(error);
+  QString message;
+  if (error) {
+    message = QString::fromLocal8Bit(error->message);
+    g_error_free(error);
+  }
   g_free(debugs);
 
   Q_EMIT parent_->LogLine(tr("Error processing %1: %2").arg(QDir::toNativeSeparators(job_.input), message));
@@ -441,10 +448,18 @@ bool Transcoder::StartJob(const Job &job) {
   }
 
   // Join them together
-  gst_element_link(src, decode);
-  if (codec && muxer) gst_element_link_many(convert, resample, codec, muxer, sink, nullptr);
-  else if (codec) gst_element_link_many(convert, resample, codec, sink, nullptr);
-  else if (muxer) gst_element_link_many(convert, resample, muxer, sink, nullptr);
+  if (!gst_element_link(src, decode)) {
+    qLog(Error) << "Failed to link filesrc to decodebin.";
+    return false;
+  }
+  bool linked = true;
+  if (codec && muxer) linked = gst_element_link_many(convert, resample, codec, muxer, sink, nullptr);
+  else if (codec) linked = gst_element_link_many(convert, resample, codec, sink, nullptr);
+  else if (muxer) linked = gst_element_link_many(convert, resample, muxer, sink, nullptr);
+  if (!linked) {
+    qLog(Error) << "Failed to link transcoder pipeline elements.";
+    return false;
+  }
 
   // Set properties
   g_object_set(src, "location", job.input.toUtf8().constData(), nullptr);
@@ -454,7 +469,13 @@ bool Transcoder::StartJob(const Job &job) {
   state->convert_element_ = convert;
 
   CHECKED_GCONNECT(decode, "pad-added", &NewPadCallback, state.get());
-  gst_bus_set_sync_handler(gst_pipeline_get_bus(GST_PIPELINE(state->pipeline_)), BusCallbackSync, state.get(), nullptr);
+  {
+    GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(state->pipeline_));
+    if (bus) {
+      gst_bus_set_sync_handler(bus, BusCallbackSync, state.get(), nullptr);
+      gst_object_unref(bus);
+    }
+  }
 
   // Start the pipeline
   gst_element_set_state(state->pipeline_, GST_STATE_PLAYING);
@@ -482,11 +503,11 @@ bool Transcoder::event(QEvent *e) {
     JobFinishedEvent *finished_event = static_cast<JobFinishedEvent*>(e);
 
     // Find this job in the list
-    JobStateList::iterator it = current_jobs_.begin();
-    for (; it != current_jobs_.end(); ++it) {
+    JobStateList::const_iterator it = current_jobs_.cbegin();
+    for (; it != current_jobs_.cend(); ++it) {
       if (it->get() == finished_event->state_) break;
     }
-    if (it == current_jobs_.end()) {
+    if (it == current_jobs_.cend()) {
       // Couldn't find it, maybe GStreamer gave us an event after we'd destroyed the pipeline?
       return true;
     }
@@ -495,7 +516,13 @@ bool Transcoder::event(QEvent *e) {
     QString output = (*it)->job_.output;
 
     // Remove event handlers from the gstreamer pipeline, so they don't get called after the pipeline is shutting down
-    gst_bus_set_sync_handler(gst_pipeline_get_bus(GST_PIPELINE(finished_event->state_->pipeline_)), nullptr, nullptr, nullptr);
+    {
+      GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(finished_event->state_->pipeline_));
+      if (bus) {
+        gst_bus_set_sync_handler(bus, nullptr, nullptr, nullptr);
+        gst_object_unref(bus);
+      }
+    }
 
     // Remove it from the list - this will also destroy the GStreamer pipeline
     current_jobs_.erase(it);
@@ -524,7 +551,13 @@ void Transcoder::Cancel() {
     SharedPtr<JobState> state(*it);
 
     // Remove event handlers from the gstreamer pipeline, so they don't get called after the pipeline is shutting down
-    gst_bus_set_sync_handler(gst_pipeline_get_bus(GST_PIPELINE(state->pipeline_)), nullptr, nullptr, nullptr);
+    {
+      GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(state->pipeline_));
+      if (bus) {
+        gst_bus_set_sync_handler(bus, nullptr, nullptr, nullptr);
+        gst_object_unref(bus);
+      }
+    }
 
     // Stop the pipeline
     if (gst_element_set_state(state->pipeline_, GST_STATE_NULL) == GST_STATE_CHANGE_ASYNC) {
@@ -551,7 +584,7 @@ QMap<QString, float> Transcoder::GetProgress() const {
     gst_element_query_position(state->pipeline_, GST_FORMAT_TIME, &position);
     gst_element_query_duration(state->pipeline_, GST_FORMAT_TIME, &duration);
 
-    ret[state->job_.input] = static_cast<float>(position) / static_cast<float>(duration);
+    ret[state->job_.input] = duration > 0 ? static_cast<float>(position) / static_cast<float>(duration) : 0.0F;
   }
 
   return ret;

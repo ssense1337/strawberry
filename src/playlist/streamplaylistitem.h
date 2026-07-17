@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2026, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #define STREAMPLAYLISTITEM_H
 
 #include <QVariant>
+#include <QUuid>
 #include <QUrl>
 
 #include "core/song.h"
@@ -30,8 +31,8 @@
 class StreamPlaylistItem : public PlaylistItem {
 
  public:
-  explicit StreamPlaylistItem(const Song::Source source);
-  explicit StreamPlaylistItem(const Song &song);
+  explicit StreamPlaylistItem(const Song::Source source, const QUuid &uuid = QUuid());
+  explicit StreamPlaylistItem(const Song &song, const bool signal = false);
 
   Song OriginalMetadata() const override { return song_; }
   QUrl OriginalUrl() const override { return song_.url(); }

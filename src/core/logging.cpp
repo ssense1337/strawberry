@@ -78,7 +78,7 @@ static QtMessageHandler sOriginalMessageHandler = nullptr;
 template<class T>
 static T CreateLogger(Level level, const QString &class_name, int line, const char *category);
 
-void GLog(const char *domain, int level, const char *message, void*) {
+void GLog(const char *domain, int level, const char *message, void* /*unused*/) {
 
   switch (level) {
     case G_LOG_FLAG_RECURSION:
@@ -337,6 +337,7 @@ QString DarwinDemangle(const QString &symbol);
 QString DarwinDemangle(const QString &symbol) {
 
   const QStringList split = symbol.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+  if (split.size() < 4) return symbol;
   QString mangled_function = split[3];
   return CXXDemangle(mangled_function);
 

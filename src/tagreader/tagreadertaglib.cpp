@@ -1,7 +1,7 @@
 /*
  * Strawberry Music Player
  * Copyright 2013, David Sansome <me@davidsansome.com>
- * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2026, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #include <taglib/fileref.h>
 #include <taglib/tbytevector.h>
 #include <taglib/tfile.h>
+#include <taglib/tfilestream.h>
 #include <taglib/tlist.h>
 #include <taglib/tstring.h>
 #include <taglib/tstringlist.h>
@@ -102,6 +103,7 @@
 #include "includes/scoped_ptr.h"
 #include "core/logging.h"
 #include "core/song.h"
+#include "core/filewriteguard.h"
 #include "constants/timeconstants.h"
 
 #include "albumcovertagdata.h"
@@ -265,7 +267,8 @@ class FileRefFactory {
  public:
   FileRefFactory() = default;
   virtual ~FileRefFactory() = default;
-  virtual TagLib::FileRef *GetFileRef(const QString &filename) = 0;
+  virtual TagLib::IOStream *GetReadOnlyStream(const QString &filename) = 0;
+  virtual TagLib::IOStream *GetReadWriteStream(const QString &filename) = 0;
   virtual TagLib::FileRef *GetFileRef(TagLib::IOStream *iostream) = 0;
 
  private:
@@ -275,11 +278,20 @@ class FileRefFactory {
 class TagLibFileRefFactory : public FileRefFactory {
  public:
   TagLibFileRefFactory() = default;
-  TagLib::FileRef *GetFileRef(const QString &filename) override {
+
+  TagLib::IOStream *GetReadOnlyStream(const QString &filename) override {
 #ifdef Q_OS_WIN32
-    return new TagLib::FileRef(filename.toStdWString().c_str());
+    return new TagLib::FileStream(filename.toStdWString().c_str(), true);
 #else
-    return new TagLib::FileRef(QFile::encodeName(filename).constData());
+    return new TagLib::FileStream(QFile::encodeName(filename).constData(), true);
+#endif
+  }
+
+  TagLib::IOStream *GetReadWriteStream(const QString &filename) override {
+#ifdef Q_OS_WIN32
+    return new TagLib::FileStream(filename.toStdWString().c_str(), false);
+#else
+    return new TagLib::FileStream(QFile::encodeName(filename).constData(), false);
 #endif
   }
 
@@ -301,7 +313,8 @@ TagReaderResult TagReaderTagLib::IsMediaFile(const QString &filename) const {
 
   qLog(Debug) << "Checking for valid file" << filename;
 
-  ScopedPtr<TagLib::FileRef> fileref(factory_->GetFileRef(filename));
+  ScopedPtr<TagLib::IOStream> stream(factory_->GetReadOnlyStream(filename));
+  ScopedPtr<TagLib::FileRef> fileref(factory_->GetFileRef(&*stream));
   return fileref &&
          !fileref->isNull() &&
          fileref->file() &&
@@ -364,7 +377,6 @@ TagReaderResult TagReaderTagLib::Read(SharedPtr<TagLib::FileRef> fileref, Song *
 
   QString disc;
   QString compilation;
-  QString lyrics;
 
   // Handle all the files which have VorbisComments (Ogg, OPUS, ...) in the same way;
   // apart, so we keep specific behavior for some formats by adding another "else if" block below.
@@ -493,7 +505,6 @@ TagReaderResult TagReaderTagLib::Read(SharedPtr<TagLib::FileRef> fileref, Song *
     song->set_compilation(compilation.toInt() == 1);
   }
 
-  if (!lyrics.isEmpty()) song->set_lyrics(lyrics);
 
   // Set integer fields to -1 if they're not valid
 
@@ -542,7 +553,8 @@ TagReaderResult TagReaderTagLib::ReadFile(const QString &filename, Song *song) c
   song->set_lastseen(QDateTime::currentSecsSinceEpoch());
   song->set_init_from_file(true);
 
-  SharedPtr<TagLib::FileRef> fileref(factory_->GetFileRef(filename));
+  ScopedPtr<TagLib::IOStream> stream(factory_->GetReadOnlyStream(filename));
+  SharedPtr<TagLib::FileRef> fileref(factory_->GetFileRef(&*stream));
   if (!fileref || fileref->isNull()) {
     qLog(Error) << "TagLib could not open file" << filename;
     return TagReaderResult::ErrorCode::FileOpenError;
@@ -612,7 +624,7 @@ void TagReaderTagLib::ParseID3v2Tags(TagLib::ID3v2::Tag *tag, QString *disc, QSt
   TagLib::ID3v2::FrameListMap map = tag->frameListMap();
 
   if (tag->header()) {
-    song->set_id3v2_version(tag->header()->majorVersion());
+    song->set_id3v2_version(static_cast<int>(tag->header()->majorVersion()));
   }
 
   if (map.contains(kID3v2_Disc)) *disc = TagLibStringToQString(map[kID3v2_Disc].front()->toString()).trimmed();
@@ -707,6 +719,9 @@ void TagReaderTagLib::ParseID3v2Tags(TagLib::ID3v2::Tag *tag, QString *disc, QSt
         }
         if (frame->description() == kID3v2_AcoustId_Fingerprint) {
           song->set_acoustid_fingerprint(frame_field_list.back());
+        }
+        if (frame->description() == kID3v2_MusicBrainz_RecordingId) {
+          song->set_musicbrainz_recording_id(frame_field_list.back());
         }
         if (frame->description() == kID3v2_MusicBrainz_AlbumArtistId) {
           song->set_musicbrainz_album_artist_id(TagLibStringListToSlashSeparatedString(frame_field_list, 1));
@@ -1090,20 +1105,29 @@ TagReaderResult TagReaderTagLib::WriteFile(const QString &filename, const Song &
     cover = LoadAlbumCoverTagData(filename, save_tag_cover_data);
   }
 
-  ScopedPtr<TagLib::FileRef> fileref(factory_->GetFileRef(filename));
+  FileWriteGuard write_guard(filename);
+  if (!write_guard.Init()) {
+    return TagReaderResult::ErrorCode::FileOpenError;
+  }
+
+  ScopedPtr<TagLib::IOStream> stream(factory_->GetReadWriteStream(write_guard.working_filename()));
+  ScopedPtr<TagLib::FileRef> fileref(factory_->GetFileRef(&*stream));
   if (!fileref || fileref->isNull()) {
-    qLog(Error) << "TagLib could not open file" << filename;
+    qLog(Error) << "TagLib could not open file" << write_guard.working_filename();
     return TagReaderResult::ErrorCode::FileOpenError;
   }
 
   if (save_tags) {
-    fileref->tag()->setTitle(song.title().isEmpty() ? TagLib::String() : QStringToTagLibString(song.title()));
-    fileref->tag()->setArtist(song.artist().isEmpty() ? TagLib::String() : QStringToTagLibString(song.artist()));
-    fileref->tag()->setAlbum(song.album().isEmpty() ? TagLib::String() : QStringToTagLibString(song.album()));
-    fileref->tag()->setGenre(song.genre().isEmpty() ? TagLib::String() : QStringToTagLibString(song.genre()));
-    fileref->tag()->setComment(song.comment().isEmpty() ? TagLib::String() : QStringToTagLibString(song.comment()));
-    fileref->tag()->setYear(song.year() <= 0 ? 0 : static_cast<uint>(song.year()));
-    fileref->tag()->setTrack(song.track() <= 0 ? 0 : static_cast<uint>(song.track()));
+    // FileRef::tag() can return nullptr for files that open but have no tag container.
+    if (TagLib::Tag *tag = fileref->tag()) {
+      tag->setTitle(song.title().isEmpty() ? TagLib::String() : QStringToTagLibString(song.title()));
+      tag->setArtist(song.artist().isEmpty() ? TagLib::String() : QStringToTagLibString(song.artist()));
+      tag->setAlbum(song.album().isEmpty() ? TagLib::String() : QStringToTagLibString(song.album()));
+      tag->setGenre(song.genre().isEmpty() ? TagLib::String() : QStringToTagLibString(song.genre()));
+      tag->setComment(song.comment().isEmpty() ? TagLib::String() : QStringToTagLibString(song.comment()));
+      tag->setYear(song.year() <= 0 ? 0 : static_cast<uint>(song.year()));
+      tag->setTrack(song.track() <= 0 ? 0 : static_cast<uint>(song.track()));
+    }
   }
 
   bool is_flac = false;
@@ -1193,12 +1217,15 @@ TagReaderResult TagReaderTagLib::WriteFile(const QString &filename, const Song &
     TagLib::MP4::Tag *tag = file_mp4->tag();
     if (tag) {
       if (save_tags) {
-        tag->setItem(kMP4_Disc, TagLib::MP4::Item(song.disc() <= 0 - 1 ? 0 : song.disc(), 0));
+        tag->setItem(kMP4_Disc, TagLib::MP4::Item(song.disc() <= 0 ? 0 : song.disc(), 0));
         tag->setItem(kMP4_Composer, TagLib::StringList(QStringToTagLibString(song.composer())));
         tag->setItem(kMP4_Grouping, TagLib::StringList(QStringToTagLibString(song.grouping())));
         tag->setItem(kMP4_Lyrics, TagLib::StringList(QStringToTagLibString(song.lyrics())));
         tag->setItem(kMP4_AlbumArtist, TagLib::StringList(QStringToTagLibString(song.albumartist())));
         tag->setItem(kMP4_Compilation, TagLib::MP4::Item(song.compilation()));
+        if (!song.musicbrainz_recording_id().isEmpty()) {
+          tag->setItem(kMP4_MusicBrainz_RecordingId, TagLib::StringList(QStringToTagLibString(song.musicbrainz_recording_id())));
+        }
       }
       if (save_playcount) {
         SetPlaycount(tag, song.playcount());
@@ -1304,12 +1331,13 @@ TagReaderResult TagReaderTagLib::WriteFile(const QString &filename, const Song &
     success = fileref->save();
   }
 
-#ifdef Q_OS_LINUX
-  if (success) {
-    // Linux: inotify doesn't seem to notice the change to the file unless we change the timestamps as well. (this is what touch does)
-    utimensat(0, QFile::encodeName(filename).constData(), nullptr, 0);
+  // Tear down the TagLib stream first so all writes are flushed and the temporary file is closed before it is copied back.
+  fileref.reset();
+  stream.reset();
+  if (success && !write_guard.Commit()) {
+    qLog(Error) << "Failed to write edited file back to" << filename;
+    return TagReaderResult::ErrorCode::FileSaveError;
   }
-#endif  // Q_OS_LINUX
 
   return success ? TagReaderResult(TagReaderResult::ErrorCode::Success) : TagReaderResult(TagReaderResult::ErrorCode::FileSaveError);
 
@@ -1330,6 +1358,9 @@ void TagReaderTagLib::SetID3v2Tag(TagLib::ID3v2::Tag *tag, const Song &song) con
   SetTextFrame(kID3v2_TitleSort, song.titlesort().isEmpty() ? QString() : song.titlesort(), tag);
   SetTextFrame(kID3v2_Compilation, song.compilation() ? QString::number(1) : QString(), tag);
   SetUnsyncLyricsFrame(song.lyrics().isEmpty() ? QString() : song.lyrics(), tag);
+  if (!song.musicbrainz_recording_id().isEmpty()) {
+    SetUserTextFrame(QLatin1String(kID3v2_MusicBrainz_RecordingId), song.musicbrainz_recording_id(), tag);
+  }
 
 }
 
@@ -1433,6 +1464,9 @@ void TagReaderTagLib::SetVorbisComments(TagLib::Ogg::XiphComment *vorbis_comment
 
   vorbis_comment->addField(kVorbisComment_Lyrics, QStringToTagLibString(song.lyrics()), true);
   vorbis_comment->removeFields(kVorbisComment_UnsyncedLyrics);
+  if (!song.musicbrainz_recording_id().isEmpty()) {
+    vorbis_comment->addField(kVorbisComment_MusicBrainz_TackId, QStringToTagLibString(song.musicbrainz_recording_id()), true);
+  }
 
 }
 
@@ -1445,6 +1479,9 @@ void TagReaderTagLib::SetAPETag(TagLib::APE::Tag *tag, const Song &song) const {
   tag->setItem(kAPE_Performer, TagLib::APE::Item(kAPE_Performer, TagLib::StringList(QStringToTagLibString(song.performer()))));
   tag->setItem(kAPE_Lyrics, TagLib::APE::Item(kAPE_Lyrics, QStringToTagLibString(song.lyrics())));
   tag->addValue(kAPE_Compilation, QStringToTagLibString(song.compilation() ? QString::number(1) : QString()), true);
+  if (!song.musicbrainz_recording_id().isEmpty()) {
+    tag->setItem(kAPE_MusicBrainz_TackId, TagLib::APE::Item(kAPE_MusicBrainz_TackId, TagLib::StringList(QStringToTagLibString(song.musicbrainz_recording_id()))));
+  }
 
 }
 
@@ -1456,6 +1493,7 @@ void TagReaderTagLib::SetASFTag(TagLib::ASF::Tag *tag, const Song &song) const {
   SetAsfAttribute(tag, kASF_Disc, song.disc());
   SetAsfAttribute(tag, kASF_OriginalDate, song.originalyear());
   SetAsfAttribute(tag, kASF_OriginalYear, song.originalyear());
+  SetAsfAttribute(tag, kASF_MusicBrainz_RecordingId, song.musicbrainz_recording_id());
 
 }
 
@@ -1498,7 +1536,8 @@ TagReaderResult TagReaderTagLib::LoadEmbeddedCover(const QString &filename, QByt
 
   qLog(Debug) << "Loading cover from" << filename;
 
-  ScopedPtr<TagLib::FileRef> fileref(factory_->GetFileRef(filename));
+  ScopedPtr<TagLib::IOStream> stream(factory_->GetReadOnlyStream(filename));
+  ScopedPtr<TagLib::FileRef> fileref(factory_->GetFileRef(&*stream));
   if (!fileref || fileref->isNull()) {
     qLog(Error) << "TagLib could not open file" << filename;
     return TagReaderResult::ErrorCode::FileOpenError;
@@ -1647,7 +1686,10 @@ QByteArray TagReaderTagLib::LoadEmbeddedCover(TagLib::ID3v2::Tag *tag) const {
   if (apic_frames.isEmpty()) {
     return QByteArray();
   }
-  TagLib::ID3v2::AttachedPictureFrame *picture = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(apic_frames.front());
+  TagLib::ID3v2::AttachedPictureFrame *picture = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame*>(apic_frames.front());
+  if (!picture) {
+    return QByteArray();
+  }
   return QByteArray(reinterpret_cast<const char*>(picture->picture().data()), picture->picture().size());
 
 }
@@ -1703,7 +1745,7 @@ void TagReaderTagLib::SetEmbeddedCover(TagLib::ID3v2::Tag *tag, const QByteArray
   TagLib::ID3v2::FrameList apiclist = tag->frameListMap()[kID3v2_CoverArt];
   for (TagLib::ID3v2::FrameList::ConstIterator it = apiclist.begin(); it != apiclist.end(); ++it) {
     TagLib::ID3v2::AttachedPictureFrame *frame = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame*>(*it);
-    tag->removeFrame(frame, false);
+    tag->removeFrame(frame, true);
   }
 
   if (!data.isEmpty()) {
@@ -1756,9 +1798,15 @@ TagReaderResult TagReaderTagLib::SaveEmbeddedCover(const QString &filename, cons
     return TagReaderResult::ErrorCode::FileDoesNotExist;
   }
 
-  ScopedPtr<TagLib::FileRef> fileref(factory_->GetFileRef(filename));
+  FileWriteGuard write_guard(filename);
+  if (!write_guard.Init()) {
+    return TagReaderResult::ErrorCode::FileOpenError;
+  }
+
+  ScopedPtr<TagLib::IOStream> stream(factory_->GetReadWriteStream(write_guard.working_filename()));
+  ScopedPtr<TagLib::FileRef> fileref(factory_->GetFileRef(&*stream));
   if (!fileref || fileref->isNull()) {
-    qLog(Error) << "TagLib could not open file" << filename;
+    qLog(Error) << "TagLib could not open file" << write_guard.working_filename();
     return TagReaderResult::ErrorCode::FileOpenError;
   }
 
@@ -1814,12 +1862,13 @@ TagReaderResult TagReaderTagLib::SaveEmbeddedCover(const QString &filename, cons
   }
 
   const bool success = fileref->file()->save();
-#ifdef Q_OS_LINUX
-  if (success) {
-    // Linux: inotify doesn't seem to notice the change to the file unless we change the timestamps as well. (this is what touch does)
-    utimensat(0, QFile::encodeName(filename).constData(), nullptr, 0);
+
+  fileref.reset();
+  stream.reset();
+  if (success && !write_guard.Commit()) {
+    qLog(Error) << "Failed to write edited file back to" << filename;
+    return TagReaderResult::ErrorCode::FileSaveError;
   }
-#endif  // Q_OS_LINUX
 
   return success ? TagReaderResult::ErrorCode::Success : TagReaderResult::ErrorCode::FileSaveError;
 
@@ -1910,9 +1959,15 @@ TagReaderResult TagReaderTagLib::SaveSongPlaycount(const QString &filename, cons
     return TagReaderResult::ErrorCode::FileDoesNotExist;
   }
 
-  ScopedPtr<TagLib::FileRef> fileref(factory_->GetFileRef(filename));
+  FileWriteGuard write_guard(filename);
+  if (!write_guard.Init()) {
+    return TagReaderResult::ErrorCode::FileOpenError;
+  }
+
+  ScopedPtr<TagLib::IOStream> stream(factory_->GetReadWriteStream(write_guard.working_filename()));
+  ScopedPtr<TagLib::FileRef> fileref(factory_->GetFileRef(&*stream));
   if (!fileref || fileref->isNull()) {
-    qLog(Error) << "TagLib could not open file" << filename;
+    qLog(Error) << "TagLib could not open file" << write_guard.working_filename();
     return TagReaderResult::ErrorCode::FileOpenError;
   }
 
@@ -1968,12 +2023,13 @@ TagReaderResult TagReaderTagLib::SaveSongPlaycount(const QString &filename, cons
   }
 
   const bool success = fileref->save();
-#ifdef Q_OS_LINUX
-  if (success) {
-    // Linux: inotify doesn't seem to notice the change to the file unless we change the timestamps as well. (this is what touch does)
-    utimensat(0, QFile::encodeName(filename).constData(), nullptr, 0);
+
+  fileref.reset();
+  stream.reset();
+  if (success && !write_guard.Commit()) {
+    qLog(Error) << "Failed to write edited file back to" << filename;
+    return TagReaderResult::ErrorCode::FileSaveError;
   }
-#endif  // Q_OS_LINUX
 
   return success ? TagReaderResult::ErrorCode::Success : TagReaderResult::ErrorCode::FileSaveError;
 
@@ -2040,9 +2096,15 @@ TagReaderResult TagReaderTagLib::SaveSongRating(const QString &filename, const f
     return TagReaderResult::ErrorCode::Success;
   }
 
-  ScopedPtr<TagLib::FileRef> fileref(factory_->GetFileRef(filename));
+  FileWriteGuard write_guard(filename);
+  if (!write_guard.Init()) {
+    return TagReaderResult::ErrorCode::FileOpenError;
+  }
+
+  ScopedPtr<TagLib::IOStream> stream(factory_->GetReadWriteStream(write_guard.working_filename()));
+  ScopedPtr<TagLib::FileRef> fileref(factory_->GetFileRef(&*stream));
   if (!fileref || fileref->isNull()) {
-    qLog(Error) << "TagLib could not open file" << filename;
+    qLog(Error) << "TagLib could not open file" << write_guard.working_filename();
     return TagReaderResult::ErrorCode::FileOpenError;
   }
 
@@ -2097,15 +2159,15 @@ TagReaderResult TagReaderTagLib::SaveSongRating(const QString &filename, const f
   }
 
   const bool success = fileref->save();
-#ifdef Q_OS_LINUX
-  if (success) {
-    // Linux: inotify doesn't seem to notice the change to the file unless we change the timestamps as well. (this is what touch does)
-    utimensat(0, QFile::encodeName(filename).constData(), nullptr, 0);
-  }
-#endif  // Q_OS_LINUX
-
   if (!success) {
-    qLog(Error) << "TagLib hasn't been able to save file" << filename;
+    qLog(Error) << "TagLib hasn't been able to save file" << write_guard.working_filename();
+  }
+
+  fileref.reset();
+  stream.reset();
+  if (success && !write_guard.Commit()) {
+    qLog(Error) << "Failed to write edited file back to" << filename;
+    return TagReaderResult::ErrorCode::FileSaveError;
   }
 
   return success ? TagReaderResult::ErrorCode::Success : TagReaderResult::ErrorCode::FileSaveError;

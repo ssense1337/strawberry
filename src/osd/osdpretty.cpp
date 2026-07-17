@@ -63,6 +63,7 @@
 
 #ifdef Q_OS_WIN32
 #  include <windows.h>
+#  include <dwmapi.h>
 #endif
 
 #ifdef Q_OS_WIN32
@@ -215,16 +216,33 @@ void OSDPretty::ScreenRemoved(QScreen *screen) {
 
 bool OSDPretty::IsTransparencyAvailable() {
 
+  if (qApp) {
+    const QString platform = QGuiApplication::platformName();
 #ifdef HAVE_QPA_QPLATFORMNATIVEINTERFACE
-  if (qApp && QGuiApplication::platformName() == "xcb"_L1) {
-    QPlatformNativeInterface *native = QGuiApplication::platformNativeInterface();
-    QScreen *screen = popup_screen_ == nullptr ? QGuiApplication::primaryScreen() : popup_screen_;
-    if (native && screen) {
-      return native->nativeResourceForScreen(QByteArray("compositingEnabled"), screen);
+    if (platform == "xcb"_L1) {
+      // On X11 the window can only be translucent while a compositing manager is running.
+      QPlatformNativeInterface *native = QGuiApplication::platformNativeInterface();
+      QScreen *screen = popup_screen_ == nullptr ? QGuiApplication::primaryScreen() : popup_screen_;
+      if (native && screen) {
+        return native->nativeResourceForScreen(QByteArray("compositingEnabled"), screen);
+      }
     }
+#endif
+    // Wayland compositors always composite the scene, so translucency is always available.
+    if (platform.startsWith("wayland"_L1)) {
+      return true;
+    }
+  }
+
+#ifdef Q_OS_WIN32
+  // On Windows translucency requires Desktop Window Manager composition to be enabled.
+  BOOL composition_enabled = FALSE;
+  if (SUCCEEDED(DwmIsCompositionEnabled(&composition_enabled))) {
+    return composition_enabled != FALSE;
   }
 #endif
 
+  // For macOS (Quartz) and any other platform we assume translucency is available.
   return true;
 
 }
@@ -233,11 +251,11 @@ void OSDPretty::Load() {
 
   Settings s;
   s.beginGroup(OSDPrettySettings::kSettingsGroup);
-  foreground_color_ = QColor(static_cast<QRgb>(s.value(OSDPrettySettings::kForegroundColor, 0).toInt()));
+  foreground_color_ = QColor(static_cast<QRgb>(s.value(OSDPrettySettings::kForegroundColor, OSDPrettySettings::kDefaultForegroundColor).toInt()));
   background_color_ = QColor(static_cast<QRgb>(s.value(OSDPrettySettings::kBackgroundColor, OSDPrettySettings::kPresetBlue).toInt()));
-  background_opacity_ = s.value(OSDPrettySettings::kBackgroundOpacity, 0.85).toFloat();
-  font_.fromString(s.value(OSDPrettySettings::kFont, u"Verdana,9,-1,5,50,0,0,0,0,0"_s).toString());
-  disable_duration_ = s.value(OSDPrettySettings::kDisableDuration, false).toBool();
+  background_opacity_ = s.value(OSDPrettySettings::kBackgroundOpacity, OSDPrettySettings::kDefaultBackgroundOpacity).toFloat();
+  font_.fromString(s.value(OSDPrettySettings::kFont, QLatin1String(OSDPrettySettings::kDefaultFont)).toString());
+  disable_duration_ = s.value(OSDPrettySettings::kDisableDuration, OSDPrettySettings::kDefaultDisableDuration).toBool();
 #ifdef Q_OS_WIN32
   fading_enabled_ = s.value(OSDPrettySettings::kFading, true).toBool();
 #else

@@ -24,6 +24,13 @@ namespace CollectionSettings {
 
 constexpr char kSettingsGroup[] = "Collection";
 
+enum class CacheSizeUnit {
+  KB,
+  MB,
+  GB,
+  TB
+};
+
 constexpr char kStartupScan[] = "startup_scan";
 constexpr char kMonitor[] = "monitor";
 constexpr char kSongTracking[] = "song_tracking";
@@ -37,7 +44,7 @@ constexpr char kPrettyCovers[] = "pretty_covers";
 constexpr char kVariousArtists[] = "various_artists";
 constexpr char kSkipArticlesForArtists[] = "skip_articles_for_artists";
 constexpr char kSkipArticlesForAlbums[] = "skip_articles_for_albums";
-constexpr char kUseSortTags[] = "use_short_tags";
+constexpr char kUseSortTags[] = "use_sort_tags";
 constexpr char kSettingsCacheSize[] = "cache_size";
 constexpr char kSettingsCacheSizeUnit[] = "cache_size_unit";
 constexpr char kSettingsDiskCacheEnable[] = "disk_cache_enable";
@@ -52,12 +59,27 @@ constexpr char kOverwriteRating[] = "overwrite_rating";
 constexpr char kDeleteFiles[] = "delete_files";
 constexpr char kLastPath[] = "last_path";
 
-enum class CacheSizeUnit {
-  KB,
-  MB,
-  GB,
-  TB
-};
+constexpr bool kDefaultStartupScan = true;
+constexpr bool kDefaultMonitor = true;
+constexpr bool kDefaultSongTracking = false;
+constexpr bool kDefaultMarkSongsUnavailable = true;
+constexpr bool kDefaultSongENUR128LoudnessAnalysis = false;
+constexpr int kDefaultExpireUnavailableSongs = 60;
+constexpr bool kDefaultAutoOpen = false;
+constexpr bool kDefaultShowDividers = true;
+constexpr bool kDefaultPrettyCovers = true;
+constexpr bool kDefaultVariousArtists = true;
+constexpr bool kDefaultSkipArticlesForArtists = true;
+constexpr bool kDefaultSkipArticlesForAlbums = false;
+constexpr bool kDefaultUseSortTags = true;
+constexpr CacheSizeUnit kDefaultSettingsCacheSizeUnit = CacheSizeUnit::MB;
+constexpr bool kDefaultSettingsDiskCacheEnable = false;
+constexpr CacheSizeUnit kDefaultSettingsDiskCacheSizeUnit = CacheSizeUnit::MB;
+constexpr bool kDefaultSavePlayCounts = false;
+constexpr bool kDefaultSaveRatings = false;
+constexpr bool kDefaultOverwritePlaycount = false;
+constexpr bool kDefaultOverwriteRating = false;
+constexpr bool kDefaultDeleteFiles = false;
 
 }  // namespace CollectionSettings
 

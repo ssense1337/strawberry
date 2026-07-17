@@ -47,6 +47,11 @@
 
 using namespace Qt::Literals::StringLiterals;
 
+namespace {
+constexpr char kTab[] = "tab";
+constexpr char kDefaultTab[] = "artists";
+}  // namespace
+
 StreamingTabsView::StreamingTabsView(const StreamingServicePtr service, const SharedPtr<AlbumCoverLoader> albumcover_loader, const QString &settings_group, QWidget *parent)
     : QWidget(parent),
       service_(service),
@@ -161,7 +166,7 @@ StreamingTabsView::StreamingTabsView(const StreamingServicePtr service, const Sh
 
   Settings s;
   s.beginGroup(settings_group_);
-  QString tab = s.value("tab", u"artists"_s).toString().toLower();
+  const QString tab = s.value(kTab, QLatin1String(kDefaultTab)).toString().toLower();
   s.endGroup();
 
   if (tab == "artists"_L1) {
@@ -185,10 +190,13 @@ StreamingTabsView::~StreamingTabsView() {
 
   Settings s;
   s.beginGroup(settings_group_);
-  s.setValue("tab", ui_->tabs->currentWidget()->objectName().toLower());
+  if (QWidget *current = ui_->tabs->currentWidget()) {
+    s.setValue(kTab, current->objectName().toLower());
+  }
   s.endGroup();
 
   delete ui_;
+
 }
 
 void StreamingTabsView::ReloadSettings() {

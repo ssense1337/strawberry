@@ -3,7 +3,7 @@
  * This file was part of Clementine.
  * Copyright 2012, David Sansome <me@davidsansome.com>
  * Copyright 2012, 2014, John Maguire <john.maguire@gmail.com>
- * Copyright 2018-2024, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2026, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,14 +55,17 @@ class AlbumCoverLoader;
 class CurrentAlbumCoverLoader;
 class CoverProviders;
 class LyricsProviders;
-class AudioScrobbler;
-class LastFMImport;
 class StreamingServices;
 class RadioServices;
 #ifdef HAVE_MOODBAR
 class MoodbarController;
 class MoodbarLoader;
 #endif
+#ifdef HAVE_WAVEFORM
+class WaveformController;
+class WaveformLoader;
+#endif
+class AudioScrobbler;
 
 class Application : public QObject {
   Q_OBJECT
@@ -93,8 +96,6 @@ class Application : public QObject {
 
   SharedPtr<LyricsProviders> lyrics_providers() const;
 
-  SharedPtr<AudioScrobbler> scrobbler() const;
-
   SharedPtr<StreamingServices> streaming_services() const;
   SharedPtr<RadioServices> radio_services() const;
 
@@ -103,7 +104,12 @@ class Application : public QObject {
   SharedPtr<MoodbarLoader> moodbar_loader() const;
 #endif
 
-  SharedPtr<LastFMImport> lastfm_import() const;
+#ifdef HAVE_WAVEFORM
+  SharedPtr<WaveformController> waveform_controller() const;
+  SharedPtr<WaveformLoader> waveform_loader() const;
+#endif
+
+  SharedPtr<AudioScrobbler> scrobbler() const;
 
   void Exit();
 

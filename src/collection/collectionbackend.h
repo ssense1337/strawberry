@@ -34,6 +34,7 @@
 #include <QString>
 #include <QStringList>
 #include <QUrl>
+#include <QVariantList>
 #include <QSqlDatabase>
 
 #include "includes/shared_ptr.h"
@@ -142,7 +143,7 @@ class CollectionBackend : public CollectionBackendInterface {
  public:
   Q_INVOKABLE explicit CollectionBackend(QObject *parent = nullptr);
 
-  ~CollectionBackend();
+  ~CollectionBackend() override;
 
   void Init(SharedPtr<Database> db, SharedPtr<TaskManager> task_manager, const Song::Source source, const QString &songs_table, const QString &dirs_table = QString(), const QString &subdirs_table = QString());
 
@@ -225,7 +226,7 @@ class CollectionBackend : public CollectionBackendInterface {
 
   SongList GetSongsByFingerprint(const QString &fingerprint) override;
 
-  SongList ExecuteQuery(const QString &sql);
+  SongList ExecuteQuery(const QString &sql, const QVariantList &bound_values = QVariantList());
 
   void AddOrUpdateSongsAsync(const SongList &songs);
   void UpdateSongsBySongIDAsync(const SongMap &new_songs);

@@ -57,6 +57,9 @@ constexpr int IconSize_LargeSidebar = 40;
 constexpr int IconSize_SmallSidebar = 32;
 }  // namespace
 
+const char *FancyTabWidget::kTabMode = "tab_mode";
+const char *FancyTabWidget::kCurrentTab = "current_tab";
+
 FancyTabWidget::FancyTabWidget(QWidget *parent)
     : QTabWidget(parent),
       menu_(nullptr),
@@ -110,8 +113,10 @@ void FancyTabWidget::SaveSettings(const QString &settings_group) {
   Settings s;
   s.beginGroup(settings_group);
 
-  s.setValue("tab_mode", static_cast<int>(mode_));
-  s.setValue("current_tab", currentIndex());
+  if (mode_ != Mode::None) {
+    s.setValue(kTabMode, static_cast<int>(mode_));
+  }
+  s.setValue(kCurrentTab, currentIndex());
 
   for (FancyTabData *tab : std::as_const(tabs_)) {
     QString k = u"tab_"_s + tab->name();
@@ -132,8 +137,8 @@ void FancyTabWidget::ReloadSettings() {
 
   Settings s;
   s.beginGroup(AppearanceSettings::kSettingsGroup);
-  bg_color_system_ = s.value(AppearanceSettings::kTabBarSystemColor, false).toBool();
-  bg_gradient_ = s.value(AppearanceSettings::kTabBarGradient, true).toBool();
+  bg_color_system_ = s.value(AppearanceSettings::kTabBarSystemColor, AppearanceSettings::kDefaultTabBarSystemColor).toBool();
+  bg_gradient_ = s.value(AppearanceSettings::kTabBarGradient, AppearanceSettings::kDefaultTabBarGradient).toBool();
   bg_color_ = DefaultTabbarBgColor();
   if (!bg_color_system_) {
     bg_color_ = s.value(AppearanceSettings::kTabBarColor, bg_color_).value<QColor>();
@@ -276,8 +281,8 @@ void FancyTabWidget::SetCurrentIndex(int idx) {
   if (idx >= count() || idx < 0) idx = 0;
 
   QWidget *currentPage = widget(idx);
-  QLayout *layout = currentPage->layout();
-  if (bottom_widget_) layout->addWidget(bottom_widget_);
+  QLayout *layout = currentPage ? currentPage->layout() : nullptr;
+  if (bottom_widget_ && layout) layout->addWidget(bottom_widget_);
   QTabWidget::setCurrentIndex(idx);
 
 }
@@ -285,8 +290,8 @@ void FancyTabWidget::SetCurrentIndex(int idx) {
 void FancyTabWidget::CurrentTabChangedSlot(const int idx) {
 
   QWidget *currentPage = currentWidget();
-  QLayout *layout = currentPage->layout();
-  if (bottom_widget_) layout->addWidget(bottom_widget_);
+  QLayout *layout = currentPage ? currentPage->layout() : nullptr;
+  if (bottom_widget_ && layout) layout->addWidget(bottom_widget_);
 
   Q_EMIT CurrentTabChanged(idx);
 

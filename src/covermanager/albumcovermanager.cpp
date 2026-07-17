@@ -101,6 +101,9 @@ using std::make_shared;
 
 namespace {
 constexpr char kSettingsGroup[] = "CoverManager";
+constexpr char kGeometry[] = "geometry";
+constexpr char kSplitterState[] = "splitter_state";
+constexpr char kSaveCoverType[] = "save_cover_type";
 constexpr int kThumbnailSize = 120;
 }  // namespace
 
@@ -242,11 +245,11 @@ void AlbumCoverManager::Init() {
   Settings s;
   s.beginGroup(kSettingsGroup);
 
-  if (s.contains("geometry")) {
-    restoreGeometry(s.value("geometry").toByteArray());
+  if (s.contains(kGeometry)) {
+    restoreGeometry(s.value(kGeometry).toByteArray());
   }
 
-  if (!s.contains("splitter_state") || !ui_->splitter->restoreState(s.value("splitter_state").toByteArray())) {
+  if (!s.contains(kSplitterState) || !ui_->splitter->restoreState(s.value(kSplitterState).toByteArray())) {
     // Sensible default size for the artists view
     ui_->splitter->setSizes(QList<int>() << 200 << width() - 200);
   }
@@ -302,11 +305,11 @@ void AlbumCoverManager::LoadGeometry() {
 
   Settings s;
   s.beginGroup(kSettingsGroup);
-  if (s.contains("geometry"_L1)) {
-    restoreGeometry(s.value("geometry").toByteArray());
+  if (s.contains(kGeometry)) {
+    restoreGeometry(s.value(kGeometry).toByteArray());
   }
-  if (s.contains("splitter_state"_L1)) {
-    ui_->splitter->restoreState(s.value("splitter_state").toByteArray());
+  if (s.contains(kSplitterState)) {
+    ui_->splitter->restoreState(s.value(kSplitterState).toByteArray());
   }
   else {
     // Sensible default size for the artists view
@@ -323,9 +326,9 @@ void AlbumCoverManager::SaveSettings() {
 
   Settings s;
   s.beginGroup(kSettingsGroup);
-  s.setValue("geometry", saveGeometry());
-  s.setValue("splitter_state", ui_->splitter->saveState());
-  s.setValue("save_cover_type", static_cast<int>(album_cover_choice_controller_->get_save_album_cover_type()));
+  s.setValue(kGeometry, saveGeometry());
+  s.setValue(kSplitterState, ui_->splitter->saveState());
+  s.setValue(kSaveCoverType, static_cast<int>(album_cover_choice_controller_->get_save_album_cover_type()));
   s.endGroup();
 
 }
@@ -756,14 +759,17 @@ void AlbumCoverManager::LoadCoverFromFile() {
 void AlbumCoverManager::SaveCoverToFile() {
 
   Song song = GetSingleSelectionAsSong();
-  if (!song.is_valid() || song.art_unset()) return;
+  if (!song.is_valid()) return;
 
   // Load the image from disk
   AlbumCoverImageResult result;
   for (const AlbumCoverLoaderOptions::Type cover_type : std::as_const(cover_types_)) {
     switch (cover_type) {
       case AlbumCoverLoaderOptions::Type::Unset:
-        return;
+        if (song.art_unset()) {
+          return;
+        }
+        break;
       case AlbumCoverLoaderOptions::Type::Embedded:
         if (song.art_embedded()) {
           const TagReaderResult tagreaderclient_result = tagreader_client_->LoadCoverDataBlocking(song.url().toLocalFile(), result.image_data);
@@ -1105,9 +1111,10 @@ bool AlbumCoverManager::ItemHasCover(const AlbumItem &album_item) const {
 
 void AlbumCoverManager::SaveEmbeddedCoverFinished(TagReaderReplyPtr reply, AlbumItem *album_item, const QUrl &url, const bool art_embedded) {
 
-  if (cover_save_tasks_.contains(album_item, url)) {
-    cover_save_tasks_.remove(album_item, url);
+  if (!cover_save_tasks_.contains(album_item, url)) {
+    return;
   }
+  cover_save_tasks_.remove(album_item, url);
 
   if (!reply->success()) {
     Q_EMIT Error(tr("Could not save cover to file %1.").arg(url.toLocalFile()));

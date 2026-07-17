@@ -2,7 +2,7 @@
  * Strawberry Music Player
  * This file was part of Clementine.
  * Copyright 2010, David Sansome <me@davidsansome.com>
- * Copyright 2013-2025, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2013-2026, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,7 +61,8 @@
 #include "covermanager/albumcoverloaderresult.h"
 #include "covermanager/albumcoverimageresult.h"
 
-class About;
+class AboutDialog;
+class Appearance;
 class Console;
 class AlbumCoverManager;
 class Application;
@@ -81,7 +82,7 @@ class OrganizeDialog;
 class PlaylistListContainer;
 class QueueView;
 class SystemTrayIcon;
-#ifdef HAVE_MUSICBRAINZ
+#ifdef HAVE_TAGFETCHER
 class TagFetcher;
 #endif
 class TrackSelectionDialog;
@@ -93,14 +94,17 @@ class SmartPlaylistsViewContainer;
 #ifdef Q_OS_WIN32
 class Windows7ThumbBar;
 #endif
+#ifdef _MSC_VER
+class WinSystemMediaTransportControls;
+#endif
 class AddStreamDialog;
-class LastFMImportDialog;
 class RadioViewContainer;
+#if QT_CONFIG(sessionmanager)
+class QSessionManager;
+#endif
 
 #ifdef HAVE_DISCORD_RPC
-namespace discord {
-class RichPresence;
-}
+class DiscordRichPresence;
 #endif
 
 class MainWindow : public QMainWindow, public PlatformInterface {
@@ -111,9 +115,10 @@ class MainWindow : public QMainWindow, public PlatformInterface {
                       SharedPtr<SystemTrayIcon> systemtrayicon,
                       OSDBase *osd,
 #ifdef HAVE_DISCORD_RPC
-                      discord::RichPresence *discord_rich_presence,
+                      DiscordRichPresence *discord_rich_presence,
 #endif
                       const CommandlineOptions &options,
+                      const QString &default_style,
                       QWidget *parent = nullptr);
   ~MainWindow() override;
 
@@ -153,7 +158,7 @@ class MainWindow : public QMainWindow, public PlatformInterface {
   void ForceShowOSD(const Song &song, const bool toggle);
 
   void PlaylistMenuHidden();
-  void PlaylistRightClick(const QPoint global_pos, const QModelIndex &index);
+  void ShowPlaylistContextMenu(const QPoint global_pos, const QModelIndex &index);
   void PlaylistCurrentChanged(const QModelIndex &current);
   void PlaylistViewSelectionModelChanged();
   void PlaylistPlay();
@@ -283,6 +288,9 @@ class MainWindow : public QMainWindow, public PlatformInterface {
   void CommandlineOptionsReceived(const QByteArray &string_options);
   void Raise();
   void Exit();
+#if QT_CONFIG(sessionmanager)
+  void CommitData(QSessionManager &manager);
+#endif
 
  private:
   void SaveSettings();
@@ -305,15 +313,19 @@ class MainWindow : public QMainWindow, public PlatformInterface {
 #ifdef Q_OS_WIN32
   Windows7ThumbBar *thumbbar_;
 #endif
+#ifdef _MSC_VER
+  WinSystemMediaTransportControls *smtc_;
+#endif
 
   Application *app_;
+  SharedPtr<Appearance> appearance_;
   SharedPtr<SystemTrayIcon> systemtrayicon_;
   OSDBase *osd_;
 #ifdef HAVE_DISCORD_RPC
-  discord::RichPresence *discord_rich_presence_;
+  DiscordRichPresence *discord_rich_presence_;
 #endif
   Lazy<ErrorDialog> error_dialog_;
-  Lazy<About> about_dialog_;
+  Lazy<AboutDialog> about_dialog_;
   Lazy<Console> console_;
   Lazy<EditTagDialog> edit_tag_dialog_;
   AlbumCoverChoiceController *album_cover_choice_controller_;
@@ -334,7 +346,7 @@ class MainWindow : public QMainWindow, public PlatformInterface {
   Lazy<TranscodeDialog> transcode_dialog_;
   Lazy<AddStreamDialog> add_stream_dialog_;
 
-#ifdef HAVE_MUSICBRAINZ
+#ifdef HAVE_TAGFETCHER
   ScopedPtr<TagFetcher> tag_fetcher_;
 #endif
   ScopedPtr<TrackSelectionDialog> track_selection_dialog_;
@@ -356,8 +368,6 @@ class MainWindow : public QMainWindow, public PlatformInterface {
 #endif
 
   RadioViewContainer *radio_view_;
-
-  LastFMImportDialog *lastfm_import_dialog_;
 
   QAction *collection_show_all_;
   QAction *collection_show_duplicates_;

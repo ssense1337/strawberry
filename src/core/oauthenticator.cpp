@@ -46,7 +46,6 @@
 #include "oauthenticator.h"
 
 using namespace Qt::Literals::StringLiterals;
-using std::make_shared;
 using namespace std::chrono_literals;
 
 namespace {
@@ -339,8 +338,6 @@ void OAuthenticator::AuthorizationUrlReceived(const QUrl &request_url, const QUr
     return;
   }
 
-  qLog(Debug) << settings_group_ << "Authorization URL Received" << request_url.toDisplayString();
-
   QUrlQuery url_query(request_url);
 
   if (url_query.hasQueryItem(u"error_description"_s)) {
@@ -470,6 +467,7 @@ void OAuthenticator::AccessTokenRequestFinished(QNetworkReply *reply, const bool
   if (reply->error() != QNetworkReply::NoError && reply->error() < 200) {
     const QString error_message = QStringLiteral("%1 (%2)").arg(reply->errorString()).arg(reply->error());
     Q_EMIT AuthenticationFinished(false, error_message);
+    return;
   }
 
   if (reply->error() != QNetworkReply::NoError || reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200) {

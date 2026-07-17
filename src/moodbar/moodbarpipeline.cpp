@@ -22,6 +22,7 @@
 #include "moodbarpipeline.h"
 
 #include <cstdlib>
+#include <cmath>
 
 #include <memory>
 
@@ -39,7 +40,9 @@
 #include "core/signalchecker.h"
 #include "utilities/threadutils.h"
 #include "moodbar/moodbarbuilder.h"
-#include "engine/gstfastspectrum.h"
+#ifdef HAVE_GSTFASTSPECTRUM
+#  include "engine/gstfastspectrum.h"
+#endif
 
 using namespace Qt::Literals::StringLiterals;
 using std::make_unique;
@@ -102,11 +105,15 @@ void MoodbarPipeline::Start() {
   pipeline_ = gst_pipeline_new("moodbar-pipeline");
 
   GstElement *decodebin = CreateElement("uridecodebin");
-  convert_element_ = CreateElement("audioconvert");
+  GstElement *convert_element = CreateElement("audioconvert");
+#ifdef HAVE_GSTFASTSPECTRUM
   GstElement *spectrum = CreateElement("strawberry-fastspectrum");
+#else
+  GstElement *spectrum = CreateElement("spectrum");
+#endif
   GstElement *fakesink = CreateElement("fakesink");
 
-  if (!decodebin || !convert_element_ || !spectrum || !fakesink) {
+  if (!decodebin || !convert_element || !spectrum || !fakesink) {
     gst_object_unref(GST_OBJECT(pipeline_));
     pipeline_ = nullptr;
     Q_EMIT Finished(false);
@@ -114,13 +121,15 @@ void MoodbarPipeline::Start() {
   }
 
   // Join them together
-  if (!gst_element_link_many(convert_element_, spectrum, fakesink, nullptr)) {
+  if (!gst_element_link_many(convert_element, spectrum, fakesink, nullptr)) {
     qLog(Error) << "Failed to link elements";
     gst_object_unref(GST_OBJECT(pipeline_));
     pipeline_ = nullptr;
     Q_EMIT Finished(false);
     return;
   }
+
+  convert_element_ = convert_element;
 
   builder_ = make_unique<MoodbarBuilder>();
 
@@ -130,8 +139,22 @@ void MoodbarPipeline::Start() {
   g_object_set(decodebin, "uri", gst_url.constData(), nullptr);
   g_object_set(spectrum, "bands", kBands, nullptr);
 
+#ifdef HAVE_GSTFASTSPECTRUM
   GstStrawberryFastSpectrum *fastspectrum = reinterpret_cast<GstStrawberryFastSpectrum*>(spectrum);
-  fastspectrum->output_callback = [this](double *magnitudes, const int size) { builder_->AddFrame(magnitudes, size); };
+  // This callback runs on a GStreamer streaming thread.
+  // Skip processing once the pipeline has been stopped: the worker thread may already be tearing down builder_ in Finish(), and touching it here would be a data race / use-after-free.
+  fastspectrum->output_callback = [this](double *magnitudes, const int size) {
+    if (running_ && builder_) builder_->AddFrame(magnitudes, size);
+  };
+#else
+  GObjectClass *spectrum_class = G_OBJECT_GET_CLASS(spectrum);
+  if (g_object_class_find_property(spectrum_class, "message")) {
+    g_object_set(spectrum, "message", TRUE, nullptr);
+  }
+  else if (g_object_class_find_property(spectrum_class, "post-messages")) {
+    g_object_set(spectrum, "post-messages", TRUE, nullptr);
+  }
+#endif
 
   // Connect signals
   CHECKED_GCONNECT(decodebin, "pad-added", &NewPadCallback, this);
@@ -153,9 +176,11 @@ void MoodbarPipeline::ReportError(GstMessage *msg) {
   gchar *debugs = nullptr;
 
   gst_message_parse_error(msg, &error, &debugs);
-  QString message = QString::fromLocal8Bit(error->message);
-
-  g_error_free(error);
+  QString message;
+  if (error) {
+    message = QString::fromLocal8Bit(error->message);
+    g_error_free(error);
+  }
   g_free(debugs);
 
   qLog(Error) << "Error processing" << url_ << ":" << message;
@@ -221,6 +246,26 @@ GstBusSyncReply MoodbarPipeline::BusCallbackSync(GstBus *bus, GstMessage *messag
       instance->Stop(false);
       break;
 
+#ifndef HAVE_GSTFASTSPECTRUM
+    case GST_MESSAGE_ELEMENT:{
+      const GstStructure *s = gst_message_get_structure(message);
+      if (s && gst_structure_has_name(s, "spectrum") && instance->builder_) {
+        const GValue *magnitudes_val = gst_structure_get_value(s, "magnitude");
+        if (magnitudes_val) {
+          const guint n = gst_value_list_get_size(magnitudes_val);
+          double mags[kBands]{};
+          const guint count = n <= static_cast<guint>(kBands) ? n : static_cast<guint>(kBands);
+          for (guint i = 0; i < count; ++i) {
+            const GValue *v = gst_value_list_get_value(magnitudes_val, i);
+            mags[i] = std::pow(10.0, static_cast<double>(g_value_get_float(v)) / 10.0);
+          }
+          instance->builder_->AddFrame(mags, static_cast<int>(count));
+        }
+      }
+      return GST_BUS_DROP;
+    }
+#endif
+
     default:
       break;
   }
@@ -244,14 +289,24 @@ void MoodbarPipeline::Finish(const bool success) {
 
   success_ = success;
 
+  // Drive the pipeline to GST_STATE_NULL first so the streaming threads (which may still be invoking the spectrum output callback) are joined before we read and reset builder_.
+  // Doing this the other way around races the callback against builder_.reset() and is a use-after-free.
+  Cleanup();
+
   if (builder_) {
     data_ = builder_->Finish(1000);
     builder_.reset();
   }
 
-  Cleanup();
-
   Q_EMIT Finished(success);
+
+}
+
+void MoodbarPipeline::Shutdown() {
+
+  Q_ASSERT(QThread::currentThread() == thread());
+
+  Cleanup();
 
 }
 

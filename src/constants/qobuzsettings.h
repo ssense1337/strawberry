@@ -27,21 +27,30 @@ constexpr char kSettingsGroup[] = "Qobuz";
 constexpr char kEnabled[] = "enabled";
 constexpr char kAppId[] = "app_id";
 constexpr char kAppSecret[] = "app_secret";
-constexpr char kUsername[] = "username";
-constexpr char kPassword[] = "password";
+constexpr char kPrivateKey[] = "private_key";
 constexpr char kFormat[] = "format";
 constexpr char kSearchDelay[] = "searchdelay";
 constexpr char kArtistsSearchLimit[] = "artistssearchlimit";
 constexpr char kAlbumsSearchLimit[] = "albumssearchlimit";
 constexpr char kSongsSearchLimit[] = "songssearchlimit";
-constexpr char kBase64Secret[] = "base64secret";
 constexpr char kDownloadAlbumCovers[] = "downloadalbumcovers";
 constexpr char kRemoveRemastered[] = "remove_remastered";
 
+constexpr char kUsername[] = "username";
+constexpr char kPassword[] = "password";
 constexpr char kUserId[] = "user_id";
 constexpr char kCredentialsId[] = "credentials_id";
 constexpr char kDeviceId[] = "device_id";
 constexpr char kUserAuthToken[] = "user_auth_token";
+
+constexpr bool kDefaultEnabled = false;
+constexpr int kDefaultFormat = 27;
+constexpr int kDefaultSearchDelay = 1500;
+constexpr int kDefaultArtistsSearchLimit = 4;
+constexpr int kDefaultAlbumsSearchLimit = 10;
+constexpr int kDefaultSongsSearchLimit = 10;
+constexpr bool kDefaultDownloadAlbumCovers = true;
+constexpr bool kDefaultRemoveRemastered = true;
 
 }  // namespace QobuzSettings
 

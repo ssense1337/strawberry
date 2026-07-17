@@ -2,7 +2,7 @@
  * Strawberry Music Player
  * This file was part of Clementine.
  * Copyright 2010, David Sansome <me@davidsansome.com>
- * Copyright 2020-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2020-2026, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,8 @@ class PlaylistSequence : public QWidget {
     Off = 0,
     All = 1,
     InsideAlbum = 2,
-    Albums = 3
+    Albums = 3,
+    Grouping = 4
   };
 
   RepeatMode repeat_mode() const;

@@ -2,6 +2,7 @@
  * Strawberry Music Player
  * This file was part of Clementine.
  * Copyright 2010, David Sansome <me@davidsansome.com>
+ * Copyright 2018-2026, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,33 +23,21 @@
 #define RATINGWIDGET_H
 
 #include <QWidget>
-#include <QFrame>
-#include <QPixmap>
-#include <QRect>
 
-class RatingPainter {
- public:
-  RatingPainter();
+class QPaintEvent;
+class QMouseEvent;
+class QKeyEvent;
+class QEvent;
 
-  static constexpr int kStarCount = 5;
-  static constexpr int kStarSize = 16;
-
-  static QRect Contents(const QRect rect);
-  static float RatingForPos(const QPoint pos, const QRect rect);
-
-  void Paint(QPainter *painter, const QRect rect, float rating) const;
-
- private:
-  QPixmap stars_[kStarCount * 2 + 1];
-};
+#include "ratingpainter.h"
 
 class RatingWidget : public QWidget {
   Q_OBJECT
 
-  Q_PROPERTY(float rating READ rating WRITE set_rating)
+  Q_PROPERTY(float rating READ rating WRITE set_rating NOTIFY RatingValueChanged)
 
  public:
-  RatingWidget(QWidget *parent = nullptr);
+  explicit RatingWidget(QWidget *parent = nullptr);
 
   QSize sizeHint() const override;
 
@@ -56,7 +45,10 @@ class RatingWidget : public QWidget {
   void set_rating(const float rating);
 
  Q_SIGNALS:
+  // Emitted only when the user changes the rating through the widget, not on programmatic set_rating() calls.
   void RatingChanged(const float rating);
+  // Property NOTIFY signal, emitted on any rating change including set_rating().
+  void RatingValueChanged(const float rating);
 
  protected:
   void paintEvent(QPaintEvent *e) override;

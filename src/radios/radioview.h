@@ -28,6 +28,7 @@ class QMimeData;
 class QMenu;
 class QAction;
 class QShowEvent;
+class QMouseEvent;
 class QContextMenuEvent;
 
 class RadioModel;
@@ -37,10 +38,11 @@ class RadioView : public AutoExpandingTreeView {
 
  public:
   explicit RadioView(QWidget *parent = nullptr);
-  ~RadioView();
+  ~RadioView() override;
 
   void showEvent(QShowEvent *e) override;
   void contextMenuEvent(QContextMenuEvent *e) override;
+  void mouseDoubleClickEvent(QMouseEvent *event) override;
 
  Q_SIGNALS:
   void GetChannels();

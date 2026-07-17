@@ -153,6 +153,16 @@ endif()
 
 find_package(PkgConfig REQUIRED)
 find_package(Threads REQUIRED)
+
+# Detect whether the MinGW GCC toolchain uses the posix (winpthreads) threading model.
+# This is reported by "gcc -v" as "Thread model: posix" (as opposed to "win32").
+if(WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  execute_process(COMMAND ${CMAKE_CXX_COMPILER} -v OUTPUT_QUIET ERROR_VARIABLE GCC_VERBOSE_OUTPUT)
+  if(GCC_VERBOSE_OUTPUT MATCHES "Thread model: posix")
+    set(HAVE_WINPTHREADS ON)
+  endif()
+endif()
+
 find_package(Backtrace)
 if(Backtrace_FOUND)
   set(HAVE_BACKTRACE ON)
@@ -210,10 +220,12 @@ find_package(GTest)
 
 pkg_check_modules(LIBSPARSEHASH IMPORTED_TARGET libsparsehash)
 
-find_package(RapidJSON)
-
 set(QT_VERSION_MAJOR 6)
-set(QT_MIN_VERSION 6.4.0)
+if(APPLE OR WIN32)
+  set(QT_MIN_VERSION 6.8.0)
+else()
+  set(QT_MIN_VERSION 6.4.0)
+endif()
 set(QT_DEFAULT_MAJOR_VERSION ${QT_VERSION_MAJOR})
 set(QT_COMPONENTS Core Concurrent Gui Widgets Network Sql)
 set(QT_OPTIONAL_COMPONENTS GuiPrivate LinguistTools Test)
@@ -292,12 +304,14 @@ if(UNIX AND NOT APPLE)
   )
 endif()
 
-optional_component(SONGFINGERPRINTING ON "Song fingerprinting and tracking"
+optional_component(CHROMAPRINT ON "Chromaprint"
   DEPENDS "chromaprint" CHROMAPRINT_FOUND
 )
-
-optional_component(MUSICBRAINZ ON "MusicBrainz integration"
-  DEPENDS "chromaprint" CHROMAPRINT_FOUND
+optional_component(SONGTRACKING ON "Song tracking"
+  DEPENDS "chromaprint" HAVE_CHROMAPRINT
+)
+optional_component(TAGFETCHER ON "Tag fetcher"
+  DEPENDS "chromaprint" HAVE_CHROMAPRINT
 )
 
 if(UNIX AND NOT APPLE)
@@ -346,9 +360,14 @@ optional_component(TIDAL ON "Streaming: Tidal")
 optional_component(SPOTIFY ON "Streaming: Spotify")
 optional_component(QOBUZ ON "Streaming: Qobuz")
 
-optional_component(MOODBAR ON "Moodbar"
+optional_component(MOODBAR ON "Moodbar")
+
+optional_component(GSTFASTSPECTRUM ON "Moodbar: Fast spectrum with FFTW3"
+  DEPENDS "moodbar" HAVE_MOODBAR
   DEPENDS "fftw3" FFTW3_FOUND
 )
+
+optional_component(WAVEFORM ON "Waveform")
 
 optional_component(EBUR128 ON "EBU R 128 loudness normalization"
   DEPENDS "libebur128" LIBEBUR128_FOUND
@@ -374,13 +393,7 @@ optional_component(STREAMTAGREADER ON "Stream tagreader"
   DEPENDS "sparsehash" LIBSPARSEHASH_FOUND
 )
 
-optional_component(DISCORD_RPC ON "Discord Rich Presence"
-  DEPENDS "RapidJSON" RapidJSON_FOUND
-)
-
-if(HAVE_SONGFINGERPRINTING OR HAVE_MUSICBRAINZ)
-  set(HAVE_CHROMAPRINT ON)
-endif()
+optional_component(DISCORD_RPC ON "Discord Rich Presence")
 
 if(HAVE_X11_GLOBALSHORTCUTS OR HAVE_KGLOBALACCEL_GLOBALSHORTCUTS OR APPLE OR WIN32)
   set(HAVE_GLOBALSHORTCUTS ON)
@@ -432,6 +445,7 @@ set(SOURCES
   src/core/sqlrow.cpp
   src/core/metatypes.cpp
   src/core/deletefiles.cpp
+  src/core/filewriteguard.cpp
   src/core/filesystemmusicstorage.cpp
   src/core/filesystemwatcherinterface.cpp
   src/core/mergedproxymodel.cpp
@@ -441,7 +455,6 @@ set(SOURCES
   src/core/threadsafenetworkdiskcache.cpp
   src/core/networktimeouts.cpp
   src/core/networkproxyfactory.cpp
-  src/core/qtfslistener.cpp
   src/core/settings.cpp
   src/core/settingsprovider.cpp
   src/core/signalchecker.cpp
@@ -467,6 +480,7 @@ set(SOURCES
   src/core/httpbaserequest.cpp
   src/core/jsonbaserequest.cpp
   src/core/oauthenticator.cpp
+  src/core/appearance.cpp
 
   src/utilities/strutils.cpp
   src/utilities/envutils.cpp
@@ -486,6 +500,7 @@ set(SOURCES
   src/utilities/coverutils.cpp
   src/utilities/screenutils.cpp
   src/utilities/textencodingutils.cpp
+  src/utilities/styleutils.cpp
   src/utilities/coveroptions.cpp
   src/utilities/musixmatchprovider.cpp
 
@@ -554,6 +569,7 @@ set(SOURCES
   src/engine/gststartup.cpp
   src/engine/gstengine.cpp
   src/engine/gstenginepipeline.cpp
+  src/engine/gstbusmessageevent.cpp
 
   src/analyzer/fht.cpp
   src/analyzer/analyzerbase.cpp
@@ -689,15 +705,12 @@ set(SOURCES
   src/lyrics/jsonlyricsprovider.cpp
   src/lyrics/htmllyricsprovider.cpp
   src/lyrics/ovhlyricsprovider.cpp
-  src/lyrics/lololyricsprovider.cpp
   src/lyrics/geniuslyricsprovider.cpp
   src/lyrics/musixmatchlyricsprovider.cpp
-  src/lyrics/chartlyricsprovider.cpp
   src/lyrics/songlyricscomlyricsprovider.cpp
   src/lyrics/azlyricscomlyricsprovider.cpp
   src/lyrics/elyricsnetlyricsprovider.cpp
   src/lyrics/letraslyricsprovider.cpp
-  src/lyrics/lyricfindlyricsprovider.cpp
   src/lyrics/lrcliblyricsprovider.cpp
 
   src/settings/settingsdialog.cpp
@@ -712,12 +725,13 @@ set(SOURCES
   src/settings/coverssettingspage.cpp
   src/settings/lyricssettingspage.cpp
   src/settings/networkproxysettingspage.cpp
+  src/settings/radiosettingspage.cpp
   src/settings/appearancesettingspage.cpp
   src/settings/contextsettingspage.cpp
   src/settings/notificationssettingspage.cpp
   src/settings/transcodersettingspage.cpp
 
-  src/dialogs/about.cpp
+  src/dialogs/aboutdialog.cpp
   src/dialogs/console.cpp
   src/dialogs/errordialog.cpp
   src/dialogs/edittagdialog.cpp
@@ -725,9 +739,7 @@ set(SOURCES
   src/dialogs/addstreamdialog.cpp
   src/dialogs/userpassdialog.cpp
   src/dialogs/deleteconfirmationdialog.cpp
-  src/dialogs/lastfmimportdialog.cpp
   src/dialogs/messagedialog.cpp
-  src/dialogs/snapdialog.cpp
   src/dialogs/saveplaylistsdialog.cpp
 
   src/widgets/autoexpandingtreeview.cpp
@@ -755,6 +767,7 @@ set(SOURCES
   src/widgets/tracksliderslider.cpp
   src/widgets/loginstatewidget.cpp
   src/widgets/ratingwidget.cpp
+  src/widgets/ratingpainter.cpp
   src/widgets/resizabletextedit.cpp
 
   src/osd/osdbase.cpp
@@ -784,6 +797,9 @@ set(SOURCES
   src/radios/radiochannel.cpp
   src/radios/somafmservice.cpp
   src/radios/radioparadiseservice.cpp
+  src/radios/radiobrowserservice.cpp
+  src/radios/radiobrowsersearchview.cpp
+  src/radios/radiobrowsersearchmodel.cpp
   src/radios/radiomimedata.cpp
 
   src/scrobbler/audioscrobbler.cpp
@@ -794,7 +810,6 @@ set(SOURCES
   src/scrobbler/scrobblemetadata.cpp
   src/scrobbler/lastfmscrobbler.cpp
   src/scrobbler/listenbrainzscrobbler.cpp
-  src/scrobbler/lastfmimport.cpp
 
   src/organize/organize.cpp
   src/organize/organizeformat.cpp
@@ -850,7 +865,6 @@ set(HEADERS
   src/core/networkaccessmanager.h
   src/core/threadsafenetworkdiskcache.h
   src/core/networktimeouts.h
-  src/core/qtfslistener.h
   src/core/settings.h
   src/core/songloader.h
   src/core/taskmanager.h
@@ -865,6 +879,7 @@ set(HEADERS
   src/core/httpbaserequest.h
   src/core/jsonbaserequest.h
   src/core/oauthenticator.h
+  src/core/appearance.h
 
   src/tagreader/tagreaderclient.h
   src/tagreader/tagreaderreply.h
@@ -988,15 +1003,12 @@ set(HEADERS
   src/lyrics/jsonlyricsprovider.h
   src/lyrics/htmllyricsprovider.h
   src/lyrics/ovhlyricsprovider.h
-  src/lyrics/lololyricsprovider.h
   src/lyrics/geniuslyricsprovider.h
   src/lyrics/musixmatchlyricsprovider.h
-  src/lyrics/chartlyricsprovider.h
   src/lyrics/songlyricscomlyricsprovider.h
   src/lyrics/azlyricscomlyricsprovider.h
   src/lyrics/elyricsnetlyricsprovider.h
   src/lyrics/letraslyricsprovider.h
-  src/lyrics/lyricfindlyricsprovider.h
   src/lyrics/lrcliblyricsprovider.h
 
   src/settings/settingsdialog.h
@@ -1011,12 +1023,13 @@ set(HEADERS
   src/settings/coverssettingspage.h
   src/settings/lyricssettingspage.h
   src/settings/networkproxysettingspage.h
+  src/settings/radiosettingspage.h
   src/settings/appearancesettingspage.h
   src/settings/contextsettingspage.h
   src/settings/notificationssettingspage.h
   src/settings/transcodersettingspage.h
 
-  src/dialogs/about.h
+  src/dialogs/aboutdialog.h
   src/dialogs/errordialog.h
   src/dialogs/console.h
   src/dialogs/edittagdialog.h
@@ -1024,9 +1037,7 @@ set(HEADERS
   src/dialogs/addstreamdialog.h
   src/dialogs/userpassdialog.h
   src/dialogs/deleteconfirmationdialog.h
-  src/dialogs/lastfmimportdialog.h
   src/dialogs/messagedialog.h
-  src/dialogs/snapdialog.h
   src/dialogs/saveplaylistsdialog.h
 
   src/widgets/autoexpandingtreeview.h
@@ -1081,6 +1092,9 @@ set(HEADERS
   src/radios/radiomimedata.h
   src/radios/somafmservice.h
   src/radios/radioparadiseservice.h
+  src/radios/radiobrowserservice.h
+  src/radios/radiobrowsersearchview.h
+  src/radios/radiobrowsersearchmodel.h
 
   src/scrobbler/audioscrobbler.h
   src/scrobbler/scrobblersettingsservice.h
@@ -1088,7 +1102,6 @@ set(HEADERS
   src/scrobbler/scrobblercache.h
   src/scrobbler/lastfmscrobbler.h
   src/scrobbler/listenbrainzscrobbler.h
-  src/scrobbler/lastfmimport.h
 
   src/organize/organize.h
   src/organize/organizeformatvalidator.h
@@ -1165,6 +1178,7 @@ set(UI
   src/settings/coverssettingspage.ui
   src/settings/lyricssettingspage.ui
   src/settings/networkproxysettingspage.ui
+  src/settings/radiosettingspage.ui
   src/settings/appearancesettingspage.ui
   src/settings/notificationssettingspage.ui
   src/settings/transcodersettingspage.ui
@@ -1172,14 +1186,13 @@ set(UI
   src/equalizer/equalizer.ui
   src/equalizer/equalizerslider.ui
 
-  src/dialogs/about.ui
+  src/dialogs/aboutdialog.ui
   src/dialogs/errordialog.ui
   src/dialogs/console.ui
   src/dialogs/edittagdialog.ui
   src/dialogs/trackselectiondialog.ui
   src/dialogs/addstreamdialog.ui
   src/dialogs/userpassdialog.ui
-  src/dialogs/lastfmimportdialog.ui
   src/dialogs/messagedialog.ui
   src/dialogs/saveplaylistsdialog.ui
 
@@ -1193,6 +1206,7 @@ set(UI
   src/streaming/streamingsearchview.ui
 
   src/radios/radioviewcontainer.ui
+  src/radios/radiobrowsersearchview.ui
 
   src/organize/organizedialog.ui
   src/organize/organizeerrordialog.ui
@@ -1217,6 +1231,17 @@ set(UI
 
 if(UNIX)
   optional_source(UNIX SOURCES src/core/unixsignalwatcher.cpp HEADERS src/core/unixsignalwatcher.h)
+endif()
+
+if(LINUX)
+  list(APPEND SOURCES src/core/filesystemwatcherinotify.cpp)
+  list(APPEND HEADERS src/core/filesystemwatcherinotify.h)
+elseif(WIN32)
+  list(APPEND SOURCES src/core/filesystemwatcherwin.cpp src/core/filesystemwatcherwinthread.cpp)
+  list(APPEND HEADERS src/core/filesystemwatcherwin.h src/core/filesystemwatcherwinthread.h)
+else()
+  list(APPEND SOURCES src/core/filesystemwatcherqt.cpp)
+  list(APPEND HEADERS src/core/filesystemwatcherqt.h)
 endif()
 
 if(APPLE)
@@ -1258,8 +1283,8 @@ optional_source(HAVE_STREAMTAGREADER
 )
 
 optional_source(HAVE_DISCORD_RPC
-  SOURCES src/discord/richpresence.cpp
-  HEADERS src/discord/richpresence.h
+  SOURCES src/discord/discordrpc.cpp src/discord/discordrichpresence.cpp src/discord/discordpresence.cpp
+  HEADERS src/discord/discordrpc.h src/discord/discordrichpresence.h
 )
 
 if(HAVE_GLOBALSHORTCUTS)
@@ -1299,17 +1324,18 @@ endif()
 optional_source(HAVE_ALSA SOURCES src/engine/alsadevicefinder.cpp src/engine/alsapcmdevicefinder.cpp)
 optional_source(HAVE_PULSE SOURCES src/engine/pulsedevicefinder.cpp)
 optional_source(MSVC SOURCES src/engine/uwpdevicefinder.cpp src/engine/asiodevicefinder.cpp)
+optional_source(MSVC SOURCES src/core/winsystemmediatransportcontrols.cpp HEADERS src/core/winsystemmediatransportcontrols.h)
 optional_source(HAVE_CHROMAPRINT SOURCES src/engine/chromaprinter.cpp)
 
-optional_source(HAVE_MUSICBRAINZ
+optional_source(HAVE_TAGFETCHER
   SOURCES
-    src/musicbrainz/acoustidclient.cpp
-    src/musicbrainz/musicbrainzclient.cpp
-    src/musicbrainz/tagfetcher.cpp
+    src/tagfetcher/acoustidclient.cpp
+    src/tagfetcher/musicbrainzclient.cpp
+    src/tagfetcher/tagfetcher.cpp
   HEADERS
-    src/musicbrainz/acoustidclient.h
-    src/musicbrainz/musicbrainzclient.h
-    src/musicbrainz/tagfetcher.h
+    src/tagfetcher/acoustidclient.h
+    src/tagfetcher/musicbrainzclient.h
+    src/tagfetcher/tagfetcher.h
 )
 
 optional_source(HAVE_EBUR128 SOURCES src/engine/ebur128analysis.cpp)
@@ -1327,6 +1353,25 @@ if(HAVE_MPRIS2)
   qt_add_dbus_adaptor(SOURCES src/mpris2/org.mpris.MediaPlayer2.Playlists.xml src/mpris2/mpris2.h mpris::Mpris2 mpris2_playlists Mpris2Playlists)
 endif()
 
+optional_source(HAVE_WAVEFORM
+  SOURCES
+    src/waveform/waveformbuilder.cpp
+    src/waveform/waveformpipeline.cpp
+    src/waveform/waveformloader.cpp
+    src/waveform/waveformcontroller.cpp
+    src/waveform/waveformrenderer.cpp
+    src/waveform/waveformproxystyle.cpp
+    src/settings/waveformsettingspage.cpp
+  HEADERS
+    src/waveform/waveformpipeline.h
+    src/waveform/waveformloader.h
+    src/waveform/waveformcontroller.h
+    src/waveform/waveformproxystyle.h
+    src/settings/waveformsettingspage.h
+  UI
+    src/settings/waveformsettingspage.ui
+)
+
 optional_source(HAVE_MOODBAR
   SOURCES
     src/moodbar/moodbarbuilder.cpp
@@ -1336,8 +1381,6 @@ optional_source(HAVE_MOODBAR
     src/moodbar/moodbarpipeline.cpp
     src/moodbar/moodbarproxystyle.cpp
     src/moodbar/moodbarrenderer.cpp
-    src/engine/gstfastspectrumplugin.cpp
-    src/engine/gstfastspectrum.cpp
     src/settings/moodbarsettingspage.cpp
   HEADERS
     src/moodbar/moodbarcontroller.h
@@ -1349,6 +1392,8 @@ optional_source(HAVE_MOODBAR
   UI
     src/settings/moodbarsettingspage.ui
 )
+
+optional_source(HAVE_GSTFASTSPECTRUM SOURCES src/engine/gstfastspectrumplugin.cpp src/engine/gstfastspectrum.cpp)
 
 optional_source(HAVE_GIO SOURCES src/device/giolister.cpp HEADERS src/device/giolister.h)
 
@@ -1512,11 +1557,6 @@ if(LINUX AND LSB_RELEASE_EXEC AND DPKG_BUILDPACKAGE)
   add_subdirectory(debian)
 endif()
 
-if(HAVE_DISCORD_RPC)
-  add_subdirectory(3rdparty/discord-rpc)
-  target_include_directories(strawberry_lib PUBLIC 3rdparty/discord-rpc)
-endif()
-
 if(HAVE_TRANSLATIONS)
   qt_add_lupdate(strawberry_lib TS_FILES "${CMAKE_SOURCE_DIR}/src/translations/strawberry_en_US.ts" OPTIONS -locations none -no-ui-lines -no-obsolete)
   file(GLOB_RECURSE ts_files ${CMAKE_SOURCE_DIR}/src/translations/*.ts)
@@ -1565,7 +1605,7 @@ target_link_libraries(strawberry_lib PUBLIC
   $<$<BOOL:${HAVE_ALSA}>:ALSA::ALSA>
   $<$<BOOL:${HAVE_PULSE}>:PkgConfig::LIBPULSE>
   $<$<BOOL:${HAVE_CHROMAPRINT}>:PkgConfig::CHROMAPRINT>
-  $<$<BOOL:${HAVE_MOODBAR}>:PkgConfig::FFTW3>
+  $<$<BOOL:${HAVE_GSTFASTSPECTRUM}>:PkgConfig::FFTW3>
   $<$<BOOL:${HAVE_EBUR128}>:PkgConfig::LIBEBUR128>
   $<$<BOOL:${HAVE_X11_GLOBALSHORTCUTS}>:X11::X11_xcb>
   $<$<BOOL:${HAVE_GIO}>:PkgConfig::GIO>
@@ -1577,7 +1617,6 @@ target_link_libraries(strawberry_lib PUBLIC
   $<$<BOOL:${WIN32}>:dsound dwmapi ${GETOPT_LIBRARIES}>
   $<$<BOOL:${MSVC}>:WindowsApp>
   KDAB::kdsingleapplication
-  $<$<BOOL:${HAVE_DISCORD_RPC}>:discord-rpc>
 )
 
 if(APPLE)
@@ -1589,6 +1628,7 @@ if(APPLE)
     "-framework DiskArbitration"
     "-framework IOKit"
     "-framework ScriptingBridge"
+    "-framework UserNotifications"
   )
   if(HAVE_SPARKLE)
     target_include_directories(strawberry_lib SYSTEM PRIVATE ${SPARKLE}/Headers)

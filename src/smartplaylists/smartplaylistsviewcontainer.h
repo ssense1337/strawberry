@@ -70,7 +70,7 @@ class SmartPlaylistsViewContainer : public QWidget {
   void ItemsSelectedChanged();
   void ItemDoubleClicked(const QModelIndex &idx);
 
-  void RightClicked(const QPoint global_pos, const QModelIndex &idx);
+  void ShowSmartPlaylistContextMenu(const QPoint global_pos, const QModelIndex &idx);
 
   void AppendToPlaylist();
   void ReplaceCurrentPlaylist();
@@ -92,7 +92,6 @@ class SmartPlaylistsViewContainer : public QWidget {
   void RestoreDefaultsFromContext();
 
   void NewSmartPlaylistFinished();
-  void EditSmartPlaylistFinished();
 
  Q_SIGNALS:
   void AddToPlaylist(QMimeData *data);

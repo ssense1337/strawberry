@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2020-2025, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2020-2026, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,9 @@
 
 #include <memory>
 
-#include <QApplication>
-#include <QThread>
+#include <QtConcurrentRun>
+#include <QFuture>
+#include <QFutureWatcher>
 #include <QByteArray>
 #include <QVariant>
 #include <QString>
@@ -128,8 +129,6 @@ void GeniusLyricsProvider::OAuthFinished(const bool success, const QString &erro
 
 void GeniusLyricsProvider::StartSearch(const int id, const LyricsSearchRequest &request) {
 
-  Q_ASSERT(QThread::currentThread() != qApp->thread());
-
   if (!authenticated()) {
     EndSearch(id, request);
     return;
@@ -170,7 +169,7 @@ GeniusLyricsProvider::JsonObjectResult GeniusLyricsProvider::ParseJsonObject(QNe
       const QJsonObject json_object = json_document.object();
       if (json_object.contains("errors"_L1) && json_object["errors"_L1].isArray()) {
         const QJsonArray array_errors = json_object["errors"_L1].toArray();
-        for (const auto &value : array_errors) {
+        for (const QJsonValueConstRef &value : array_errors) {
           if (!value.isObject()) continue;
           const QJsonObject object_error = value.toObject();
           if (!object_error.contains("category"_L1) || !object_error.contains("code"_L1) || !object_error.contains("detail"_L1)) {
@@ -213,8 +212,6 @@ GeniusLyricsProvider::JsonObjectResult GeniusLyricsProvider::ParseJsonObject(QNe
 }
 
 void GeniusLyricsProvider::HandleSearchReply(QNetworkReply *reply, const int id) {
-
-  Q_ASSERT(QThread::currentThread() != qApp->thread());
 
   if (!replies_.contains(reply)) return;
   replies_.removeAll(reply);
@@ -333,8 +330,6 @@ void GeniusLyricsProvider::HandleSearchReply(QNetworkReply *reply, const int id)
 
 void GeniusLyricsProvider::HandleLyricReply(QNetworkReply *reply, const int search_id, const QUrl &url) {
 
-  Q_ASSERT(QThread::currentThread() != qApp->thread());
-
   if (!replies_.contains(reply)) return;
   replies_.removeAll(reply);
   QObject::disconnect(reply, nullptr, this, nullptr);
@@ -351,11 +346,13 @@ void GeniusLyricsProvider::HandleLyricReply(QNetworkReply *reply, const int sear
 
   if (reply->error() != QNetworkReply::NoError) {
     Error(QStringLiteral("%1 (%2)").arg(reply->errorString()).arg(reply->error()));
+    reply->readAll();  // QTBUG-135641
     EndSearch(search, lyric);
     return;
   }
   if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200) {
     Error(QStringLiteral("Received HTTP code %1").arg(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt()));
+    reply->readAll();  // QTBUG-135641
     EndSearch(search, lyric);
     return;
   }
@@ -370,22 +367,30 @@ void GeniusLyricsProvider::HandleLyricReply(QNetworkReply *reply, const int sear
   static const QRegularExpression start_tag(u"<div[^>]*>"_s);
   static const QRegularExpression end_tag(u"<\\/div>"_s);
   static const QRegularExpression lyrics_start(u"<div data-lyrics-container=[^>]+>"_s);
-
-  static const QRegularExpression regex_html_tag_span_trans(u"<span class=\"LyricsHeader__Translations[^>]*>[^<]*</span>"_s);
-  static const QRegularExpression regex_html_tag_div_ellipsis(u"<div class=\"LyricsHeader__TextEllipsis[^>]*>[^<]*</div>"_s);
-  static const QRegularExpression regex_html_tag_span_contribs(u"<span class=\"ContributorsCreditSong__Contributors[^>]*>[^<]*</span>"_s);
-  static const QRegularExpression regex_html_tag_div_bio(u"<div class=\"SongBioPreview__Container[^>]*>.*?</div>"_s);
+  static const QRegularExpression regex_html_lyrics_header(uR"((?(DEFINE)(?<balanced><div\b[^>]*>(?:[^<]++|<(?!/?div\b)|(?&balanced))*</div>))<div\b[^>]*class="LyricsHeader__Container[^"]*"[^>]*>(?:[^<]++|<(?!/?div\b)|(?&balanced))*</div>)"_s);
   static const QRegularExpression regex_html_tag_h2(u"<h2 [^>]*>[^<]*</h2>"_s);
-  static const QList<QRegularExpression> regex_removes{ regex_html_tag_span_trans, regex_html_tag_div_ellipsis, regex_html_tag_span_contribs, regex_html_tag_div_bio, regex_html_tag_h2 };
+  static const QList<QRegularExpression> regex_removes{ regex_html_lyrics_header, regex_html_tag_h2 };
 
-  const QString lyrics = HtmlLyricsProvider::ParseLyricsFromHTML(QString::fromUtf8(data), start_tag, end_tag, lyrics_start, true, regex_removes);
+   QFutureWatcher<QString> *watcher = new QFutureWatcher<QString>(this);
+  QObject::connect(watcher, &QFutureWatcher<QString>::finished, this, [this, watcher, search, lyric]() {
+    ParseLyricsFromHTMLFinished(watcher, search, lyric);
+  });
+  watcher->setFuture(QtConcurrent::run([content = QString::fromUtf8(data)]() {
+    return HtmlLyricsProvider::ParseLyricsFromHTML(content, start_tag, end_tag, lyrics_start, true, regex_removes);
+  }));
+
+}
+
+void GeniusLyricsProvider::ParseLyricsFromHTMLFinished(QFutureWatcher<QString> *watcher, GeniusLyricsSearchContextPtr search, const GeniusLyricsLyricContext &lyric) {
+
+  watcher->deleteLater();
+  const QString lyrics = watcher->result();
   if (!lyrics.isEmpty()) {
     LyricsSearchResult result(lyrics);
     result.artist = lyric.artist;
     result.title = lyric.title;
     search->results.append(result);
   }
-
   EndSearch(search, lyric);
 
 }
@@ -395,7 +400,7 @@ void GeniusLyricsProvider::EndSearch(GeniusLyricsSearchContextPtr search, const 
   if (search->requests_lyric_.contains(lyric.url)) {
     search->requests_lyric_.remove(lyric.url);
   }
-  if (search->requests_lyric_.count() == 0) {
+  if (search->requests_lyric_.size() == 0) {
     requests_search_.remove(search->id);
     EndSearch(search->id, search->request, search->results);
   }

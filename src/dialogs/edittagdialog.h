@@ -60,7 +60,7 @@ class LyricsProviders;
 class StreamingServices;
 class AlbumCoverChoiceController;
 class Ui_EditTagDialog;
-#ifdef HAVE_MUSICBRAINZ
+#ifdef HAVE_TAGFETCHER
 class TrackSelectionDialog;
 class TagFetcher;
 #endif
@@ -148,7 +148,7 @@ class EditTagDialog : public QDialog {
   void PreviousSong();
   void NextSong();
 
-  void SongSaveTagsComplete(TagReaderReplyPtr reply, const QString &filename, Song song, const UpdateCoverAction cover_action);
+  void SongSaveTagsComplete(TagReaderReplyPtr reply, const QString &filename, Song song, const EditTagDialog::UpdateCoverAction cover_action);
 
  private:
   struct FieldData {
@@ -202,7 +202,7 @@ class EditTagDialog : public QDialog {
   const SharedPtr<CoverProviders> cover_providers_;
 
   AlbumCoverChoiceController *album_cover_choice_controller_;
-#ifdef HAVE_MUSICBRAINZ
+#ifdef HAVE_TAGFETCHER
   TagFetcher *tag_fetcher_;
   TrackSelectionDialog *results_dialog_;
 #endif
@@ -222,6 +222,8 @@ class EditTagDialog : public QDialog {
 
   quint64 summary_cover_art_id_;
   quint64 tags_cover_art_id_;
+  QString summary_text_;
+  QString tags_summary_text_;
   bool cover_art_is_set_;
 
   QPushButton *previous_button_;

@@ -58,7 +58,7 @@ class CollectionWatcher : public QObject {
                              const SharedPtr<CollectionBackend> backend,
                              QObject *parent = nullptr);
 
-  ~CollectionWatcher();
+  ~CollectionWatcher() override;
 
   Song::Source source() const { return source_; }
 
@@ -106,13 +106,15 @@ class CollectionWatcher : public QObject {
   // Multiple calls to FindSongsInSubdirectory during one transaction will only result in one call to CollectionBackend::FindSongsInDirectory.
   class ScanTransaction {
    public:
-    ScanTransaction(CollectionWatcher *watcher, const int dir, const bool incremental, const bool ignores_mtime, const bool mark_songs_unavailable);
+    ScanTransaction(CollectionWatcher *watcher, const int dir_id, const bool incremental, const bool ignores_mtime);
     ~ScanTransaction();
 
     SongList FindSongsInSubdirectory(const QString &path);
     bool HasSongsWithMissingFingerprint(const QString &path);
     bool HasSongsWithMissingLoudnessCharacteristics(const QString &path);
     bool HasSeenSubdir(const QString &path);
+    bool HasScannedPath(const QString &path);
+    void MarkPathScanned(const QString &path);
     void SetKnownSubdirs(const CollectionSubdirectoryList &subdirs);
     CollectionSubdirectoryList GetImmediateSubdirs(const QString &path);
     CollectionSubdirectoryList GetAllSubdirs();
@@ -140,11 +142,10 @@ class CollectionWatcher : public QObject {
    private:
     ScanTransaction &operator=(const ScanTransaction &transaction) { Q_UNUSED(transaction); return *this; }
 
-    int task_id_;
-    quint64 progress_;
-    quint64 progress_max_;
+    CollectionWatcher *watcher_;
 
     int dir_id_;
+
     // Incremental scan enters a directory only if it has changed since the last scan.
     bool incremental_;
     // This type of scan updates every file in a folder that's being scanned.
@@ -157,7 +158,10 @@ class CollectionWatcher : public QObject {
     bool mark_songs_unavailable_;
     int expire_unavailable_songs_days_;
 
-    CollectionWatcher *watcher_;
+    int task_id_;
+
+    quint64 progress_max_;
+    quint64 progress_;
 
     QMultiMap<QString, Song> cached_songs_;
     bool cached_songs_dirty_;
@@ -170,6 +174,8 @@ class CollectionWatcher : public QObject {
 
     CollectionSubdirectoryList known_subdirs_;
     bool known_subdirs_dirty_;
+
+    QSet<QString> scanned_paths_;
   };
 
  private Q_SLOTS:

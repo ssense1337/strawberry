@@ -96,7 +96,7 @@ CollectionSettingsPage::CollectionSettingsPage(SettingsDialog *dialog,
   QObject::connect(ui_->add_directory, &QPushButton::clicked, this, &CollectionSettingsPage::AddDirectory);
   QObject::connect(ui_->remove_directory, &QPushButton::clicked, this, &CollectionSettingsPage::RemoveDirectory);
 
-#ifdef HAVE_SONGFINGERPRINTING
+#ifdef HAVE_SONGTRACKING
   QObject::connect(ui_->song_tracking, &QCheckBox::toggled, this, &CollectionSettingsPage::SongTrackingToggled);
 #endif
 
@@ -113,7 +113,7 @@ CollectionSettingsPage::CollectionSettingsPage(SettingsDialog *dialog,
 
   QObject::connect(ui_->button_save_stats, &QPushButton::clicked, this, &CollectionSettingsPage::WriteAllSongsStatisticsToFiles);
 
-#ifndef HAVE_SONGFINGERPRINTING
+#ifndef HAVE_SONGTRACKING
   ui_->song_tracking->hide();
 #endif
 
@@ -148,36 +148,36 @@ void CollectionSettingsPage::Load() {
 
   s.beginGroup(kSettingsGroup);
 
-  ui_->startup_scan->setChecked(s.value(kStartupScan, true).toBool());
-  ui_->monitor->setChecked(s.value(kMonitor, true).toBool());
-  ui_->song_tracking->setChecked(s.value(kSongTracking, false).toBool());
-  ui_->mark_songs_unavailable->setChecked(ui_->song_tracking->isChecked() ? true : s.value(kMarkSongsUnavailable, true).toBool());
-  ui_->song_ebur128_loudness_analysis->setChecked(s.value(kSongENUR128LoudnessAnalysis, false).toBool());
-  ui_->expire_unavailable_songs_days->setValue(s.value(kExpireUnavailableSongs, 60).toInt());
+  ui_->startup_scan->setChecked(s.value(kStartupScan, kDefaultStartupScan).toBool());
+  ui_->monitor->setChecked(s.value(kMonitor, kDefaultMonitor).toBool());
+  ui_->song_tracking->setChecked(s.value(kSongTracking, kDefaultSongTracking).toBool());
+  ui_->mark_songs_unavailable->setChecked(ui_->song_tracking->isChecked() ? true : s.value(kMarkSongsUnavailable, kDefaultMarkSongsUnavailable).toBool());
+  ui_->song_ebur128_loudness_analysis->setChecked(s.value(kSongENUR128LoudnessAnalysis, kDefaultSongENUR128LoudnessAnalysis).toBool());
+  ui_->expire_unavailable_songs_days->setValue(s.value(kExpireUnavailableSongs, kDefaultExpireUnavailableSongs).toInt());
 
   QStringList filters = s.value(kCoverArtPatterns, QStringList() << u"front"_s << u"cover"_s).toStringList();
   ui_->cover_art_patterns->setText(filters.join(u','));
 
-  ui_->auto_open->setChecked(s.value(kAutoOpen, true).toBool());
-  ui_->show_dividers->setChecked(s.value(kShowDividers, true).toBool());
-  ui_->pretty_covers->setChecked(s.value(kPrettyCovers, true).toBool());
-  ui_->various_artists->setChecked(s.value(kVariousArtists, true).toBool());
-  ui_->checkbox_skip_articles_for_artists->setChecked(s.value(kSkipArticlesForArtists, true).toBool());
-  ui_->checkbox_skip_articles_for_albums->setChecked(s.value(kSkipArticlesForAlbums, false).toBool());
-  ui_->checkbox_use_sort_tags->setChecked(s.value(kUseSortTags, true).toBool());
+  ui_->auto_open->setChecked(s.value(kAutoOpen, kDefaultAutoOpen).toBool());
+  ui_->show_dividers->setChecked(s.value(kShowDividers, kDefaultShowDividers).toBool());
+  ui_->pretty_covers->setChecked(s.value(kPrettyCovers, kDefaultPrettyCovers).toBool());
+  ui_->various_artists->setChecked(s.value(kVariousArtists, kDefaultVariousArtists).toBool());
+  ui_->checkbox_skip_articles_for_artists->setChecked(s.value(kSkipArticlesForArtists, kDefaultSkipArticlesForArtists).toBool());
+  ui_->checkbox_skip_articles_for_albums->setChecked(s.value(kSkipArticlesForAlbums, kDefaultSkipArticlesForAlbums).toBool());
+  ui_->checkbox_use_sort_tags->setChecked(s.value(kUseSortTags, kDefaultUseSortTags).toBool());
 
   ui_->spinbox_cache_size->setValue(s.value(kSettingsCacheSize, kSettingsCacheSizeDefault).toInt());
-  ui_->combobox_cache_size->setCurrentIndex(ui_->combobox_cache_size->findData(s.value(kSettingsCacheSizeUnit, static_cast<int>(CacheSizeUnit::MB)).toInt()));
-  ui_->checkbox_disk_cache->setChecked(s.value(kSettingsDiskCacheEnable, false).toBool());
+  ui_->combobox_cache_size->setCurrentIndex(ui_->combobox_cache_size->findData(s.value(kSettingsCacheSizeUnit, static_cast<int>(kDefaultSettingsCacheSizeUnit)).toInt()));
+  ui_->checkbox_disk_cache->setChecked(s.value(kSettingsDiskCacheEnable, kDefaultSettingsDiskCacheEnable).toBool());
   ui_->spinbox_disk_cache_size->setValue(s.value(kSettingsDiskCacheSize, kSettingsDiskCacheSizeDefault).toInt());
-  ui_->combobox_disk_cache_size->setCurrentIndex(ui_->combobox_disk_cache_size->findData(s.value(kSettingsDiskCacheSizeUnit, static_cast<int>(CacheSizeUnit::MB)).toInt()));
+  ui_->combobox_disk_cache_size->setCurrentIndex(ui_->combobox_disk_cache_size->findData(s.value(kSettingsDiskCacheSizeUnit, static_cast<int>(kDefaultSettingsDiskCacheSizeUnit)).toInt()));
 
-  ui_->checkbox_save_playcounts->setChecked(s.value(kSavePlayCounts, false).toBool());
-  ui_->checkbox_save_ratings->setChecked(s.value(kSaveRatings, false).toBool());
-  ui_->checkbox_overwrite_playcount->setChecked(s.value(kOverwritePlaycount, false).toBool());
-  ui_->checkbox_overwrite_rating->setChecked(s.value(kOverwriteRating, false).toBool());
+  ui_->checkbox_save_playcounts->setChecked(s.value(kSavePlayCounts, kDefaultSavePlayCounts).toBool());
+  ui_->checkbox_save_ratings->setChecked(s.value(kSaveRatings, kDefaultSaveRatings).toBool());
+  ui_->checkbox_overwrite_playcount->setChecked(s.value(kOverwritePlaycount, kDefaultOverwritePlaycount).toBool());
+  ui_->checkbox_overwrite_rating->setChecked(s.value(kOverwriteRating, kDefaultOverwriteRating).toBool());
 
-  ui_->checkbox_delete_files->setChecked(s.value(kDeleteFiles, false).toBool());
+  ui_->checkbox_delete_files->setChecked(s.value(kDeleteFiles, kDefaultDeleteFiles).toBool());
 
   s.endGroup();
 
@@ -229,15 +229,13 @@ void CollectionSettingsPage::Save() {
 
   s.endGroup();
 
-  const QMap<int, CollectionDirectory> dirs = collection_directory_model_->directories();
-  for (const CollectionDirectory &dir : dirs) {
+  for (const CollectionDirectory &dir : collection_directory_model_->directories()) {
     if (!collectionsettings_directory_model_->paths().contains(dir.path)) {
       collection_backend_->RemoveDirectoryAsync(dir);
     }
   }
 
-  const QStringList paths = collectionsettings_directory_model_->paths();
-  for (const QString &path : paths) {
+  for (const QString &path : collectionsettings_directory_model_->paths()) {
     if (!collection_directory_model_->paths().contains(path)) {
       collection_backend_->AddDirectoryAsync(path);
     }
@@ -261,11 +259,11 @@ void CollectionSettingsPage::AddDirectory() {
       return;
     }
     collectionsettings_directory_model_->AddDirectory(path);
+
+    s.setValue(kLastPath, path);
+
+    set_changed();
   }
-
-  s.setValue(kLastPath, path);
-
-  set_changed();
 
 }
 
@@ -316,7 +314,7 @@ void CollectionSettingsPage::ClearPixmapDiskCache() {
 
 void CollectionSettingsPage::CacheSizeUnitChanged(int index) {
 
-  const CacheSizeUnit cache_size_unit = static_cast<CacheSizeUnit>(ui_->combobox_cache_size->currentData(index).toInt());
+  const CacheSizeUnit cache_size_unit = static_cast<CacheSizeUnit>(ui_->combobox_cache_size->itemData(index).toInt());
 
   switch (cache_size_unit) {
     case CacheSizeUnit::MB:
@@ -331,7 +329,7 @@ void CollectionSettingsPage::CacheSizeUnitChanged(int index) {
 
 void CollectionSettingsPage::DiskCacheSizeUnitChanged(int index) {
 
-  const CacheSizeUnit cache_size_unit = static_cast<CacheSizeUnit>(ui_->combobox_disk_cache_size->currentData(index).toInt());
+  const CacheSizeUnit cache_size_unit = static_cast<CacheSizeUnit>(ui_->combobox_disk_cache_size->itemData(index).toInt());
 
   switch (cache_size_unit) {
     case CacheSizeUnit::GB:

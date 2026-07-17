@@ -73,6 +73,7 @@ CollectionFilterWidget::CollectionFilterWidget(QWidget *parent)
       group_by_dialog_(new GroupByDialog(this)),
       groupings_manager_(nullptr),
       filter_age_menu_(nullptr),
+      filter_rating_menu_(nullptr),
       group_by_menu_(nullptr),
       collection_menu_(nullptr),
       group_by_group_(nullptr),
@@ -93,6 +94,8 @@ CollectionFilterWidget::CollectionFilterWidget(QWidget *parent)
   // Icons
   ui_->options->setIcon(IconLoader::Load(u"configure"_s));
 
+  group_by_menu_ = new QMenu(tr("Group by"), this);
+
   // Filter by age
   QActionGroup *filter_age_group = new QActionGroup(this);
   filter_age_group->addAction(ui_->filter_age_all);
@@ -102,7 +105,7 @@ CollectionFilterWidget::CollectionFilterWidget(QWidget *parent)
   filter_age_group->addAction(ui_->filter_age_three_months);
   filter_age_group->addAction(ui_->filter_age_year);
 
-  filter_age_menu_ = new QMenu(tr("Show"), this);
+  filter_age_menu_ = new QMenu(tr("Filter by age"), this);
   filter_age_menu_->addActions(filter_age_group->actions());
 
   filter_max_ages_[ui_->filter_age_all] = -1;
@@ -112,7 +115,24 @@ CollectionFilterWidget::CollectionFilterWidget(QWidget *parent)
   filter_max_ages_[ui_->filter_age_three_months] = 60 * 60 * 24 * 30 * 3;
   filter_max_ages_[ui_->filter_age_year] = 60 * 60 * 24 * 365;
 
-  group_by_menu_ = new QMenu(tr("Group by"), this);
+  // Filter by rating
+  QActionGroup *filter_rating_group = new QActionGroup(this);
+  filter_rating_group->addAction(ui_->filter_min_rating_all);
+  filter_rating_group->addAction(ui_->filter_min_rating_non_null);
+  filter_rating_group->addAction(ui_->filter_min_rating_20p);
+  filter_rating_group->addAction(ui_->filter_min_rating_40p);
+  filter_rating_group->addAction(ui_->filter_min_rating_60p);
+  filter_rating_group->addAction(ui_->filter_min_rating_80p);
+
+  filter_rating_menu_ = new QMenu(tr("Filter by rating"), this);
+  filter_rating_menu_->addActions(filter_rating_group->actions());
+
+  filter_min_rating_[ui_->filter_min_rating_all] = -1.0F;
+  filter_min_rating_[ui_->filter_min_rating_non_null] = 0.0F;
+  filter_min_rating_[ui_->filter_min_rating_20p] = 0.2F;
+  filter_min_rating_[ui_->filter_min_rating_40p] = 0.4F;
+  filter_min_rating_[ui_->filter_min_rating_60p] = 0.6F;
+  filter_min_rating_[ui_->filter_min_rating_80p] = 0.8F;
 
   QObject::connect(ui_->save_grouping, &QAction::triggered, this, &CollectionFilterWidget::SaveGroupBy);
   QObject::connect(ui_->manage_groupings, &QAction::triggered, this, &CollectionFilterWidget::ShowGroupingManager);
@@ -120,10 +140,12 @@ CollectionFilterWidget::CollectionFilterWidget(QWidget *parent)
   // Collection config menu
   collection_menu_ = new QMenu(tr("Display options"), this);
   collection_menu_->setIcon(ui_->options->icon());
-  collection_menu_->addMenu(filter_age_menu_);
   collection_menu_->addMenu(group_by_menu_);
   collection_menu_->addAction(ui_->save_grouping);
   collection_menu_->addAction(ui_->manage_groupings);
+  collection_menu_->addSeparator();
+  collection_menu_->addMenu(filter_age_menu_);
+  collection_menu_->addMenu(filter_rating_menu_);
   collection_menu_->addSeparator();
   ui_->options->setMenu(collection_menu_);
 
@@ -144,7 +166,11 @@ void CollectionFilterWidget::Init(CollectionModel *model, CollectionFilter *filt
     QObject::disconnect(group_by_dialog_, nullptr, model_, nullptr);
     const QList<QAction*> actions = filter_max_ages_.keys();
     for (QAction *action : actions) {
-      QObject::disconnect(action, &QAction::triggered, model_, nullptr);
+      QObject::disconnect(action, &QAction::triggered, this, nullptr);
+    }
+    const QList<QAction*> filter_actions = filter_min_rating_.keys();
+    for (QAction *action : filter_actions) {
+      QObject::disconnect(action, &QAction::triggered, this, nullptr);
     }
   }
 
@@ -160,6 +186,12 @@ void CollectionFilterWidget::Init(CollectionModel *model, CollectionFilter *filt
   for (QAction *action : actions) {
     const int filter_max_age = filter_max_ages_.value(action);
     QObject::connect(action, &QAction::triggered, this, [this, filter_max_age]() { model_->SetFilterMaxAge(filter_max_age); } );
+  }
+
+  const QList<QAction*> filter_actions = filter_min_rating_.keys();
+  for (QAction *action : filter_actions) {
+    const float filter_min_rate = filter_min_rating_.value(action);
+    QObject::connect(action, &QAction::triggered, this, [this, filter_min_rate]() { model_->SetFilterMinRating(filter_min_rate); } );
   }
 
   // Load settings
@@ -206,7 +238,7 @@ void CollectionFilterWidget::ReloadSettings() {
 
   Settings s;
   s.beginGroup(AppearanceSettings::kSettingsGroup);
-  int iconsize = s.value(AppearanceSettings::kIconSizeConfigureButtons, 20).toInt();
+  int iconsize = s.value(AppearanceSettings::kIconSizeConfigureButtons, AppearanceSettings::kDefaultIconSizeConfigureButtons).toInt();
   s.endGroup();
   ui_->options->setIconSize(QSize(iconsize, iconsize));
   ui_->search_field->setIconSize(iconsize);
@@ -249,6 +281,7 @@ void CollectionFilterWidget::UpdateGroupByActions() {
 
   if (group_by_group_) {
     QObject::disconnect(group_by_group_, nullptr, this, nullptr);
+    qDeleteAll(group_by_group_->actions());
     delete group_by_group_;
   }
 
@@ -292,12 +325,12 @@ QActionGroup *CollectionFilterWidget::CreateGroupByActions(const QString &saved_
   // Read saved groupings
   Settings s;
   s.beginGroup(saved_groupings_settings_group);
-  int version = s.value("version").toInt();
+  int version = s.value(SavedGroupingManager::kVersion).toInt();
   if (version == 1) {
     QStringList saved = s.childKeys();
     for (int i = 0; i < saved.size(); ++i) {
       const QString &name = saved.at(i);
-      if (name == "version"_L1) continue;
+      if (name == QLatin1String(SavedGroupingManager::kVersion)) continue;
       QByteArray bytes = s.value(name).toByteArray();
       QDataStream ds(&bytes, QIODevice::ReadOnly);
       CollectionModel::Grouping g;
@@ -309,7 +342,7 @@ QActionGroup *CollectionFilterWidget::CreateGroupByActions(const QString &saved_
     QStringList saved = s.childKeys();
     for (int i = 0; i < saved.size(); ++i) {
       const QString &name = saved.at(i);
-      if (name == "version"_L1) continue;
+      if (name == QLatin1String(SavedGroupingManager::kVersion)) continue;
       s.remove(name);
     }
   }
@@ -357,7 +390,7 @@ void CollectionFilterWidget::SaveGroupBy() {
   QByteArray buffer;
   QDataStream datastream(&buffer, QIODevice::WriteOnly);
   datastream << model_->GetGroupBy();
-  s.setValue("version", u"1"_s);
+  s.setValue(SavedGroupingManager::kVersion, u"1"_s);
   s.setValue(QUrl::toPercentEncoding(name), buffer);
   s.endGroup();
 
@@ -402,6 +435,8 @@ void CollectionFilterWidget::GroupByClicked(QAction *action) {
     group_by_dialog_->show();
     return;
   }
+
+  if (!model_) return;
 
   CollectionModel::Grouping g = action->property("group_by").value<CollectionModel::Grouping>();
   model_->SetGroupBy(g);
@@ -457,6 +492,8 @@ void CollectionFilterWidget::SetFilterMode(CollectionFilterOptions::FilterMode f
   ui_->search_field->clear();
   ui_->search_field->setEnabled(filter_mode == CollectionFilterOptions::FilterMode::All);
 
+  if (!model_) return;
+
   model_->SetFilterMode(filter_mode);
 
 }
@@ -505,6 +542,8 @@ void CollectionFilterWidget::keyReleaseEvent(QKeyEvent *e) {
 
 void CollectionFilterWidget::FilterTextChanged(const QString &text) {
 
+  if (!model_) return;
+
   const bool delay = (delay_behaviour_ == DelayBehaviour::AlwaysDelayed) || (delay_behaviour_ == DelayBehaviour::DelayedOnLargeLibraries && !text.isEmpty() && text.length() < 3 && model_->total_song_count() >= 100000);
 
   if (delay) {
@@ -519,7 +558,7 @@ void CollectionFilterWidget::FilterTextChanged(const QString &text) {
 
 void CollectionFilterWidget::FilterDelayTimeout() {
 
-  if (filter_applies_to_model_) {
+  if (filter_applies_to_model_ && filter_) {
     filter_->SetFilterString(ui_->search_field->text());
   }
 
