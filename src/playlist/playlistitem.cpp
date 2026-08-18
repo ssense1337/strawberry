@@ -23,8 +23,6 @@
 
 #include <memory>
 
-#include <QtConcurrentRun>
-#include <QFuture>
 #include <QUuid>
 #include <QColor>
 
@@ -40,7 +38,7 @@
 using std::make_shared;
 using namespace Qt::Literals::StringLiterals;
 
-PlaylistItem::PlaylistItem(const Song::Source source, const QUuid &uuid, const bool signal) : source_(source), uuid_(uuid.isNull() ? QUuid::createUuid() : uuid), uuid_generated_(uuid.isNull()), signal_(signal), should_skip_(false) {}
+PlaylistItem::PlaylistItem(const Song::Source source, const QUuid &uuid, const bool signal) : source_(source), uuid_(uuid.isNull() ? QUuid::createUuid() : uuid), uuid_generated_(uuid.isNull()), signal_(signal), should_skip_(false), save_generation_(0) {}
 
 PlaylistItem::~PlaylistItem() = default;
 
@@ -126,14 +124,6 @@ void PlaylistItem::BindToQuery(SqlQuery *query) const {
 
   DatabaseSongMetadata().BindToQuery(query);
 
-}
-
-static Song ReloadPlaylistItem(PlaylistItemPtr item) {
-  return item->Reload();
-}
-
-QFuture<Song> PlaylistItem::BackgroundReload() {
-  return QtConcurrent::run(ReloadPlaylistItem, shared_from_this());
 }
 
 void PlaylistItem::SetBackgroundColor(short priority, const QColor &color) {

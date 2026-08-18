@@ -24,9 +24,6 @@
 
 #include "config.h"
 
-#include <memory>
-
-#include <QFuture>
 #include <QMetaType>
 #include <QList>
 #include <QMap>
@@ -46,9 +43,7 @@ class QAction;
 class SqlQuery;
 class SqlRow;
 
-using std::enable_shared_from_this;
-
-class PlaylistItem : public enable_shared_from_this<PlaylistItem> {
+class PlaylistItem {
  public:
   explicit PlaylistItem(const Song::Source source, const QUuid &uuid = QUuid(), const bool signal = false);
   virtual ~PlaylistItem();
@@ -96,8 +91,11 @@ class PlaylistItem : public enable_shared_from_this<PlaylistItem> {
 
   virtual bool InitFromQuery(const SqlRow &query) = 0;
   void BindToQuery(SqlQuery *query) const;
-  virtual Song Reload() { return Song(); }
-  QFuture<Song> BackgroundReload();
+
+  // Identifies the most recent edit made to this item through the playlist (e.g. inline tag editing).
+  // A caller starting an asynchronous write/reload round trip should capture the value returned by BumpSaveGeneration() and compare it against save_generation() once the round trip completes: a mismatch means a newer edit has since superseded it, so the (now stale) result must not be applied.
+  quint64 save_generation() const { return save_generation_; }
+  quint64 BumpSaveGeneration() { return ++save_generation_; }
 
   // Background colors.
   void SetBackgroundColor(const short priority, const QColor &color);
@@ -125,6 +123,7 @@ class PlaylistItem : public enable_shared_from_this<PlaylistItem> {
   bool uuid_generated_;
   bool signal_;
   bool should_skip_;
+  quint64 save_generation_;
 
   enum class DatabaseColumn {
     CollectionId
