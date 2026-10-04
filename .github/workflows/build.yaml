@@ -11,7 +11,7 @@ jobs:
   build-windows-mingw:
     name: Build Windows MinGW
     if: (github.event_name == 'push' && github.repository == 'strawberrymusicplayer/strawberry' && github.ref_name != 'l10n_master' && github.ref_name != 'macos') ||
-      (github.event_name == 'pull_request' && github.head_ref != 'l10n_master' && github.head_ref != 'macos') ||
+        (github.event_name == 'pull_request' && github.head_ref != 'l10n_master' && github.head_ref != 'macos') ||
         (github.event_name == 'release')
     runs-on: ubuntu-latest
     strategy:
@@ -70,9 +70,7 @@ jobs:
         env:
           PKG_CONFIG_PATH: /strawberry-mxe/usr/${{matrix.arch}}-w64-mingw32.shared/lib/pkgconfig
         run: >
-          cmake
-          -S .
-          -B build
+          cmake -S . -B build
           -DCMAKE_SYSTEM_NAME="Windows"
           -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}"
           -DCMAKE_FIND_ROOT_PATH=/strawberry-mxe/usr/${{matrix.arch}}-w64-mingw32.shared
@@ -235,7 +233,7 @@ jobs:
   build-windows-msvc:
     name: Build Windows MSVC
     if: (github.event_name == 'push' && github.repository == 'strawberrymusicplayer/strawberry' && github.ref_name != 'l10n_master' && github.ref_name != 'macos') ||
-      (github.event_name == 'pull_request' && github.head_ref != 'l10n_master' && github.head_ref != 'macos') ||
+        (github.event_name == 'pull_request' && github.head_ref != 'l10n_master' && github.head_ref != 'macos') ||
         (github.event_name == 'release')
     strategy:
       fail-fast: false
@@ -340,35 +338,12 @@ jobs:
         working-directory: downloads
         run: 7z x LockedList.zip
 
-      - name: Download NSIS Registry plugin
-        shell: cmd
-        working-directory: downloads
-        run: curl -f -O -L https://nsis.sourceforge.io/mediawiki/images/4/47/Registry.zip
-
-      - name: Extract NSIS Registry plugin
-        shell: cmd
-        working-directory: downloads
-        run: 7z x Registry.zip
-
-      - name: Download NSIS Inetc plugin
-        shell: cmd
-        working-directory: downloads
-        run: curl -f -O -L https://nsis.sourceforge.io/mediawiki/images/c/c9/Inetc.zip
-
-      - name: Extract NSIS Inetc plugin
-        shell: cmd
-        working-directory: downloads
-        run: 7z x Inetc.zip
-
       - name: Install NSIS plugins
         shell: cmd
         working-directory: downloads
         run: |
           copy "Plugins\LockedList64.dll" "C:\Program Files (x86)\NSIS\Plugins\"
           copy "Plugins\x86-unicode\LockedList.dll" "C:\Program Files (x86)\NSIS\Plugins\x86-unicode\"
-          copy "Desktop\Plugin\registry.dll" "C:\Program Files (x86)\NSIS\Plugins\"
-          copy "Desktop\Plugin\registry.dll" "C:\Program Files (x86)\NSIS\Plugins\x86-unicode\"
-          copy "Plugins\x86-unicode\INetC.dll" "C:\Program Files (x86)\NSIS\Plugins\x86-unicode\"
 
       - name: Setup MSVC Environment
         shell: pwsh
@@ -379,6 +354,7 @@ jobs:
           $vs_path = & $vswhere -latest -products * -requires $vc_tools_component -property installationPath
           if (-not $vs_path) { throw "Visual Studio with $vc_tools_component not found" }
           Write-Host "Using Visual Studio in $vs_path"
+          # Run vcvarsall.bat from a batch file to avoid cmd.exe quoting issues, and print the resulting environment.
           $vcvars_script = Join-Path $env:RUNNER_TEMP "vcvars.bat"
           Set-Content -Path $vcvars_script -Encoding ascii -Value "@call `"$vs_path\VC\Auxiliary\Build\vcvarsall.bat`" $vcvars_arch ${{env.sdk_version}} || exit /b 1`r`n@set"
           $vcvars_output = & cmd.exe /c $vcvars_script
@@ -386,6 +362,7 @@ jobs:
             $vcvars_output | Write-Host
             throw "vcvarsall.bat failed"
           }
+          # Export the variables vcvarsall.bat added or changed to the following steps.
           foreach ($line in $vcvars_output) {
             if ($line -match '^([^=]+)=(.*)$' -and [Environment]::GetEnvironmentVariable($matches[1]) -ne $matches[2]) {
               "$($matches[1])=$($matches[2])" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
@@ -425,10 +402,7 @@ jobs:
       - name: Run CMake
         shell: cmd
         run: >
-          cmake
-          -S .
-          -B build
-          -G "Ninja"
+          cmake -S . -B build -G "Ninja"
           -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}"
           -DCMAKE_PREFIX_PATH="${{env.prefix_path_forwardslash}}/lib/cmake"
           -DENABLE_WIN32_CONSOLE=${{env.enable_win32_console}}
