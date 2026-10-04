@@ -10,8 +10,8 @@ jobs:
 
   build-windows-mingw:
     name: Build Windows MinGW
-    if: (github.event_name == 'push' && github.repository == 'strawberrymusicplayer/strawberry' && github.ref_name != 'l10n_master') ||
-        (github.event_name == 'pull_request' && github.head_ref != 'l10n_master') ||
+    if: (github.event_name == 'push' && github.repository == 'strawberrymusicplayer/strawberry' && github.ref_name != 'l10n_master' && github.ref_name != 'macos') ||
+      (github.event_name == 'pull_request' && github.head_ref != 'l10n_master' && github.head_ref != 'macos') ||
         (github.event_name == 'release')
     runs-on: ubuntu-latest
     strategy:
@@ -42,6 +42,30 @@ jobs:
       - name: Add MXE directory to PATH
         run: echo "/strawberry-mxe/usr/bin" >> $GITHUB_PATH
 
+      - name: Restore ccache
+        if: github.event_name != 'release'
+        uses: actions/cache@v6
+        with:
+          path: ~/.ccache
+          key: ccache-${{github.job}}-${{matrix.arch}}-${{matrix.buildtype}}-${{github.run_id}}
+          restore-keys: ccache-${{github.job}}-${{matrix.arch}}-${{matrix.buildtype}}-
+
+      - name: Enable ccache
+        if: github.event_name != 'release'
+        run: |
+          ccache=/strawberry-mxe/.ccache/bin/ccache
+          if [ ! -x "${ccache}" ]; then
+            echo "::warning::${ccache} not found, building without ccache."
+            exit 0
+          fi
+          echo "CCACHE_DIR=${HOME}/.ccache" >> "${GITHUB_ENV}"
+          echo "CCACHE_BASEDIR=${GITHUB_WORKSPACE}" >> "${GITHUB_ENV}"
+          echo "CCACHE_NOHASHDIR=true" >> "${GITHUB_ENV}"
+          echo "CCACHE_MAXSIZE=750M" >> "${GITHUB_ENV}"
+          echo "CMAKE_C_COMPILER_LAUNCHER=${ccache}" >> "${GITHUB_ENV}"
+          echo "CMAKE_CXX_COMPILER_LAUNCHER=${ccache}" >> "${GITHUB_ENV}"
+          CCACHE_DIR="${HOME}/.ccache" "${ccache}" --zero-stats
+
       - name: Run CMake
         env:
           PKG_CONFIG_PATH: /strawberry-mxe/usr/${{matrix.arch}}-w64-mingw32.shared/lib/pkgconfig
@@ -66,9 +90,31 @@ jobs:
           -DENABLE_MTP=OFF
           -DENABLE_GPOD=OFF
           -DENABLE_SPOTIFY=OFF
+          -DCREATE_SOURCE_API_CREDENTIALS=OFF
+          -DAPI_CREDENTIALS_ENCRYPTION_KEY="$(openssl rand -hex 32)"
+          -DACOUSTID_API_KEY="${{secrets.ACOUSTID_API_KEY}}"
+          -DLASTFM_API_KEY="${{secrets.LASTFM_API_KEY}}"
+          -DLASTFM_SHARED_SECRET="${{secrets.LASTFM_SHARED_SECRET}}"
+          -DLISTENBRAINZ_CLIENT_ID="${{secrets.LISTENBRAINZ_CLIENT_ID}}"
+          -DLISTENBRAINZ_CLIENT_SECRET="${{secrets.LISTENBRAINZ_CLIENT_SECRET}}"
+          -DSPOTIFY_CLIENT_ID="${{secrets.SPOTIFY_CLIENT_ID}}"
+          -DSPOTIFY_CLIENT_SECRET="${{secrets.SPOTIFY_CLIENT_SECRET}}"
+          -DGENIUS_CLIENT_ID="${{secrets.GENIUS_CLIENT_ID}}"
+          -DGENIUS_CLIENT_SECRET="${{secrets.GENIUS_CLIENT_SECRET}}"
+          -DMUSIXMATCH_APP_ID="${{secrets.MUSIXMATCH_APP_ID}}"
+          -DMUSIXMATCH_APP_SECRET="${{secrets.MUSIXMATCH_APP_SECRET}}"
+          -DOPENTIDAL_CLIENT_ID="${{secrets.OPENTIDAL_CLIENT_ID}}"
+          -DOPENTIDAL_CLIENT_SECRET="${{secrets.OPENTIDAL_CLIENT_SECRET}}"
+          -DDISCOGS_CLIENT_ID="${{secrets.DISCOGS_CLIENT_ID}}"
+          -DDISCOGS_CLIENT_SECRET="${{secrets.DISCOGS_CLIENT_SECRET}}"
+          -DTIDAL_CLIENT_ID="${{secrets.TIDAL_CLIENT_ID}}"
 
       - name: Run Make
         run: cmake --build build --config "${{env.cmake_buildtype}}" --parallel $(nproc)
+
+      - name: Show ccache statistics
+        if: github.event_name != 'release' && env.CMAKE_CXX_COMPILER_LAUNCHER != ''
+        run: ${CMAKE_CXX_COMPILER_LAUNCHER} --show-stats
 
       - name: Create directories
         working-directory: build
@@ -188,8 +234,8 @@ jobs:
 
   build-windows-msvc:
     name: Build Windows MSVC
-    if: (github.event_name == 'push' && github.repository == 'strawberrymusicplayer/strawberry' && github.ref_name != 'l10n_master') ||
-        (github.event_name == 'pull_request' && github.head_ref != 'l10n_master') ||
+    if: (github.event_name == 'push' && github.repository == 'strawberrymusicplayer/strawberry' && github.ref_name != 'l10n_master' && github.ref_name != 'macos') ||
+      (github.event_name == 'pull_request' && github.head_ref != 'l10n_master' && github.head_ref != 'macos') ||
         (github.event_name == 'release')
     strategy:
       fail-fast: false
@@ -260,7 +306,7 @@ jobs:
       - name: Download Windows MSVC dependencies
         shell: cmd
         working-directory: downloads
-        run: curl -f -O -L https://github.com/strawberrymusicplayer/strawberry-msvc-dependencies/releases/latest/download/strawberry-msvc-${{matrix.arch}}-${{matrix.buildtype}}.tar.xz
+        run: curl -f -O -L https://github.com/strawberrymusicplayer/strawberry-msvc-dependencies/releases/download/0.1.272/strawberry-msvc-${{matrix.arch}}-${{matrix.buildtype}}.tar.xz
 
       - name: Extract Windows MSVC dependencies
         shell: bash
@@ -325,11 +371,26 @@ jobs:
           copy "Plugins\x86-unicode\INetC.dll" "C:\Program Files (x86)\NSIS\Plugins\x86-unicode\"
 
       - name: Setup MSVC Environment
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: ${{matrix.arch}}
-          sdk: ${{env.sdk_version}}
-          vsversion: 2022
+        shell: pwsh
+        run: |
+          $vcvars_arch = if ("${{matrix.arch}}" -eq "arm64") { "arm64" } else { "x64" }
+          $vc_tools_component = if ("${{matrix.arch}}" -eq "arm64") { "Microsoft.VisualStudio.Component.VC.Tools.ARM64" } else { "Microsoft.VisualStudio.Component.VC.Tools.x86.x64" }
+          $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+          $vs_path = & $vswhere -latest -products * -requires $vc_tools_component -property installationPath
+          if (-not $vs_path) { throw "Visual Studio with $vc_tools_component not found" }
+          Write-Host "Using Visual Studio in $vs_path"
+          $vcvars_script = Join-Path $env:RUNNER_TEMP "vcvars.bat"
+          Set-Content -Path $vcvars_script -Encoding ascii -Value "@call `"$vs_path\VC\Auxiliary\Build\vcvarsall.bat`" $vcvars_arch ${{env.sdk_version}} || exit /b 1`r`n@set"
+          $vcvars_output = & cmd.exe /c $vcvars_script
+          if ($LASTEXITCODE -ne 0 -or ($vcvars_output -match '^\[ERROR:')) {
+            $vcvars_output | Write-Host
+            throw "vcvarsall.bat failed"
+          }
+          foreach ($line in $vcvars_output) {
+            if ($line -match '^([^=]+)=(.*)$' -and [Environment]::GetEnvironmentVariable($matches[1]) -ne $matches[2]) {
+              "$($matches[1])=$($matches[2])" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            }
+          }
 
       - name: Checkout
         uses: actions/checkout@v7
@@ -349,6 +410,13 @@ jobs:
         shell: bash
         run: echo "enable_spotify=$(test -f "${{env.prefix_path_unix}}/lib/gstreamer-1.0/gstspotify.dll" && echo "ON" || echo "OFF")" >> $GITHUB_ENV
 
+      - name: Generate API credentials encryption key
+        shell: bash
+        run: |
+          key=$(openssl rand -hex 32)
+          echo "::add-mask::$key"
+          echo "api_credentials_encryption_key=$key" >> $GITHUB_ENV
+
       - name: Remove -lm from .pc files
         if: matrix.arch == 'arm64'
         shell: bash
@@ -363,7 +431,6 @@ jobs:
           -G "Ninja"
           -DCMAKE_BUILD_TYPE="${{env.cmake_buildtype}}"
           -DCMAKE_PREFIX_PATH="${{env.prefix_path_forwardslash}}/lib/cmake"
-          -DARCH="${{matrix.arch}}"
           -DENABLE_WIN32_CONSOLE=${{env.enable_win32_console}}
           -DPKG_CONFIG_EXECUTABLE="${{env.prefix_path_forwardslash}}/bin/pkg-config.exe"
           -DICU_ROOT="${{env.prefix_path_forwardslash}}"
@@ -372,6 +439,24 @@ jobs:
           -DENABLE_MTP=OFF
           -DENABLE_GPOD=OFF
           -DENABLE_SPOTIFY=${{env.enable_spotify}}
+          -DCREATE_SOURCE_API_CREDENTIALS=OFF
+          -DAPI_CREDENTIALS_ENCRYPTION_KEY="${{env.api_credentials_encryption_key}}"
+          -DACOUSTID_API_KEY="${{secrets.ACOUSTID_API_KEY}}"
+          -DLASTFM_API_KEY="${{secrets.LASTFM_API_KEY}}"
+          -DLASTFM_SHARED_SECRET="${{secrets.LASTFM_SHARED_SECRET}}"
+          -DLISTENBRAINZ_CLIENT_ID="${{secrets.LISTENBRAINZ_CLIENT_ID}}"
+          -DLISTENBRAINZ_CLIENT_SECRET="${{secrets.LISTENBRAINZ_CLIENT_SECRET}}"
+          -DSPOTIFY_CLIENT_ID="${{secrets.SPOTIFY_CLIENT_ID}}"
+          -DSPOTIFY_CLIENT_SECRET="${{secrets.SPOTIFY_CLIENT_SECRET}}"
+          -DGENIUS_CLIENT_ID="${{secrets.GENIUS_CLIENT_ID}}"
+          -DGENIUS_CLIENT_SECRET="${{secrets.GENIUS_CLIENT_SECRET}}"
+          -DMUSIXMATCH_APP_ID="${{secrets.MUSIXMATCH_APP_ID}}"
+          -DMUSIXMATCH_APP_SECRET="${{secrets.MUSIXMATCH_APP_SECRET}}"
+          -DOPENTIDAL_CLIENT_ID="${{secrets.OPENTIDAL_CLIENT_ID}}"
+          -DOPENTIDAL_CLIENT_SECRET="${{secrets.OPENTIDAL_CLIENT_SECRET}}"
+          -DDISCOGS_CLIENT_ID="${{secrets.DISCOGS_CLIENT_ID}}"
+          -DDISCOGS_CLIENT_SECRET="${{secrets.DISCOGS_CLIENT_SECRET}}"
+          -DTIDAL_CLIENT_ID="${{secrets.TIDAL_CLIENT_ID}}"
 
       - name: Run Make
         shell: cmd
