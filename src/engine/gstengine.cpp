@@ -2,7 +2,7 @@
 *   Copyright (C) 2003-2005 by Mark Kretschmann <markey@web.de>           *
 *   Copyright (C) 2005 by Jakub Stachowski <qbast@go2.pl>                 *
 *   Copyright (C) 2006 Paul Cifarelli <paul@cifarelli.net>                *
-*   Copyright (C) 2017-2024 Jonas Kvinge <jonas@jkvinge.net>              *
+*   Copyright (C) 2017-2026 Jonas Kvinge <jonas@jkvinge.net>              *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -26,7 +26,6 @@
 #include <algorithm>
 #include <optional>
 #include <utility>
-#include <memory>
 
 #include <glib.h>
 #include <glib-object.h>
@@ -56,6 +55,7 @@
 #include "core/signalchecker.h"
 #include "core/enginemetadata.h"
 #include "constants/timeconstants.h"
+#include "utilities/strutils.h"
 #include "enginebase.h"
 #include "gsturl.h"
 #include "gstengine.h"
@@ -71,6 +71,7 @@ using namespace Qt::Literals::StringLiterals;
 
 const char *GstEngine::kAutoSink = "autoaudiosink";
 const char *GstEngine::kALSASink = "alsasink";
+const char *GstEngine::kASIOSink = "asiosink";
 
 namespace {
 constexpr char kOpenALSASink[] = "openalsink";
@@ -191,7 +192,7 @@ void GstEngine::StartPreloading(const QUrl &media_url, const QUrl &stream_url, c
     // Add request to discover the stream
     if (discoverer_ && media_url.scheme() != u"spotify"_s) {
       if (!gst_discoverer_discover_uri_async(discoverer_, gst_url.url.constData())) {
-        qLog(Error) << "Failed to start stream discovery for" << gst_url.url;
+        qLog(Error) << "Failed to start stream discovery for" << Utilities::UrlForLog(gst_url.url);
       }
     }
   }
@@ -204,7 +205,7 @@ bool GstEngine::Load(const QUrl &media_url, const QUrl &stream_url, const Engine
 
   const GstUrl gst_url = FixupUrl(stream_url);
 
-  bool crossfade = current_pipeline_ && ((crossfade_enabled_ && change & EngineBase::TrackChangeType::Manual) || (autocrossfade_enabled_ && change & EngineBase::TrackChangeType::Auto) || ((crossfade_enabled_ || autocrossfade_enabled_) && change & EngineBase::TrackChangeType::Intro));
+  bool crossfade = current_pipeline_ && ((crossfade_enabled_ && change & EngineBase::TrackChangeType::Manual) || (autocrossfade_enabled_ && change & EngineBase::TrackChangeType::Auto) || ((crossfade_enabled_ || autocrossfade_enabled_) && change & EngineBase::TrackChangeType::Scan));
 
   if (change & EngineBase::TrackChangeType::Auto && change & EngineBase::TrackChangeType::SameAlbum && !crossfade_same_album_) {
     crossfade = false;
@@ -242,12 +243,13 @@ bool GstEngine::Load(const QUrl &media_url, const QUrl &stream_url, const Engine
   BufferingFinished();
 
   SetVolume(volume_);
+  SetMute(muted_);
   SetStereoBalance(stereo_balance_);
   SetEqualizerParameters(equalizer_preamp_, equalizer_gains_);
 
   // Maybe fade in this track
   if (crossfade && (!old_pipeline || !old_pipeline->exclusive_mode()) && !AnyExclusivePipelineActive()) {
-    current_pipeline_->StartFader(fadeout_duration_nanosec_, QTimeLine::Forward);
+    current_pipeline_->StartFader(fadeout_duration_nanosec_, QTimeLine::Forward, QEasingCurve::Linear, true);
   }
 
   // Setting up stream discoverer
@@ -263,7 +265,7 @@ bool GstEngine::Load(const QUrl &media_url, const QUrl &stream_url, const Engine
   // Add request to discover the stream
   if (discoverer_ && media_url.scheme() != u"spotify"_s) {
     if (!gst_discoverer_discover_uri_async(discoverer_, gst_url.url.constData())) {
-      qLog(Error) << "Failed to start stream discovery for" << gst_url.url;
+      qLog(Error) << "Failed to start stream discovery for" << Utilities::UrlForLog(gst_url.url);
     }
   }
 
@@ -418,6 +420,10 @@ void GstEngine::SetVolumeSW(const uint volume) {
   if (current_pipeline_) current_pipeline_->SetVolume(volume);
 }
 
+void GstEngine::SetMuteSW(const bool mute) {
+  if (current_pipeline_) current_pipeline_->SetMute(mute);
+}
+
 qint64 GstEngine::position_nanosec() const {
 
   if (!current_pipeline_) return 0;
@@ -525,10 +531,16 @@ bool GstEngine::ExclusiveModeSupport(const QString &output) const {
   return output == QLatin1String(kWASAPISink) || output == QLatin1String(kWASAPI2Sink);
 }
 
+bool GstEngine::FadingSupport(const QString &output) const {
+  // ASIO drivers usually only allow one stream at a time, so fading between two pipelines doesn't work, and fading on a single pipeline breaks bit-perfect output.
+  return output != QLatin1String(kASIOSink);
+}
+
 void GstEngine::ReloadSettings() {
 
 #ifdef HAVE_SPOTIFY
   const QString old_spotify_access_token = spotify_access_token_;
+  const SpotifySettings::Bitrate old_spotify_bitrate = spotify_bitrate_;
 #endif
 
   EngineBase::ReloadSettings();
@@ -538,6 +550,10 @@ void GstEngine::ReloadSettings() {
 #ifdef HAVE_SPOTIFY
   if (current_pipeline_ && old_spotify_access_token != spotify_access_token_) {
     current_pipeline_->set_spotify_access_token(spotify_access_token_);
+  }
+  // Applies to the next track, the bitrate can't be changed for the track that is playing.
+  if (current_pipeline_ && old_spotify_bitrate != spotify_bitrate_) {
+    current_pipeline_->set_spotify_bitrate(spotify_bitrate_);
   }
 #endif
 
@@ -611,7 +627,7 @@ void GstEngine::timerEvent(QTimerEvent *e) {
       const qint64 gap = static_cast<qint64>(buffer_duration_nanosec_) + (autocrossfade_enabled_ ? fadeout_duration_nanosec_ : kPreloadGapNanosec);
       // Emit TrackAboutToEnd when we're a few seconds away from finishing
       if (remaining < gap + fudge) {
-        qLog(Debug) << "Stream from URL" << media_url_.toString() << "about to end in" << remaining / kNsecPerSec << "seconds. Fudge:" << fudge / kNsecPerMsec << "+" << "Gap:" << gap / kNsecPerMsec;
+        qLog(Debug) << "Stream from URL" << Utilities::UrlForLog(media_url_) << "about to end in" << remaining / kNsecPerSec << "seconds. Fudge:" << fudge / kNsecPerMsec << "+" << "Gap:" << gap / kNsecPerMsec;
         EmitAboutToFinish();
       }
     }
@@ -838,12 +854,13 @@ void GstEngine::StartFadeout(GstEnginePipelinePtr pipeline) {
   QObject::disconnect(&*pipeline, &GstEnginePipeline::BufferingProgress, this, &GstEngine::BufferingProgress);
   QObject::disconnect(&*pipeline, &GstEnginePipeline::BufferingFinished, this, &GstEngine::BufferingFinished);
   QObject::disconnect(&*pipeline, &GstEnginePipeline::VolumeChanged, this, &EngineBase::UpdateVolume);
+  QObject::disconnect(&*pipeline, &GstEnginePipeline::MuteChanged, this, &EngineBase::UpdateMute);
   QObject::disconnect(&*pipeline, &GstEnginePipeline::AboutToFinish, this, &EngineBase::EmitAboutToFinish);
 
   fadeout_pipelines_.insert(pipeline->id(), pipeline);
   pipeline->RemoveAllBufferConsumers();
 
-  pipeline->StartFader(fadeout_duration_nanosec_, QTimeLine::Backward);
+  pipeline->StartFader(fadeout_duration_nanosec_, QTimeLine::Backward, QEasingCurve::Linear, true);
   QObject::connect(&*pipeline, &GstEnginePipeline::FaderFinished, this, &GstEngine::FadeoutFinished);
 
 }
@@ -904,10 +921,11 @@ GstEnginePipelinePtr GstEngine::CreatePipeline() {
   pipeline->set_channels(channels_enabled_, channels_);
   pipeline->set_bs2b_enabled(bs2b_enabled_);
   pipeline->set_strict_ssl_enabled(strict_ssl_enabled_);
-  pipeline->set_fading_enabled(fadeout_enabled_ || crossfade_enabled_ || autocrossfade_enabled_ || fadeout_pause_enabled_);
+  pipeline->set_fading_enabled(FadingSupport(output_) && (fadeout_enabled_ || crossfade_enabled_ || autocrossfade_enabled_ || fadeout_pause_enabled_));
 
 #ifdef HAVE_SPOTIFY
   pipeline->set_spotify_access_token(spotify_access_token_);
+  pipeline->set_spotify_bitrate(spotify_bitrate_);
 #endif
 
   pipeline->AddBufferConsumer(this);
@@ -922,6 +940,7 @@ GstEnginePipelinePtr GstEngine::CreatePipeline() {
   QObject::connect(&*pipeline, &GstEnginePipeline::BufferingProgress, this, &GstEngine::BufferingProgress);
   QObject::connect(&*pipeline, &GstEnginePipeline::BufferingFinished, this, &GstEngine::BufferingFinished);
   QObject::connect(&*pipeline, &GstEnginePipeline::VolumeChanged, this, &EngineBase::UpdateVolume);
+  QObject::connect(&*pipeline, &GstEnginePipeline::MuteChanged, this, &EngineBase::UpdateMute);
   QObject::connect(&*pipeline, &GstEnginePipeline::AboutToFinish, this, &EngineBase::EmitAboutToFinish);
 
   return pipeline;
@@ -1080,7 +1099,7 @@ void GstEngine::StreamDiscovered(GstDiscoverer *discoverer, GstDiscovererInfo *i
   GstDiscovererResult result = gst_discoverer_info_get_result(info);
   if (result != GST_DISCOVERER_OK) {
     const QString error_message = GSTdiscovererErrorMessage(result);
-    qLog(Error) << QStringLiteral("Stream discovery for %1 failed: %2").arg(QString::fromUtf8(discovered_url), error_message);
+    qLog(Error) << QStringLiteral("Stream discovery for %1 failed: %2").arg(Utilities::UrlForLog(discovered_url), error_message);
     return;
   }
 
@@ -1145,13 +1164,13 @@ void GstEngine::StreamDiscovered(GstDiscoverer *discoverer, GstDiscovererInfo *i
 
     gst_discoverer_stream_info_list_free(audio_streams);
 
-    qLog(Debug) << "Got stream info for" << discovered_url + ":" << Song::TextForFiletype(engine_metadata.filetype);
+    qLog(Debug) << "Got stream info for" << Utilities::UrlForLog(discovered_url) + u':' << Song::TextForFiletype(engine_metadata.filetype);
 
     Q_EMIT instance->MetaData(engine_metadata);
 
   }
   else {
-    qLog(Error) << "Could not detect an audio stream in" << discovered_url;
+    qLog(Error) << "Could not detect an audio stream in" << Utilities::UrlForLog(discovered_url);
   }
 
 }

@@ -43,7 +43,7 @@ class QShowEvent;
 class QCloseEvent;
 
 class Player;
-class DeviceFinders;
+class AudioDeviceListers;
 class CollectionLibrary;
 class CoverProviders;
 class LyricsProviders;
@@ -60,7 +60,7 @@ class SettingsDialog : public QDialog {
 
  public:
   explicit SettingsDialog(const SharedPtr<Player> player,
-                          const SharedPtr<DeviceFinders> device_finders,
+                          const SharedPtr<AudioDeviceListers> audio_device_listers,
                           const SharedPtr<CollectionLibrary> collection,
                           const SharedPtr<CoverProviders> cover_providers,
                           const SharedPtr<LyricsProviders> lyrics_providers,
@@ -84,6 +84,7 @@ class SettingsDialog : public QDialog {
     Scrobbler,
     Covers,
     Lyrics,
+    Acoustid,
     Transcoding,
     Proxy,
     Appearance,
@@ -96,6 +97,8 @@ class SettingsDialog : public QDialog {
     Tidal,
     Qobuz,
     Spotify,
+    Plex,
+    Jellyfin,
     Radio,
   };
 

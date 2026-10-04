@@ -1,0 +1,61 @@
+/*
+ * Strawberry Music Player
+ * Copyright 2019-2026, Jonas Kvinge <jonas@jkvinge.net>
+ *
+ * Strawberry is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Strawberry is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Strawberry.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#ifndef QOBUZAPICREDENTIALFETCHER_H
+#define QOBUZAPICREDENTIALFETCHER_H
+
+#include "config.h"
+
+#include <QObject>
+#include <QString>
+
+#include "includes/shared_ptr.h"
+
+class QNetworkReply;
+class NetworkAccessManager;
+
+class QobuzApiCredentialFetcher : public QObject {
+  Q_OBJECT
+
+ public:
+  explicit QobuzApiCredentialFetcher(const SharedPtr<NetworkAccessManager> network, QObject *parent = nullptr);
+
+  void FetchApiCredentials();
+
+ Q_SIGNALS:
+  void ApiCredentialsFetched(const QString &app_id, const QString &app_secret, const QString &login_app_id, const QString &private_key);
+  void ApiCredentialsFetchError(const QString &error);
+
+ private Q_SLOTS:
+  void LoginPageReceived();
+  void BundleReceived();
+
+ private:
+  static QString ExtractAppId(const QString &bundle);
+  static QString ExtractLoginAppId(const QString &bundle);
+  static QString ExtractAppSecret(const QString &bundle);
+  static QString ExtractPrivateKey(const QString &bundle);
+
+  const SharedPtr<NetworkAccessManager> network_;
+  QNetworkReply *login_page_reply_;
+  QNetworkReply *bundle_reply_;
+  QString bundle_url_;
+};
+
+#endif  // QOBUZAPICREDENTIALFETCHER_H

@@ -46,7 +46,8 @@
 #include "core/networkaccessmanager.h"
 #include "core/player.h"
 #include "core/urlhandlers.h"
-#include "engine/devicefinders.h"
+#include "credentialsmanager/credentialsmanager.h"
+#include "engine/audiodevicelisters.h"
 #include "tagreader/tagreaderclient.h"
 #include "collection/collectionlibrary.h"
 #include "playlist/playlistbackend.h"
@@ -78,6 +79,9 @@
 #ifdef HAVE_SUBSONIC
 #  include "scrobbler/subsonicscrobbler.h"
 #endif
+#ifdef HAVE_JELLYFIN
+#  include "scrobbler/jellyfinscrobbler.h"
+#endif
 
 #include "streaming/streamingservices.h"
 
@@ -98,6 +102,14 @@
 #ifdef HAVE_QOBUZ
 #  include "qobuz/qobuzservice.h"
 #  include "covermanager/qobuzcoverprovider.h"
+#endif
+
+#ifdef HAVE_PLEX
+#  include "plex/plexservice.h"
+#endif
+
+#ifdef HAVE_JELLYFIN
+#  include "jellyfin/jellyfinservice.h"
 #endif
 
 #ifdef HAVE_MOODBAR
@@ -133,7 +145,8 @@ class ApplicationImpl {
         task_manager_([]() { return new TaskManager(); }),
         player_([app]() { return new Player(app->task_manager(), app->url_handlers(), app->playlist_manager()); }),
         network_([]() { return new NetworkAccessManager(); }),
-        device_finders_([]() { return new DeviceFinders(); }),
+        credentials_manager_([]() { return new CredentialsManager(); }),
+        audio_device_listers_([]() { return new AudioDeviceListers(); }),
         url_handlers_([]() { return new UrlHandlers(); }),
         device_manager_([app]() { return new DeviceManager(app->task_manager(), app->database(), app->tagreader_client(), app->albumcover_loader()); }),
         collection_([app]() { return new CollectionLibrary(app->database(), app->task_manager(), app->tagreader_client(), app->albumcover_loader()); }),
@@ -187,7 +200,7 @@ class ApplicationImpl {
         streaming_services_([app]() {
           StreamingServices *streaming_services = new StreamingServices();
 #ifdef HAVE_SUBSONIC
-          streaming_services->AddService(make_shared<SubsonicService>(app->task_manager(), app->database(), app->url_handlers(), app->albumcover_loader()));
+          streaming_services->AddService(make_shared<SubsonicService>(app->task_manager(), app->database(), app->network(), app->credentials_manager(), app->url_handlers(), app->albumcover_loader()));
 #endif
 #ifdef HAVE_TIDAL
           streaming_services->AddService(make_shared<TidalService>(app->task_manager(), app->database(), app->network(), app->url_handlers(), app->albumcover_loader()));
@@ -197,6 +210,12 @@ class ApplicationImpl {
 #endif
 #ifdef HAVE_QOBUZ
           streaming_services->AddService(make_shared<QobuzService>(app->task_manager(), app->database(), app->network(), app->url_handlers(), app->albumcover_loader()));
+#endif
+#ifdef HAVE_PLEX
+          streaming_services->AddService(make_shared<PlexService>(app->task_manager(), app->database(), app->network(), app->url_handlers(), app->albumcover_loader()));
+#endif
+#ifdef HAVE_JELLYFIN
+          streaming_services->AddService(make_shared<JellyfinService>(app->task_manager(), app->database(), app->network(), app->credentials_manager(), app->url_handlers(), app->albumcover_loader()));
 #endif
           return streaming_services;
         }),
@@ -216,6 +235,9 @@ class ApplicationImpl {
 #ifdef HAVE_SUBSONIC
           scrobbler->AddService(make_shared<SubsonicScrobbler>(scrobbler->settings(), app->network(), app->streaming_services()->Service<SubsonicService>(), app));
 #endif
+#ifdef HAVE_JELLYFIN
+          scrobbler->AddService(make_shared<JellyfinScrobbler>(scrobbler->settings(), app->network(), app->streaming_services()->Service<JellyfinService>(), app->player(), app->playlist_manager(), app));
+#endif
           return scrobbler;
         })
   {}
@@ -225,7 +247,8 @@ class ApplicationImpl {
   Lazy<TaskManager> task_manager_;
   Lazy<Player> player_;
   Lazy<NetworkAccessManager> network_;
-  Lazy<DeviceFinders> device_finders_;
+  Lazy<CredentialsManager> credentials_manager_;
+  Lazy<AudioDeviceListers> audio_device_listers_;
   Lazy<UrlHandlers> url_handlers_;
   Lazy<DeviceManager> device_manager_;
   Lazy<CollectionLibrary> collection_;
@@ -261,7 +284,7 @@ Application::Application(QObject *parent)
     g_thread_ = g_thread_new(nullptr, Application::GLibMainLoopThreadFunc, nullptr);
   }
 
-  device_finders()->Init();
+  audio_device_listers()->Init();
   collection()->Init();
   tagreader_client();
 
@@ -373,7 +396,8 @@ SharedPtr<Database> Application::database() const { return p_->database_.ptr(); 
 SharedPtr<TaskManager> Application::task_manager() const { return p_->task_manager_.ptr(); }
 SharedPtr<Player> Application::player() const { return p_->player_.ptr(); }
 SharedPtr<NetworkAccessManager> Application::network() const { return p_->network_.ptr(); }
-SharedPtr<DeviceFinders> Application::device_finders() const { return p_->device_finders_.ptr(); }
+SharedPtr<CredentialsManager> Application::credentials_manager() const { return p_->credentials_manager_.ptr(); }
+SharedPtr<AudioDeviceListers> Application::audio_device_listers() const { return p_->audio_device_listers_.ptr(); }
 SharedPtr<UrlHandlers> Application::url_handlers() const { return p_->url_handlers_.ptr(); }
 SharedPtr<DeviceManager> Application::device_manager() const { return p_->device_manager_.ptr(); }
 SharedPtr<CollectionLibrary> Application::collection() const { return p_->collection_.ptr(); }

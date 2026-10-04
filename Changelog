@@ -1,6 +1,77 @@
 Strawberry Music Player
 =======================
-ChangeLog
+Changelog
+
+Version 1.2.31 (2026.10.03):
+
+  Bugfixes:
+    * Fixed shuffle skipping tracks and repeating tracks already played, when adding tracks, removing the current track, choosing a track, turning on shuffle while playing or repeating the playlist
+    * Fixed going back to the previous track changing the shuffle order
+    * Fixed album and grouping shuffle skipping albums or groupings when choosing a track
+    * Fixed inside album shuffle and album repeat not finding the next track on the same album after removing the current track
+    * Fixed track repeat playing the wrong track after removing the current track
+    * Fixed moving several tracks that are not next to each other to another playlist removing the wrong tracks from the source playlist
+    * Fixed undo right after startup removing the restored playlist
+    * Fixed undo after repopulating a dynamic playlist acting on the wrong tracks
+    * Fixed "play now" playing the wrong track when inserting tracks into an automatically sorted playlist
+    * Fixed tracks copied to another playlist, or added to the same playlist again, being shared between the playlists, which broke updating and saving the remaining tracks when one of them was removed
+    * Fixed OpenTidal cover provider search (API changed)
+    * Fixed songlyrics.com and letras.mus.br lyrics being blocked
+    * (Windows) Fixed unstable ASIO playback
+    * (Windows|MinGW-W64) Fixed ASIO device listing
+
+  Enhancements:
+    * Volume mute is now a separate state instead of setting the volume to zero, and is shown in the volume slider and on-screen display
+    * Use uchardet to detect the text encoding of CUE sheets and M3U and PLS playlists (#2336)
+    * Use existing src/apicredentials.h when building from source
+    * Improved detecting a dark palette and calculating the playlist alternating row color
+    * Added Ctrl+B shortcut for showing the sidebar
+    * Added a "Scan tracks" repeat mode which only plays a part of each track
+    * Added a credentials manager which stores the Subsonic password in the system keyring (libsecret, KWallet, GNOME Keyring, macOS Keychain or Windows Credential Manager)
+    * Added an option to disable notifications when the title of a radio stream changes
+    * Added options to show the album edition and audio quality in Qobuz search results, and the audio quality in Tidal search results
+    * Added Plex support
+    * Added Jellyfin support
+    * Added a bitrate setting for Spotify (96, 160 or 320 kbit/s)
+    * Show a warning in the Spotify settings when the GStreamer Spotify plugin is too old to play tracks (older than 0.14.4), and explain the possible causes when a Spotify track can't be played
+    * (macOS) Fixed alternating row colors being painted in the empty area below the playlist
+    * (Windows) Disabled fading when ASIO output is selected
+
+Version 1.2.30 (2026.09.10):
+
+  Bugfixes:
+    * Fixed an out-of-bounds memory access in HMAC signing when using keys longer than the hash's block size, affecting request signing for Discogs and Musixmatch (#2309)
+    * Fixed the build failing when the tag fetcher (AcoustID) is disabled (#2310)
+    * Changed API credentials for Spotify for production use
+
+Version 1.2.29 (2026.09.07):
+
+  Enhancements:
+    * Switched MusixMatch lyrics to use API instead of scraping the HTML pages
+    * Standardized the User-Agent header format used for network requests
+    * Improved ListenBrainz scrobbling and made it respect rate limits
+    * Use self-hosted OAuth redirect/proxy for Spotify and Genius which does not accept a random localhost port
+    * Made PKCE optional for OAuth logins, for providers that don't support it
+    * Cover art search now takes album artist and compilation status into account when matching results
+    * Improved detection of generic album titles (e.g. "Greatest Hits", "Live") when scoring cover art search results, using regular expressions
+
+Version 1.2.28 (2026.08.26):
+
+  Bugfixes:
+    * Fixed playback randomly pausing itself, caused by concurrent GStreamer state changes being applied in a different order than they were requested (#2008)
+    * Fixed GStreamer errors while fingerprinting, by decoding straight through from the start and stopping once enough audio has been collected (#2284)
+    * Fixed a crash on exit caused by device listers being deleted while their own threads were still running
+    * Fixed quitting through MPRIS, or asking to quit a second time, skipping the normal shutdown and leaving subsystems to be torn down while still running
+    * Fixed thread-safety issues with the audio fader that could crash or leave the volume at the wrong level when one fade replaced another
+    * Fixed a thread-safety issue with playlist items shared between the playlist model and the playlist backend
+
+  Enhancements:
+    * Added sort options (ascending, descending and clear sorting) to the playlist column header context menu
+    * Sorting the playlist can now be undone, and clicking an already sorted column cycles on to unsorted instead of only toggling the direction
+    * Playlist changes are now written to the database by updating only the affected items instead of saving the entire playlist
+    * Updating a playlist's last played time no longer rewrites the entire playlist
+    * Reuse the network access manager for Subsonic requests instead of creating a new one for every request
+    * Added a test for smart playlist search
 
 Version 1.2.27 (2026.08.11):
 

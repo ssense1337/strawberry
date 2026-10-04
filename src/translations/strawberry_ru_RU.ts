@@ -13,7 +13,7 @@
     </message>
   </context>
   <context>
-    <name>About</name>
+    <name>AboutDialog</name>
     <message>
       <source>About</source>
       <translation>О программе</translation>
@@ -64,7 +64,7 @@
     </message>
     <message>
       <source>Clementine contributors</source>
-      <translation>Разработчики Clementine</translation>
+      <translation>Участники Clementine</translation>
     </message>
     <message>
       <source>Thanks to</source>
@@ -73,6 +73,36 @@
     <message>
       <source>Thanks to all the other Amarok and Clementine contributors.</source>
       <translation>Спасибо всем прочим разработчикам Amarok и Clementine.</translation>
+    </message>
+  </context>
+  <context>
+    <name>AcoustidClient</name>
+    <message>
+      <source>Missing AcoustID API key</source>
+      <translation>Отсутствует ключ API AcoustID</translation>
+    </message>
+  </context>
+  <context>
+    <name>AcoustidSettingsPage</name>
+    <message>
+      <source>AcoustID</source>
+      <translation>AcoustID</translation>
+    </message>
+    <message>
+      <source>AcoustID is used to identify songs by their audio fingerprint when fetching tags.</source>
+      <translation>AcoustID используется для идентификации песен по их аудиоотпечатку при получении тегов.</translation>
+    </message>
+    <message>
+      <source>API Credentials</source>
+      <translation>Учётные данные API</translation>
+    </message>
+    <message>
+      <source>Use custom API Key</source>
+      <translation>Использовать собственный ключ API</translation>
+    </message>
+    <message>
+      <source>API key</source>
+      <translation>Ключ API</translation>
     </message>
   </context>
   <context>
@@ -381,7 +411,7 @@
     </message>
     <message>
       <source>Use custom color</source>
-      <translation>Использовать собственный цвет</translation>
+      <translation>Использовать свой цвет</translation>
     </message>
     <message>
       <source>Use gradient background</source>
@@ -513,7 +543,7 @@
     </message>
     <message>
       <source>Custom color</source>
-      <translation>Собственный цвет</translation>
+      <translation>Свой цвет</translation>
     </message>
     <message>
       <source>Select playlist playing song color:</source>
@@ -1919,6 +1949,22 @@ If there are no matches then it will use the largest image in the directory.</so
       <source>Embedded album cover art (%1)</source>
       <translation>Встроенная обложка альбома (%1)</translation>
     </message>
+    <message>
+      <source>API Credentials</source>
+      <translation>Учётные данные API</translation>
+    </message>
+    <message>
+      <source>Use custom API credentials</source>
+      <translation>Использовать собственные учётные данные API</translation>
+    </message>
+    <message>
+      <source>Client ID</source>
+      <translation>ИД клиента</translation>
+    </message>
+    <message>
+      <source>Client secret</source>
+      <translation>Секретный ключ клиента</translation>
+    </message>
   </context>
   <context>
     <name>CueParser</name>
@@ -2157,6 +2203,13 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Form</source>
       <translation>Форма</translation>
+    </message>
+  </context>
+  <context>
+    <name>DiscogsCoverProvider</name>
+    <message>
+      <source>Missing Discogs client ID and/or client secret</source>
+      <translation>Отсутствует идентификатор клиента Discogs и/или секретный ключ</translation>
     </message>
   </context>
   <context>
@@ -2847,6 +2900,13 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
   </context>
   <context>
+    <name>GeniusLyricsProvider</name>
+    <message>
+      <source>Missing Genius client ID and/or client secret</source>
+      <translation>Отсутствует идентификатор клиента Genius и/или секретный ключ</translation>
+    </message>
+  </context>
+  <context>
     <name>GioLister</name>
     <message>
       <source>Mount point</source>
@@ -3136,6 +3196,10 @@ If there are no matches then it will use the largest image in the directory.</so
   <context>
     <name>LastFMScrobbler</name>
     <message>
+      <source>Missing Last.fm API key and/or API secret</source>
+      <translation>Отсутствует ключ API Last.fm и/или секретный ключ API</translation>
+    </message>
+    <message>
       <source>%1 Scrobbler Authentication</source>
       <translation>Аутентификация скробблера %1</translation>
     </message>
@@ -3169,6 +3233,13 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
   </context>
   <context>
+    <name>LastFmCoverProvider</name>
+    <message>
+      <source>Missing Last.fm API key and/or API secret</source>
+      <translation>Отсутствует ключ API Last.fm и/или секретный ключ API</translation>
+    </message>
+  </context>
+  <context>
     <name>LastPlayedItemDelegate</name>
     <message>
       <source>Never</source>
@@ -3184,6 +3255,10 @@ If there are no matches then it will use the largest image in the directory.</so
   </context>
   <context>
     <name>ListenBrainzScrobbler</name>
+    <message>
+      <source>Missing ListenBrainz client ID and/or client secret</source>
+      <translation>Отсутствует идентификатор клиента ListenBrainz и/или секретный ключ</translation>
+    </message>
     <message>
       <source>Unable to scrobble %1 - %2 because of error: %3</source>
       <translation>Не удаётся заскробблить %1 — %2 из-за ошибки: %3</translation>
@@ -3265,6 +3340,22 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Authentication failed</source>
       <translation>Ошибка аутентификации</translation>
+    </message>
+    <message>
+      <source>API Credentials</source>
+      <translation>Учётные данные API</translation>
+    </message>
+    <message>
+      <source>Use custom API credentials</source>
+      <translation>Использовать собственные учётные данные API</translation>
+    </message>
+    <message>
+      <source>Client ID</source>
+      <translation>ИД клиента</translation>
+    </message>
+    <message>
+      <source>Client secret</source>
+      <translation>Секретный ключ клиента</translation>
     </message>
   </context>
   <context>
@@ -3797,6 +3888,10 @@ If there are no matches then it will use the largest image in the directory.</so
       <source>Close current playlist tab</source>
       <translation>Закрыть текущую вкладку плейлиста</translation>
     </message>
+    <message>
+      <source>Ctrl+B</source>
+      <translation>Ctrl+B</translation>
+    </message>
   </context>
   <context>
     <name>MessageDialog</name>
@@ -3863,6 +3958,13 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Error connecting MTP device %1: %2</source>
       <translation>Ошибка подключения устройства MTP %1: %2</translation>
+    </message>
+  </context>
+  <context>
+    <name>MusixmatchLyricsProvider</name>
+    <message>
+      <source>Missing Musixmatch client ID and/or client secret</source>
+      <translation>Отсутствует идентификатор клиента Musixmatch и/или секретный ключ</translation>
     </message>
   </context>
   <context>
@@ -4171,6 +4273,18 @@ If there are no matches then it will use the largest image in the directory.</so
   <context>
     <name>OAuthenticator</name>
     <message>
+      <source>Missing client ID</source>
+      <translation>Отсутствует идентификатор клиента</translation>
+    </message>
+    <message>
+      <source>Missing client secret</source>
+      <translation>Отсутствует секретный ключ клиента</translation>
+    </message>
+    <message>
+      <source>Invalid redirect URL</source>
+      <translation>Неверный URL-адрес перенаправления</translation>
+    </message>
+    <message>
       <source>Authentication</source>
       <translation>Аутентификация</translation>
     </message>
@@ -4238,6 +4352,14 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>Громкость %1%</translation>
     </message>
     <message>
+      <source>Muted</source>
+      <translation>Звук отключён</translation>
+    </message>
+    <message>
+      <source>Unmuted</source>
+      <translation>Звук включён</translation>
+    </message>
+    <message>
       <source>Don&apos;t shuffle</source>
       <translation>Не перемешивать</translation>
     </message>
@@ -4278,8 +4400,19 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>Стоп после каждого трека</translation>
     </message>
     <message>
-      <source>Intro tracks</source>
-      <translation>Вступительные треки</translation>
+      <source>Scan tracks</source>
+      <translation>Сканировать треки</translation>
+    </message>
+  </context>
+  <context>
+    <name>OpenTidalCoverProvider</name>
+    <message>
+      <source>Missing OpenTidal client ID and/or client secret.</source>
+      <translation>Отсутствует идентификатор клиента OpenTidal и/или секретный ключ.</translation>
+    </message>
+    <message>
+      <source>Authentication failed: %1</source>
+      <translation>Ошибка аутентификации: %1</translation>
     </message>
   </context>
   <context>
@@ -4495,7 +4628,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Show above status bar</source>
-      <translation>Показать над строкой состояния</translation>
+      <translation>Выводить над строкой состояния</translation>
     </message>
   </context>
   <context>
@@ -4733,6 +4866,22 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>&amp;Заблокировать оценку</translation>
     </message>
     <message>
+      <source>Sor&amp;t</source>
+      <translation>Сортиро&amp;вка</translation>
+    </message>
+    <message>
+      <source>&amp;Ascending</source>
+      <translation>По &amp;возрастанию</translation>
+    </message>
+    <message>
+      <source>&amp;Descending</source>
+      <translation>По &amp;убыванию</translation>
+    </message>
+    <message>
+      <source>&amp;Clear sorting</source>
+      <translation>&amp;Очистить сортировку</translation>
+    </message>
+    <message>
       <source>&amp;Align text</source>
       <translation>&amp;Выравнивание текста</translation>
     </message>
@@ -4942,10 +5091,6 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>Стоп после каждого трека</translation>
     </message>
     <message>
-      <source>Intro tracks</source>
-      <translation>Вступительные треки</translation>
-    </message>
-    <message>
       <source>Don&apos;t shuffle</source>
       <translation>Не перемешивать</translation>
     </message>
@@ -4964,6 +5109,10 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Shuffle grouping</source>
       <translation>Перемешать группировка</translation>
+    </message>
+    <message>
+      <source>Scan tracks</source>
+      <translation>Сканировать треки</translation>
     </message>
   </context>
   <context>
@@ -5055,6 +5204,26 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Write metadata when saving playlists</source>
       <translation>Записывать метаданные при сохранении плейлистов</translation>
+    </message>
+    <message>
+      <source>Scan mode</source>
+      <translation>Режим сканирования</translation>
+    </message>
+    <message>
+      <source>Playing time (seconds)</source>
+      <translation>Время проигрывания (секунды)</translation>
+    </message>
+    <message>
+      <source>The time played before and after the position time selected in seconds (0 for playing the complete track)</source>
+      <translation>Время воспроизведения до и после выбранной позиции в секундах (0 для воспроизведения всего трека)</translation>
+    </message>
+    <message>
+      <source>Interest position (percent of track length)</source>
+      <translation>Интересующая позиция (в процентах от длины дорожки)</translation>
+    </message>
+    <message>
+      <source>The position time reference selected in percent of the track length</source>
+      <translation>Временная привязка местоположения, выбранная в процентах от длины дорожки</translation>
     </message>
   </context>
   <context>
@@ -5746,10 +5915,6 @@ Are you sure you want to continue?</source>
       <translation>Включить</translation>
     </message>
     <message>
-      <source>Authentication</source>
-      <translation>Аутентификация</translation>
-    </message>
-    <message>
       <source>App ID</source>
       <translation>ИД приложения</translation>
     </message>
@@ -5798,16 +5963,16 @@ Are you sure you want to continue?</source>
       <translation>Конфигурация не завершена</translation>
     </message>
     <message>
-      <source>Missing app id. Please fetch credentials first.</source>
-      <translation>Отсутствует идентификатор приложения. Пожалуйста, сначала получите учётные данные.</translation>
+      <source>Missing app id. Please fetch API credentials first.</source>
+      <translation>Отсутствует идентификатор приложения. Пожалуйста, сначала получите учётные данные API.</translation>
     </message>
     <message>
-      <source>Missing app secret. Please fetch credentials first.</source>
-      <translation>Отсутствует секретный ключ приложения. Пожалуйста, сначала получите учётные данные.</translation>
+      <source>Missing app secret. Please fetch API credentials first.</source>
+      <translation>Отсутствует секретный ключ приложения. Пожалуйста, сначала получите учётные данные API.</translation>
     </message>
     <message>
-      <source>Missing private key. Please fetch credentials first.</source>
-      <translation>Отсутствует закрытый ключ. Пожалуйста, сначала получите учётные данные.</translation>
+      <source>Missing private key. Please fetch API credentials first.</source>
+      <translation>Отсутствует закрытый ключ. Пожалуйста, сначала получите учётные данные API.</translation>
     </message>
     <message>
       <source>Authentication failed</source>
@@ -5818,20 +5983,16 @@ Are you sure you want to continue?</source>
       <translation>Получение…</translation>
     </message>
     <message>
-      <source>Credentials fetched</source>
-      <translation>Учётные данные получены</translation>
+      <source>API credentials fetched</source>
+      <translation>Учётные данные API получены</translation>
     </message>
     <message>
-      <source>Credentials have been successfully fetched. Click Login to authenticate via your browser.</source>
-      <translation>Учётные данные успешно получены. Нажмите «Войти», чтобы пройти аутентификацию через ваш браузер.</translation>
+      <source>API credentials have been successfully fetched. Click Login to authenticate via your browser.</source>
+      <translation>Учётные данные API успешно получены. Нажмите «Войти», чтобы пройти аутентификацию через ваш браузер.</translation>
     </message>
     <message>
       <source>Credential fetch failed</source>
       <translation>Не удалось получить учётные данные</translation>
-    </message>
-    <message>
-      <source>Fetch Credentials</source>
-      <translation>Получить учётные данные</translation>
     </message>
     <message>
       <source>Remove (Remastered), etc from song titles</source>
@@ -5844,6 +6005,14 @@ Are you sure you want to continue?</source>
     <message>
       <source>Automatically fetch app ID, app secret and private key from Qobuz web player</source>
       <translation>Автоматически получить идентификатор приложения, секретный ключ приложения и закрытый ключ из веб-плеера Qobuz</translation>
+    </message>
+    <message>
+      <source>API Credentials</source>
+      <translation>Учётные данные API</translation>
+    </message>
+    <message>
+      <source>Fetch API Credentials</source>
+      <translation>Получить учётные данные API</translation>
     </message>
   </context>
   <context>
@@ -6373,6 +6542,18 @@ Are you sure you want to continue?</source>
       <source>Spotify</source>
       <translation>Spotify</translation>
     </message>
+    <message>
+      <source>Use custom API credentials</source>
+      <translation>Использовать собственные учётные данные API</translation>
+    </message>
+    <message>
+      <source>Client ID:</source>
+      <translation>ИД клиента:</translation>
+    </message>
+    <message>
+      <source>Client secret:</source>
+      <translation>Секретный ключ клиента:</translation>
+    </message>
   </context>
   <context>
     <name>SettingsDialog</name>
@@ -6801,6 +6982,10 @@ Are you sure you want to continue?</source>
   <context>
     <name>SpotifyService</name>
     <message>
+      <source>Missing Spotify client ID and/or client secret</source>
+      <translation>Отсутствует идентификатор клиента Spotify и/или секретный ключ</translation>
+    </message>
+    <message>
       <source>Not authenticated with Spotify.</source>
       <translation>Не выполнена аутентификация в Spotify.</translation>
     </message>
@@ -6814,10 +6999,6 @@ Are you sure you want to continue?</source>
     <message>
       <source>Enable</source>
       <translation>Включить</translation>
-    </message>
-    <message>
-      <source>Basic authentication</source>
-      <translation>Основная аутентификация</translation>
     </message>
     <message>
       <source>Authenticate</source>
@@ -6866,6 +7047,26 @@ Are you sure you want to continue?</source>
     <message>
       <source>Remove (Remastered), etc from song titles</source>
       <translation>Удалять (Remastered) и прочее из названий песен</translation>
+    </message>
+    <message>
+      <source>Authentication</source>
+      <translation>Аутентификация</translation>
+    </message>
+    <message>
+      <source>Use custom API credentials</source>
+      <translation>Использовать собственные учётные данные API</translation>
+    </message>
+    <message>
+      <source>Client ID</source>
+      <translation>ИД клиента</translation>
+    </message>
+    <message>
+      <source>Client secret</source>
+      <translation>Секретный ключ клиента</translation>
+    </message>
+    <message>
+      <source>API Credentials</source>
+      <translation>Учётные данные API</translation>
     </message>
   </context>
   <context>
@@ -7301,14 +7502,6 @@ Are you sure you want to continue?</source>
       <translation>Включить</translation>
     </message>
     <message>
-      <source>Tidal support is not official and requires a API token from a registered application to work. We can&apos;t help you getting these.</source>
-      <translation>Поддержка Tidal не является официальной и для работы требует токен API из зарегистрированного приложения. Мы не можем помочь вам в его получении.</translation>
-    </message>
-    <message>
-      <source>Authentication</source>
-      <translation>Аутентификация</translation>
-    </message>
-    <message>
       <source>Client ID</source>
       <translation>ИД клиента</translation>
     </message>
@@ -7380,6 +7573,14 @@ Are you sure you want to continue?</source>
       <source>Remove (Remastered), etc from song titles</source>
       <translation>Удалять (Remastered) и прочее из названий песен</translation>
     </message>
+    <message>
+      <source>Use custom client ID</source>
+      <translation>Использовать собственный идентификатор клиента</translation>
+    </message>
+    <message>
+      <source>API Credentials</source>
+      <translation>Учётные данные API</translation>
+    </message>
   </context>
   <context>
     <name>TidalStreamURLRequest</name>
@@ -7392,12 +7593,12 @@ Are you sure you want to continue?</source>
       <translation>Отменено.</translation>
     </message>
     <message>
-      <source>Received URL with %1 encrypted stream from Tidal. Strawberry does not currently support encrypted streams.</source>
-      <translation>Получен адрес с шифрованным потоком %1 от Tidal. Strawberry в настоящее время не поддерживает шифрованные потоки.</translation>
+      <source>Received a %1 encrypted stream from Tidal, which Strawberry does not support. Whether Tidal delivers encrypted streams depends on the client ID in use. Try changing the Client ID in the Tidal settings</source>
+      <translation>Получен зашифрованный поток %1 от Tidal, который Strawberry не поддерживает. Поставка зашифрованных потоков Tidal зависит от используемого идентификатора клиента. Попробуйте изменить идентификатор клиента в настройках Tidal</translation>
     </message>
     <message>
-      <source>Received URL with encrypted stream from Tidal. Strawberry does not currently support encrypted streams.</source>
-      <translation>Получен адрес с шифрованным потоком от Tidal. Strawberry в настоящее время не поддерживает шифрованные потоки.</translation>
+      <source>Received an encrypted stream from Tidal, which Strawberry does not support. Whether Tidal delivers encrypted streams depends on the client ID in use. Try changing the Client ID in the Tidal settings</source>
+      <translation>Получен зашифрованный поток от Tidal, который Strawberry не поддерживает. Поставка зашифрованных потоков Tidal зависит от используемого идентификатора клиента. Попробуйте изменить идентификатор клиента в настройках Tidal</translation>
     </message>
   </context>
   <context>
@@ -8024,6 +8225,13 @@ Are you sure you want to continue?</source>
     <message>
       <source>Password</source>
       <translation>Пароль</translation>
+    </message>
+  </context>
+  <context>
+    <name>VolumeSlider</name>
+    <message>
+      <source>Muted</source>
+      <translation>Звук отключён</translation>
     </message>
   </context>
   <context>

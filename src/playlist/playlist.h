@@ -32,6 +32,7 @@
 #include <QFuture>
 #include <QList>
 #include <QMap>
+#include <QSet>
 #include <QMultiMap>
 #include <QMetaType>
 #include <QVariant>
@@ -83,6 +84,7 @@ class Playlist : public QAbstractListModel {
   friend class PlaylistUndoCommandRemoveItems;
   friend class PlaylistUndoCommandMoveItems;
   friend class PlaylistUndoCommandReOrderItems;
+  friend class PlaylistUndoCommandSortItems;
   friend class PlaylistTest;
 
  public:
@@ -168,7 +170,7 @@ class Playlist : public QAbstractListModel {
   static const int kUndoStackSize;
   static const int kUndoItemLimit;
 
-  static bool CompareItems(const Column column, const Qt::SortOrder order, PlaylistItemPtr a, PlaylistItemPtr b);
+  static bool CompareItems(const Column column, const Qt::SortOrder sort_order, PlaylistItemPtr a, PlaylistItemPtr b);
 
   static QString column_name(const Column column);
   static QString abbreviated_column_name(const Column column);
@@ -177,8 +179,7 @@ class Playlist : public QAbstractListModel {
   static bool set_column_value(Song &song, Column column, const QVariant &value);
 
   // Persistence
-  void Restore();
-  void ScheduleSaveAsync();
+  void ScheduleSave();
 
   // Accessors
   PlaylistFilter *filter() const;
@@ -233,6 +234,9 @@ class Playlist : public QAbstractListModel {
   PlaylistSequence::ShuffleMode ShuffleMode() const { return playlist_sequence_ && !is_dynamic() ? playlist_sequence_->shuffle_mode() : PlaylistSequence::ShuffleMode::Off; }
   PlaylistSequence::RepeatMode RepeatMode() const { return playlist_sequence_ && !is_dynamic() ? playlist_sequence_->repeat_mode() : PlaylistSequence::RepeatMode::Off; }
 
+  int HalfPlayingTimeS() const { return !is_dynamic() && playlist_sequence_ ? playlist_sequence_->half_playing_time_s() : 20; }
+  int PercentInterestSong() const { return !is_dynamic() && playlist_sequence_ ? playlist_sequence_->percent_interest_song() : 0; }
+
   QUndoStack *undo_stack() const { return undo_stack_; }
 
   bool scrobbled() const { return scrobbled_; }
@@ -281,7 +285,7 @@ class Playlist : public QAbstractListModel {
   Qt::DropActions supportedDropActions() const override;
   QMimeData *mimeData(const QModelIndexList &indexes) const override;
   bool dropMimeData(const QMimeData *data, Qt::DropAction action, const int row, const int column, const QModelIndex &parent_index) override;
-  void sort(const int column_number, const Qt::SortOrder order) override;
+  void sort(const int sort_column_number, const Qt::SortOrder sort_order) override;
   bool removeRows(const int row, const int count, const QModelIndex &parent = QModelIndex()) override;
   bool RemoveItemWithSignal(PlaylistItemPtr item);
 
@@ -341,6 +345,9 @@ class Playlist : public QAbstractListModel {
   void PlaylistChanged();
   void DynamicModeChanged(bool dynamic);
 
+  // Emitted when undoing or redoing a column sort changes which column (if any) is sorted, so the header's sort indicator can be kept in sync without triggering another sort.
+  void SortStateChanged(const bool is_sorted, const Playlist::Column column, const Qt::SortOrder sort_order);
+
   void Error(QString message);
 
   // Signals that the queue has changed, meaning that the remaining queued items should update their position.
@@ -353,6 +360,8 @@ class Playlist : public QAbstractListModel {
   void Rename(const int id, const QString &name);
 
  private:
+  void Restore();
+
   void SetCurrentIsPaused(const bool paused);
   int NextVirtualIndex(int i, const bool ignore_repeat_track) const;
   int PreviousVirtualIndex(int i, const bool ignore_repeat_track) const;
@@ -392,8 +401,9 @@ class Playlist : public QAbstractListModel {
   void SaveItemComplete(TagReaderReplyPtr reply, const QPersistentModelIndex &idx, PlaylistItemPtr item, const quint64 save_generation, const Song &pre_edit_metadata);
   void ReloadItemComplete(const QPersistentModelIndex &idx, PlaylistItemPtr item, const Song &new_metadata, const bool saved, const quint64 save_generation, const Song &fallback_metadata);
   void ItemsLoaded();
-  void ScheduleSave();
   void ForceScheduleSave();
+  void ScheduleSaveItem(const PlaylistItemPtr &item);
+  void ScheduleSaveLastPlayed();
   void Save();
 
  private:
@@ -420,6 +430,12 @@ class Playlist : public QAbstractListModel {
   // Only updated when items are added or removed; moves and reorders leave it untouched.
   QMap<QUuid, PlaylistItemPtr> items_by_uuid_;
 
+  // What the pending timer_save_ has to write. save_all_ means the whole playlist is rewritten (rows added, removed or reordered, or last played/dynamic state changed);
+  // otherwise only the rows in save_item_uuids_ are updated in place.
+  bool save_all_;
+  bool save_last_played_;
+  QSet<QUuid> save_item_uuids_;
+
   // Contains the indices into items_ in the order that they will be played.
   QList<int> virtual_items_;
 
@@ -432,6 +448,9 @@ class Playlist : public QAbstractListModel {
   QPersistentModelIndex stop_after_;
   bool current_is_paused_;
   int current_virtual_index_;
+
+  // Metadata of the current item if it was removed from the playlist, used to find the next track on the same album.
+  Song removed_current_item_metadata_;
 
   PlaylistSequence *playlist_sequence_;
 
@@ -453,6 +472,7 @@ class Playlist : public QAbstractListModel {
   PlaylistGeneratorPtr dynamic_playlist_;
 
   bool auto_sort_;
+  bool is_sorted_;
   Column sort_column_;
   Qt::SortOrder sort_order_;
 };

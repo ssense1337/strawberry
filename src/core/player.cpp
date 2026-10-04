@@ -2,7 +2,7 @@
  * Strawberry Music Player
  * This file was part of Clementine.
  * Copyright 2010, David Sansome <me@davidsansome.com>
- * Copyright 2018-2021, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2026, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@
 #include "core/urlhandlers.h"
 #include "core/urlhandler.h"
 #include "core/enginemetadata.h"
+#include "utilities/strutils.h"
 
 #include "engine/enginebase.h"
 #include "engine/gstengine.h"
@@ -71,6 +72,8 @@ constexpr char kVolume[] = "volume";
 constexpr char kPlaybackState[] = "playback_state";
 constexpr char kPlaybackPlaylist[] = "playback_playlist";
 constexpr char kPlaybackPosition[] = "playback_position";
+// Playing a track this long resets the count of errors that stops playback when repeating tracks that fail.
+constexpr int kErrorResetPlayingSec = 5;
 }  // namespace
 
 Player::Player(const SharedPtr<TaskManager> task_manager, const SharedPtr<UrlHandlers> url_handlers, const SharedPtr<PlaylistManager> playlist_manager, QObject *parent)
@@ -90,14 +93,15 @@ Player::Player(const SharedPtr<TaskManager> task_manager, const SharedPtr<UrlHan
       last_state_(EngineBase::State::Empty),
       nb_errors_received_(0),
       volume_(100),
-      volume_before_mute_(100),
       last_pressed_previous_(QDateTime::currentDateTime()),
       continue_on_error_(false),
       greyout_(true),
       menu_previousmode_(BehaviourSettings::PreviousBehaviour::DontRestart),
       seek_step_sec_(10),
       volume_increment_(5),
-      play_offset_nanosec_(0) {
+      play_offset_nanosec_(0),
+      play_end_sec_(0),
+      playing_start_position_(-1) {
 
   setObjectName(QLatin1String(QObject::metaObject()->className()));
 
@@ -126,6 +130,7 @@ void Player::Init() {
   QObject::connect(&*engine_, &EngineBase::TrackEnded, this, &Player::TrackEnded);
   QObject::connect(&*engine_, &EngineBase::MetaData, this, &Player::EngineMetadataReceived);
   QObject::connect(&*engine_, &EngineBase::VolumeChanged, this, &Player::SetVolumeFromEngine);
+  QObject::connect(&*engine_, &EngineBase::MuteChanged, this, &Player::SetMuteFromEngine);
 
   // Equalizer
   QObject::connect(&*equalizer_, &Equalizer::StereoBalancerEnabledChanged, &*engine_, &EngineBase::SetStereoBalancerEnabled);
@@ -300,8 +305,18 @@ void Player::HandleLoadResult(const UrlHandler::LoadResult &result) {
 
   switch (result.type_) {
     case UrlHandler::LoadResult::Type::Error:
-      if (is_current) {
-        InvalidSongRequested(result.media_url_);
+      // Continue with the next track from the event loop, a synchronous error for every track would otherwise recurse through PlayAt() and HandleLoadResult().
+      // Only once for the failed track, it can be started again before the next track is.
+      if (is_current && result.media_url_ != invalid_song_pending_url_) {
+        // Count the error like an engine error, so repeat modes stop after too many errors.
+        ++nb_errors_received_;
+        invalid_song_pending_url_ = result.media_url_;
+        const QUrl media_url = result.media_url_;
+        QTimer::singleShot(0, this, [this, media_url]() {
+          if (invalid_song_pending_url_ == media_url) invalid_song_pending_url_.clear();
+          // Don't skip a track the user started playing in the meantime.
+          if (current_item_ && current_item_->OriginalUrl() == media_url) InvalidSongRequested(media_url);
+        });
       }
       Q_EMIT Error(result.error_);
       break;
@@ -313,7 +328,7 @@ void Player::HandleLoadResult(const UrlHandler::LoadResult &result) {
 
     case UrlHandler::LoadResult::Type::TrackAvailable:{
 
-      qLog(Debug) << "URL handler for" << result.media_url_ << "returned" << result.stream_url_;
+      qLog(Debug) << "URL handler for" << result.media_url_ << "returned" << Utilities::UrlForLog(result.stream_url_);
 
       Song song;
       if (is_current) song = current_item->EffectiveMetadata();
@@ -371,13 +386,13 @@ void Player::HandleLoadResult(const UrlHandler::LoadResult &result) {
       }
 
       if (is_current) {
-        qLog(Debug) << "Playing song" << current_item->EffectiveMetadata().title() << result.stream_url_ << "position" << play_offset_nanosec_;
+        qLog(Debug) << "Playing song" << current_item->EffectiveMetadata().title() << Utilities::UrlForLog(result.stream_url_) << "position" << play_offset_nanosec_;
         engine_->Play(result.media_url_, result.stream_url_, pause_, stream_change_type_, song.has_cue(), static_cast<quint64>(song.beginning_nanosec()), song.end_nanosec(), play_offset_nanosec_, song.ebur128_integrated_loudness_lufs());
         current_item_ = current_item;
         play_offset_nanosec_ = 0;
       }
       else if (is_next && !current_item->EffectiveMetadata().is_module_music()) {
-        qLog(Debug) << "Preloading next song" << next_item->EffectiveMetadata().title() << result.stream_url_;
+        qLog(Debug) << "Preloading next song" << next_item->EffectiveMetadata().title() << Utilities::UrlForLog(result.stream_url_);
         engine_->StartPreloading(next_item->OriginalUrl(), result.stream_url_, song.has_cue(), song.beginning_nanosec(), song.end_nanosec());
       }
 
@@ -395,6 +410,34 @@ void Player::HandleLoadResult(const UrlHandler::LoadResult &result) {
 }
 
 void Player::Next() { NextInternal(EngineBase::TrackChangeType::Manual, Playlist::AutoScroll::Always); }
+
+void Player::TrackPositionChanged(const int position) {
+
+  // The engine plays the previous track while the current track is still loading, only count the current track.
+  if (!current_item_ || engine_->media_url() != current_item_->OriginalUrl()) return;
+
+  // The track played for a while, so it's not a series of errors.
+  if (playing_start_position_ < 0 || position < playing_start_position_) {
+    playing_start_position_ = position;
+  }
+  else if (position - playing_start_position_ >= kErrorResetPlayingSec) {
+    nb_errors_received_ = 0;
+  }
+
+  if (play_end_sec_ <= 0 || play_end_sec_ > position) return;
+
+  // The track played its scan window, which can be shorter than the time that resets the error count.
+  nb_errors_received_ = 0;
+
+  // Re-check the live repeat mode rather than trusting the value latched when the scan window was computed in PlayAt(): the user may have switched away from Scan mode while this track was playing.
+  if (playlist_manager_->active()->RepeatMode() != PlaylistSequence::RepeatMode::Scan) {
+    play_end_sec_ = 0;
+    return;
+  }
+
+  NextInternal(EngineBase::TrackChangeType::Scan, Playlist::AutoScroll::Always);
+
+}
 
 void Player::NextInternal(const EngineBase::TrackChangeFlags change, const Playlist::AutoScroll autoscroll) {
 
@@ -504,6 +547,9 @@ bool Player::HandleStopAfter(const Playlist::AutoScroll autoscroll) {
 
 void Player::TrackEnded() {
 
+  // The track played, so it's not a series of errors.
+  nb_errors_received_ = 0;
+
   if (current_item_ && current_item_->IsLocalCollectionItem() && current_item_->EffectiveMetadata().id() != -1) {
     playlist_manager_->collection_backend()->IncrementPlayCountAsync(current_item_->EffectiveMetadata().id());
   }
@@ -558,8 +604,13 @@ void Player::UnPause() {
     if (url_handlers_->CanHandle(song.url()) && song.stream_url_can_expire()) {
       const qint64 time = QDateTime::currentSecsSinceEpoch() - pause_time_.toSecsSinceEpoch();
       if (time >= 30) {  // Stream URL might be expired.
+        // It's already loading again, for example when resume was pressed twice.
+        if (loading_async_.contains(song.url())) return;
         qLog(Debug) << "Re-requesting stream URL for" << song.url();
         play_offset_nanosec_ = static_cast<quint64>(engine_->position_nanosec());
+        // The stream is loaded again to continue playing, not paused like the last PlayAt() might have been, and without crossfading into it.
+        pause_ = false;
+        stream_change_type_ = EngineBase::TrackChangeType::First;
         UrlHandler *url_handler = url_handlers_->GetUrlHandler(song.url());
         HandleLoadResult(url_handler->StartLoading(song.url()));
         return;
@@ -643,10 +694,12 @@ void Player::PreviousItem(const EngineBase::TrackChangeFlags change) {
 
 void Player::EngineStateChanged(const EngineBase::State state) {
 
+  // Reset the error count when playback stopped, not when playing starts, the engine reports playing before a stream fails to load.
+  // A track that played for a while or to its end, or a track the user chose to play, also resets it, see TrackPositionChanged(), TrackEnded() and PlayAt().
   if (state == EngineBase::State::Error) {
     nb_errors_received_++;
   }
-  else {
+  else if (state == EngineBase::State::Empty || state == EngineBase::State::Idle) {
     nb_errors_received_ = 0;
   }
 
@@ -692,6 +745,9 @@ void Player::SetVolumeFromSlider(const int value) {
     timer_save_volume_->start();
   }
 
+  // The user is adjusting the volume, so it shouldn't stay muted regardless of the resulting level (including zero).
+  SetMuted(false);
+
 }
 
 void Player::SetVolumeFromEngine(const uint volume) {
@@ -705,6 +761,10 @@ void Player::SetVolumeFromEngine(const uint volume) {
 
 }
 
+void Player::SetMuteFromEngine(const bool mute) {
+  Q_EMIT MuteChanged(mute);
+}
+
 void Player::SetVolume(const uint volume) {
 
   const uint new_volume = qBound(0U, volume, 100U);
@@ -714,6 +774,9 @@ void Player::SetVolume(const uint volume) {
     Q_EMIT VolumeChanged(new_volume);
     timer_save_volume_->start();
   }
+
+  // The volume is being explicitly (re)set, so it shouldn't stay muted regardless of the resulting level (including zero).
+  SetMuted(false);
 
 }
 
@@ -739,6 +802,12 @@ void Player::PlayAt(const int index, const bool pause, const quint64 offset_nano
 
   pause_time_ = pause ? QDateTime::currentDateTime() : QDateTime();
   play_offset_nanosec_ = offset_nanosec;
+  playing_start_position_ = -1;
+
+  // The user chose to play a track, errors of earlier tracks don't count anymore.
+  if (change & EngineBase::TrackChangeType::Manual || change & EngineBase::TrackChangeType::First) {
+    nb_errors_received_ = 0;
+  }
 
   if (current_item_ && change & EngineBase::TrackChangeType::Manual && engine_->position_nanosec() != engine_->length_nanosec()) {
     Q_EMIT TrackSkipped(current_item_);
@@ -756,24 +825,47 @@ void Player::PlayAt(const int index, const bool pause, const quint64 offset_nano
     return;
   }
 
-  current_item_ = playlist_manager_->active()->current_item();
-  const QUrl url = current_item_->EffectiveUrl();
+  Playlist *active_playlist = playlist_manager_->active();
+  current_item_ = active_playlist->current_item();
+
+  // play_offset_nanosec_ was already set to offset_nanosec above, and is only raised here if it's too low for the scan requirements.
+  play_end_sec_ = 0;
+
+  if (active_playlist->RepeatMode() == PlaylistSequence::RepeatMode::Scan && active_playlist->HalfPlayingTimeS() > 0) {
+    const Song &current_song = current_item_->EffectiveMetadata();
+    const qint64 middle_time_ns = (current_song.length_nanosec() * active_playlist->PercentInterestSong()) / 100;
+    const qint64 start_time_ns = middle_time_ns - (static_cast<qint64>(active_playlist->HalfPlayingTimeS()) * 1'000'000'000L);
+    const qint64 end_time_s = (middle_time_ns + (static_cast<qint64>(active_playlist->HalfPlayingTimeS()) * 1'000'000'000L)) / 1'000'000'000L;
+    if (start_time_ns > static_cast<qint64>(play_offset_nanosec_)) {
+      play_offset_nanosec_ = static_cast<quint64>(start_time_ns);
+    }
+    if (end_time_s < (current_song.length_nanosec() / 1'000'000'000L)) {
+      play_end_sec_ = end_time_s;
+    }
+  }
+
+  // A stream URL from an earlier playback of the item can have expired, or contain credentials that are not valid anymore, load it with the URL handler again.
+  // An automatic track change plays the stream URL that was just preloaded.
+  QUrl url = current_item_->EffectiveUrl();
+  if (!(change & EngineBase::TrackChangeType::Auto) && current_item_->EffectiveMetadata().stream_url_can_expire() && url_handlers_->CanHandle(current_item_->OriginalUrl())) {
+    url = current_item_->OriginalUrl();
+  }
 
   if (url_handlers_->CanHandle(url)) {
-    // It's already loading
-    if (loading_async_.contains(url)) {
-      return;
-    }
-
+    // HandleLoadResult() uses these when the URL finished loading, also when it's already loading, so it plays as requested now, for example not paused anymore.
     pause_ = pause;
     stream_change_type_ = change;
     autoscroll_ = autoscroll;
+
+    // It's already loading.
+    if (loading_async_.contains(url)) return;
+
     UrlHandler *url_handler = url_handlers_->GetUrlHandler(url);
     HandleLoadResult(url_handler->StartLoading(url));
   }
   else {
-    qLog(Debug) << "Playing song" << current_item_->EffectiveMetadata().title() << url << "position" << offset_nanosec;
-    engine_->Play(current_item_->OriginalUrl(), url, pause, change, current_item_->EffectiveMetadata().has_cue(), static_cast<quint64>(current_item_->effective_beginning_nanosec()), current_item_->effective_end_nanosec(), offset_nanosec, current_item_->EffectiveMetadata().ebur128_integrated_loudness_lufs());
+    qLog(Debug) << "Playing song" << current_item_->EffectiveMetadata().title() << Utilities::UrlForLog(url) << "position" << play_offset_nanosec_;
+    engine_->Play(current_item_->OriginalUrl(), url, pause, change, current_item_->EffectiveMetadata().has_cue(), static_cast<quint64>(current_item_->effective_beginning_nanosec()), current_item_->effective_end_nanosec(), play_offset_nanosec_, current_item_->EffectiveMetadata().ebur128_integrated_loudness_lufs());
   }
 
 }
@@ -855,15 +947,16 @@ PlaylistItemPtr Player::GetItemAt(const int pos) const {
 
 void Player::Mute() {
 
-  const uint current_volume = engine_->volume();
+  SetMuted(!engine_->is_muted());
 
-  if (current_volume == 0) {
-    SetVolume(volume_before_mute_);
-  }
-  else {
-    volume_before_mute_ = current_volume;
-    SetVolume(0);
-  }
+}
+
+void Player::SetMuted(const bool mute) {
+
+  if (mute == engine_->is_muted()) return;
+
+  engine_->SetMute(mute);
+  Q_EMIT MuteChanged(mute);
 
 }
 
@@ -958,7 +1051,7 @@ void Player::TrackAboutToEnd() {
         loading_async_ << url;
         return;
       case UrlHandler::LoadResult::Type::TrackAvailable:
-        qLog(Debug) << "URL handler for" << result.media_url_ << "returned" << result.stream_url_;
+        qLog(Debug) << "URL handler for" << result.media_url_ << "returned" << Utilities::UrlForLog(result.stream_url_);
         url = result.stream_url_;
         Song song = next_item->EffectiveMetadata();
         song.set_stream_url(url);
@@ -989,6 +1082,20 @@ void Player::ValidSongRequested(const QUrl &url) {
 void Player::InvalidSongRequested(const QUrl &url) {
 
   if (greyout_) Q_EMIT SongChangeRequestProcessed(url, false);
+
+  // The song that failed is the current song, the URL is its stream URL for an engine error, or its URL for an URL handler error.
+  if (current_item_ && (url == current_item_->OriginalUrl() || url == current_item_->EffectiveUrl()) && url_handlers_->CanHandle(current_item_->OriginalUrl())) {
+    // Let the URL handler that loaded the song check what went wrong before the next song is loaded.
+    url_handlers_->GetUrlHandler(current_item_->OriginalUrl())->PlaybackFailed(current_item_->OriginalUrl());
+    // The stream URL can have expired or contain credentials that are not valid anymore, load it with the URL handler again when the song is played again, for example with repeat track.
+    // Clear it through the playlist, which updates the row.
+    if (current_item_ == playlist_manager_->active()->current_item()) {
+      playlist_manager_->active()->ClearStreamMetadata();
+    }
+    else {
+      current_item_->ClearStreamMetadata();
+    }
+  }
 
   if (!continue_on_error_) {
     FatalError();

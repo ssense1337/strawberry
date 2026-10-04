@@ -22,7 +22,6 @@
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QtConcurrentRun>
-#include <QCoreApplication>
 #include <QByteArray>
 #include <QString>
 #include <QUrl>
@@ -44,6 +43,11 @@ constexpr char kUrl[] = "https://www.letras.mus.br/";
 constexpr char kStartTag[] = "<div[^>]*>";
 constexpr char kEndTag[] = "<\\/div>";
 constexpr char kLyricsStart[] = "<div class=\"lyric-original\">";
+
+// letras.mus.br is behind Akamai, which blocks the Strawberry user agent, and a browser user agent unless the request has the headers a browser sends with it.
+constexpr char kUserAgent[] = "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0";
+constexpr char kAccept[] = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+constexpr char kAcceptLanguage[] = "en-US,en;q=0.5";
 }  // namespace
 
 LetrasLyricsProvider::LetrasLyricsProvider(const SharedPtr<NetworkAccessManager> network, QObject *parent)
@@ -57,13 +61,17 @@ QUrl LetrasLyricsProvider::Url(const LyricsSearchRequest &request) {
 
 void LetrasLyricsProvider::StartSearch(const int id, const LyricsSearchRequest &request) {
 
-  // letras.mus.br's Akamai edge blocks generic browser User-Agents (Mozilla/Firefox/Chrome strings all return 403)
-  // but lets through identifiable HTTP-client UAs in the `name/version (+url)` form.
-  // Send a Strawberry-identifying UA instead of the default fake browser UA used by other HTML providers.
   const QUrl url = Url(request);
   QNetworkRequest network_request(url);
   network_request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-  network_request.setHeader(QNetworkRequest::UserAgentHeader, QStringLiteral("Strawberry/%1 (+https://www.strawberrymusicplayer.org)").arg(QCoreApplication::applicationVersion()));
+  network_request.setHeader(QNetworkRequest::UserAgentHeader, QLatin1String(kUserAgent));
+  network_request.setRawHeader("Accept", kAccept);
+  network_request.setRawHeader("Accept-Language", kAcceptLanguage);
+  network_request.setRawHeader("Upgrade-Insecure-Requests", "1");
+  network_request.setRawHeader("Sec-Fetch-Dest", "document");
+  network_request.setRawHeader("Sec-Fetch-Mode", "navigate");
+  network_request.setRawHeader("Sec-Fetch-Site", "none");
+  network_request.setRawHeader("Sec-Fetch-User", "?1");
   QNetworkReply *reply = network_->get(network_request);
   QObject::connect(reply, &QNetworkReply::sslErrors, this, &HttpBaseRequest::HandleSSLErrors);
   replies_ << reply;

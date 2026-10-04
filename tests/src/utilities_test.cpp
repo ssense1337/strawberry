@@ -23,6 +23,8 @@
 
 #include <QByteArray>
 #include <QString>
+#include <QStringConverter>
+#include <QUrl>
 #include <QDateTime>
 #include <QRegularExpression>
 #include <QtDebug>
@@ -35,6 +37,7 @@
 #include "utilities/cryptutils.h"
 #include "utilities/colorutils.h"
 #include "utilities/transliterate.h"
+#include "utilities/textencodingutils.h"
 #include "core/logging.h"
 #include "core/temporaryfile.h"
 
@@ -104,6 +107,27 @@ TEST(UtilitiesTest, HmacFunctions) {
   QString result_hash_sha256 = QString::fromLatin1(Utilities::HmacSha256(key.toLocal8Bit(), data.toLocal8Bit()).toHex());
   bool result_sha256 = result_hash_sha256 == u"f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8"_s;
   EXPECT_TRUE(result_sha256);
+
+  // Test Hmac MD5 with key larger than block size (RFC 2202 TC4)
+  QByteArray key_long_md5(80, 0x01);
+  QByteArray data_long_md5 = "Test Using Larger Than Block-Size Key - Hash Key First";
+  QString result_hash_long_md5 = QString::fromLatin1(Utilities::HmacMd5(key_long_md5, data_long_md5).toHex());
+  EXPECT_EQ(result_hash_long_md5, u"aa9df6c21548e9a650f5841b1b1521e0"_s);
+
+  // Test Hmac SHA1 with key larger than block size (RFC 2202 TC4)
+  QString result_hash_long_sha1 = QString::fromLatin1(Utilities::HmacSha1(key_long_md5, data_long_md5).toHex());
+  EXPECT_EQ(result_hash_long_sha1, u"a7a110816ae9239bbd2f885b7590bb024b59f381"_s);
+
+  // Test Hmac SHA256 with key larger than block size (RFC 4231 TC6)
+  QByteArray key_long_sha256(131, static_cast<char>(0xaa));
+  QByteArray data_long_sha256 = "Test Using Larger Than Block-Size Key - Hash Key First";
+  QString result_hash_long_sha256 = QString::fromLatin1(Utilities::HmacSha256(key_long_sha256, data_long_sha256).toHex());
+  EXPECT_EQ(result_hash_long_sha256, u"60e431591ee0b67f0d8a26aacbf5b77f8e0bc6213728c5140546040f0ee37f54"_s);
+
+  // Test Hmac SHA256 with key and data larger than block size (RFC 4231 TC7)
+  QByteArray data_long_sha256_2 = "This is a test using a larger than block-size key and a larger than block-size data. The key needs to be hashed before being used by the HMAC algorithm.";
+  QString result_hash_long_sha256_2 = QString::fromLatin1(Utilities::HmacSha256(key_long_sha256, data_long_sha256_2).toHex());
+  EXPECT_EQ(result_hash_long_sha256_2, u"9b09ffa71b942fcb27635fbcd5b0e944bfdc63644f0713938a7f51535c3a35e2"_s);
 
 }
 
@@ -277,5 +301,54 @@ TEST(UtilitiesTest, TemporaryFile) {
   static const QRegularExpression regex_temp_filename(u"^\\/tmp\\/test-....\\.jpg$"_s);
 
   EXPECT_TRUE(regex_temp_filename.match(temp_file.filename()).hasMatch());
+
+}
+
+TEST(UtilitiesTest, UrlForLog) {
+
+  EXPECT_EQ(Utilities::UrlForLog(QUrl(u"https://user:secret@example.com/Audio/1/stream?static=true&api_key=token"_s)), u"https://example.com/Audio/1/stream"_s);
+  EXPECT_EQ(Utilities::UrlForLog(QByteArray("http://example.com/rest/stream.view?u=user&p=secret")), u"http://example.com/rest/stream.view"_s);
+  EXPECT_EQ(Utilities::UrlForLog(QByteArray("file:///music/a%b#1.flac")), u"file:///music/a%b#1.flac"_s);
+
+}
+
+TEST(UtilitiesTest, RedactUrls) {
+
+  EXPECT_EQ(Utilities::RedactUrls(u"Unauthorized (401), URL: https://example.com/Audio/1/stream?api_key=token, Redirect to: (NULL)"_s), u"Unauthorized (401), URL: https://example.com/Audio/1/stream, Redirect to: (NULL)"_s);
+  EXPECT_EQ(Utilities::RedactUrls(u"URL: https://example.com:8096, Redirect"_s), u"URL: https://example.com:8096, Redirect"_s);
+  EXPECT_EQ(Utilities::RedactUrls(u"(https://example.com/x?t=1)."_s), u"(https://example.com/x)."_s);
+  EXPECT_EQ(Utilities::RedactUrls(u"https://user:pw@a.example.com/p?x=1;https://b.example.com/q?y=2"_s), u"https://a.example.com/p;https://b.example.com/q"_s);
+  EXPECT_EQ(Utilities::RedactUrls(u"http://user:pw@host:abc/p?k=secret"_s), u"http://host:abc/p"_s);
+  EXPECT_EQ(Utilities::RedactUrls(u"Could not open file:///music/100%.flac for reading."_s), u"Could not open file:///music/100%.flac for reading."_s);
+  EXPECT_EQ(Utilities::RedactUrls(u"First http://a.example.com/x?t=1 and second https://user:pw@b.example.com/y"_s), u"First http://a.example.com/x and second https://b.example.com/y"_s);
+  EXPECT_EQ(Utilities::RedactUrls(u"No URL here."_s), u"No URL here."_s);
+
+}
+
+TEST(UtilitiesTest, TextFromData) {
+
+  // Cyrillic text in windows-1251.
+  const QString windows1251_text = Utilities::TextFromData(QByteArray("REM GENRE Punk\r\nREM DATE 2007\r\nPERFORMER \"\xc3\xf0\xe0\xe6\xe4\xe0\xed\xf1\xea\xe0\xff \xce\xe1\xee\xf0\xee\xed\xe0\"\r\nTITLE \"\xc7\xe0\xf7\xe5\xec \xf1\xed\xff\xf2\xf1\xff \xf1\xed\xfb\"\r\nFILE \"\xc3\xf0\xe0\xe6\xe4\xe0\xed\xf1\xea\xe0\xff \xce\xe1\xee\xf0\xee\xed\xe0 - \xc7\xe0\xf7\xe5\xec \xf1\xed\xff\xf2\xf1\xff \xf1\xed\xfb.flac\" WAVE\r\n  TRACK 01 AUDIO\r\n    TITLE \"\xcc\xfb \xe8\xe4\xb8\xec\"\r\n    INDEX 01 00:00:00\r\n"));
+  EXPECT_TRUE(windows1251_text.contains(u"PERFORMER \"Гражданская Оборона\""_s));
+  EXPECT_TRUE(windows1251_text.contains(u"FILE \"Гражданская Оборона - Зачем снятся сны.flac\" WAVE"_s));
+  EXPECT_TRUE(windows1251_text.contains(u"TITLE \"Мы идём\""_s));
+
+  // German text in ISO-8859-1.
+  const QString latin1_text = Utilities::TextFromData(QByteArray("PERFORMER \"Die \xc4rzte\"\r\nTITLE \"Ger\xe4usch\"\r\nFILE \"Die \xc4rzte - Ger\xe4usch.flac\" WAVE\r\n  TRACK 01 AUDIO\r\n    TITLE \"Unrockbar\"\r\n  TRACK 02 AUDIO\r\n    TITLE \"Nichts in der Welt\"\r\n  TRACK 03 AUDIO\r\n    TITLE \"Dein Vampyr\"\r\n"));
+  EXPECT_TRUE(latin1_text.contains(u"PERFORMER \"Die Ärzte\""_s));
+  EXPECT_TRUE(latin1_text.contains(u"TITLE \"Geräusch\""_s));
+
+  // UTF-8 with and without a byte order mark.
+  EXPECT_EQ(Utilities::TextFromData(u"TITLE \"Мы идём\""_s.toUtf8()), u"TITLE \"Мы идём\""_s);
+  EXPECT_EQ(Utilities::TextFromData(QByteArray("\xef\xbb\xbf") + u"TITLE \"Мы идём\""_s.toUtf8()), u"TITLE \"Мы идём\""_s);
+
+  // UTF-16 without a byte order mark.
+  const QString utf16_text = u"PERFORMER \"Гражданская Оборона\"\r\nTITLE \"Мы идём\"\r\n"_s;
+  QStringEncoder utf16le_encoder(QStringConverter::Encoding::Utf16LE);
+  QStringEncoder utf16be_encoder(QStringConverter::Encoding::Utf16BE);
+  const QByteArray utf16le_data = utf16le_encoder.encode(utf16_text);
+  const QByteArray utf16be_data = utf16be_encoder.encode(utf16_text);
+  EXPECT_EQ(Utilities::TextFromData(utf16le_data), utf16_text);
+  EXPECT_EQ(Utilities::TextFromData(utf16be_data), utf16_text);
 
 }

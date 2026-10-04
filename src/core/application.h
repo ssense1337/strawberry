@@ -40,10 +40,11 @@ class TaskManager;
 class ApplicationImpl;
 class TagReaderClient;
 class Database;
-class DeviceFinders;
+class AudioDeviceListers;
 class UrlHandlers;
 class Player;
 class NetworkAccessManager;
+class CredentialsManager;
 class CollectionLibrary;
 class CollectionBackend;
 class CollectionModel;
@@ -79,7 +80,8 @@ class Application : public QObject {
   SharedPtr<TaskManager> task_manager() const;
   SharedPtr<Player> player() const;
   SharedPtr<NetworkAccessManager> network() const;
-  SharedPtr<DeviceFinders> device_finders() const;
+  SharedPtr<CredentialsManager> credentials_manager() const;
+  SharedPtr<AudioDeviceListers> audio_device_listers() const;
   SharedPtr<UrlHandlers> url_handlers() const;
   SharedPtr<DeviceManager> device_manager() const;
 

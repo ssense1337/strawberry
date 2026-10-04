@@ -37,6 +37,7 @@
 
 #include "includes/shared_ptr.h"
 #include "core/song.h"
+#include "playlistitemsavedata.h"
 
 class QAction;
 
@@ -50,6 +51,11 @@ class PlaylistItem {
 
   static SharedPtr<PlaylistItem> NewFromSource(const Song::Source source, const QUuid &uuid = QUuid());
   static SharedPtr<PlaylistItem> NewFromSong(const Song &song, bool signal = false);
+
+  // Creates a new item with the same metadata and a new UUID, for inserting into another playlist, or again into the same playlist.
+  // Items must not be shared between playlists or rows, since the playlist keys them by UUID and pointer.
+  // Like restoring the item from the database, playlist specific state such as stream metadata, colors and skipping is not copied.
+  SharedPtr<PlaylistItem> Copy() const;
 
   enum class Option {
     Default = 0x00,
@@ -90,7 +96,9 @@ class PlaylistItem {
   virtual void SetArtManual(const QUrl &cover_url) = 0;
 
   virtual bool InitFromQuery(const SqlRow &query) = 0;
-  void BindToQuery(SqlQuery *query) const;
+
+  // Must be called on the thread that owns this item; see PlaylistItemSaveData.
+  PlaylistItemSaveData CreateSaveData() const;
 
   // Identifies the most recent edit made to this item through the playlist (e.g. inline tag editing).
   // A caller starting an asynchronous write/reload round trip should capture the value returned by BumpSaveGeneration() and compare it against save_generation() once the round trip completes: a mismatch means a newer edit has since superseded it, so the (now stale) result must not be applied.

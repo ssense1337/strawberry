@@ -195,7 +195,7 @@ class MainWindow : public QMainWindow, public PlatformInterface {
   void StopAfterCurrent();
 
   void SongChanged(const Song &song);
-  void VolumeChanged(const uint volume);
+  void MuteChanged(const bool mute);
 
   void CopyFilesToCollection(const QList<QUrl> &urls);
   void MoveFilesToCollection(const QList<QUrl> &urls);
@@ -366,6 +366,12 @@ class MainWindow : public QMainWindow, public PlatformInterface {
 #ifdef HAVE_QOBUZ
   StreamingTabsView *qobuz_view_;
 #endif
+#ifdef HAVE_PLEX
+  StreamingSongsView *plex_view_;
+#endif
+#ifdef HAVE_JELLYFIN
+  StreamingTabsView *jellyfin_view_;
+#endif
 
   RadioViewContainer *radio_view_;
 
@@ -419,6 +425,7 @@ class MainWindow : public QMainWindow, public PlatformInterface {
   AlbumCoverImageResult album_cover_;
   bool exit_;
   int exit_count_;
+  bool exit_started_;
   bool playlists_loaded_;
   bool delete_files_;
   std::optional<CommandlineOptions> options_;

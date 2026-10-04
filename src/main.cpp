@@ -269,22 +269,6 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // Set the permissions on the config file on Unix - it can contain passwords for streaming services, so it's important that other users can't read it.
-  // On Windows these are stored in the registry instead.
-#ifdef Q_OS_UNIX
-  {
-    Settings s;
-    if (QFile::exists(s.fileName())) {
-      if (!QFile::setPermissions(s.fileName(), QFile::ReadOwner | QFile::WriteOwner)) {
-        qLog(Error) << "Could not set permissions for settingsfile" << s.fileName();
-      }
-    }
-    else {
-      qLog(Error) << "Missing settingsfile" << s.fileName();
-    }
-  }
-#endif
-
   // Resources
   Q_INIT_RESOURCE(data);
   Q_INIT_RESOURCE(icons);
@@ -398,7 +382,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 #ifdef HAVE_MPRIS2
-  mpris::Mpris2 mpris2(app.player(), app.playlist_manager(), app.current_albumcover_loader());
+  Mpris2 mpris2(app.player(), app.playlist_manager(), app.current_albumcover_loader());
 #endif
 #ifdef HAVE_DISCORD_RPC
   DiscordRichPresence discord_rich_presence(app.player(), app.playlist_manager());
@@ -429,7 +413,8 @@ int main(int argc, char *argv[]) {
 #endif  // Q_OS_MACOS
 
 #ifdef HAVE_MPRIS2
-  QObject::connect(&mpris2, &mpris::Mpris2::RaiseMainWindow, &w, &MainWindow::Raise);
+  QObject::connect(&mpris2, &Mpris2::RaiseMainWindow, &w, &MainWindow::Raise);
+  QObject::connect(&mpris2, &Mpris2::ExitApplication, &w, &MainWindow::Exit);
 #endif
   QObject::connect(&single_app, &KDSingleApplication::messageReceived, &w, QOverload<const QByteArray&>::of(&MainWindow::CommandlineOptionsReceived));
 

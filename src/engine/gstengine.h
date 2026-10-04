@@ -2,7 +2,7 @@
 *   Copyright (C) 2003-2005 by Mark Kretschmann <markey@web.de>           *
 *   Copyright (C) 2005 by Jakub Stachowski <qbast@go2.pl>                 *
 *   Copyright (C) 2006 Paul Cifarelli <paul@cifarelli.net>                *
-*   Copyright (C) 2017-2024 Jonas Kvinge <jonas@jkvinge.net>              *
+*   Copyright (C) 2017-2026 Jonas Kvinge <jonas@jkvinge.net>              *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -58,6 +58,7 @@ class GstEngine : public EngineBase, public GstBufferConsumer {
 
   static const char *kAutoSink;
   static const char *kALSASink;
+  static const char *kASIOSink;
 
   bool Init() override;
   State state() const override;
@@ -71,6 +72,7 @@ class GstEngine : public EngineBase, public GstBufferConsumer {
 
  protected:
   void SetVolumeSW(const uint volume) override;
+  void SetMuteSW(const bool mute) override;
 
  public:
   qint64 position_nanosec() const override;
@@ -83,6 +85,7 @@ class GstEngine : public EngineBase, public GstBufferConsumer {
   bool CustomDeviceSupport(const QString &output) const override;
   bool ALSADeviceSupport(const QString &output) const override;
   bool ExclusiveModeSupport(const QString &output) const override;
+  bool FadingSupport(const QString &output) const override;
 
   void ConsumeBuffer(GstBuffer *buffer, const int pipeline_id, const QString &format) override;
 

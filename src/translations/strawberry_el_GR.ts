@@ -5,74 +5,104 @@
     <name>ASXParser</name>
     <message>
       <source>ASX playlist is too large</source>
-      <translation type="unfinished">ASX playlist is too large</translation>
+      <translation>Η λίστα αναπαραγωγής ASX είναι πολύ μεγάλη</translation>
     </message>
     <message>
       <source>Failed to write ASX playlist</source>
-      <translation type="unfinished">Failed to write ASX playlist</translation>
+      <translation>Αποτυχία εγγραφής λίστας αναπαραγωγής ASX</translation>
     </message>
   </context>
   <context>
-    <name>About</name>
+    <name>AboutDialog</name>
     <message>
       <source>About</source>
-      <translation>Σχετικά με την εφαρμογή</translation>
+      <translation type="unfinished">About</translation>
     </message>
     <message>
       <source>About Strawberry</source>
-      <translation>Σχετικά Με Strawberry</translation>
+      <translation type="unfinished">About Strawberry</translation>
     </message>
     <message>
       <source>Version %1</source>
-      <translation>Έκδοση %1</translation>
+      <translation type="unfinished">Version %1</translation>
     </message>
     <message>
       <source>Strawberry is a music player and music collection organizer.</source>
-      <translation>Το Strawberry είναι ένα πρόγραμμα αναπαραγωγής μουσικής και οργάνωσης μουσικής συλλογής.</translation>
+      <translation type="unfinished">Strawberry is a music player and music collection organizer.</translation>
     </message>
     <message>
       <source>It is a fork of Clementine released in 2018 aimed at music collectors and audiophiles.</source>
-      <translation>Είναι απόγονος του Clementine που κυκλοφόρησε το 2018 και απευθύνεται σε συλλέκτες μουσικής και ηχόφιλους.</translation>
+      <translation type="unfinished">It is a fork of Clementine released in 2018 aimed at music collectors and audiophiles.</translation>
     </message>
     <message>
       <source>Strawberry is free software released under GPL. The source code is available on %1</source>
-      <translation>Το Strawberry είναι ελεύθερο λογισμικό που διατίθεται στο πλαίσιο της GPL. Ο πηγαίος κώδικας είναι διαθέσιμος στο %1</translation>
+      <translation type="unfinished">Strawberry is free software released under GPL. The source code is available on %1</translation>
     </message>
     <message>
       <source>You should have received a copy of the GNU General Public License along with this program.  If not, see %1</source>
-      <translation>Θα πρέπει να έχετε λάβει ένα αντίγραφο της Γενικής Άδειας Δημόσιας Χρήσης GNU (GNU General Public License) μαζί με το πρόγραμμα. Αν όχι, ανατρέξτε στην ενότητα %1</translation>
+      <translation type="unfinished">You should have received a copy of the GNU General Public License along with this program.  If not, see %1</translation>
     </message>
     <message>
       <source>If you like Strawberry and can make use of it, consider sponsoring or donating.</source>
-      <translation>'Αν σας είναι χρήσιμο το Strawberry εξετάστε το ενδεχόμενο επιχορήγησης ή δωρεά.</translation>
+      <translation type="unfinished">If you like Strawberry and can make use of it, consider sponsoring or donating.</translation>
     </message>
     <message>
       <source>You can sponsor the author on %1 or %2. You can also make a one-time payment through %3.</source>
-      <translation>Μπορείτε να επιχορηγήσετε τον συγγραφέα στο %1 ή %2. Μπορείτε επίσης να κάνετε μια εφάπαξ πληρωμή μέσω του %3.</translation>
+      <translation type="unfinished">You can sponsor the author on %1 or %2. You can also make a one-time payment through %3.</translation>
     </message>
     <message>
       <source>Author and maintainer</source>
-      <translation>Συγγραφέας και συντηρητής</translation>
+      <translation type="unfinished">Author and maintainer</translation>
     </message>
     <message>
       <source>Contributors</source>
-      <translation>Συντελεστές</translation>
+      <translation type="unfinished">Contributors</translation>
     </message>
     <message>
       <source>Clementine authors</source>
-      <translation>Συγγραφείς του Clementine</translation>
+      <translation type="unfinished">Clementine authors</translation>
     </message>
     <message>
       <source>Clementine contributors</source>
-      <translation>Συντελεστές Clementine</translation>
+      <translation type="unfinished">Clementine contributors</translation>
     </message>
     <message>
       <source>Thanks to</source>
-      <translation>Ευχαριστούμε</translation>
+      <translation type="unfinished">Thanks to</translation>
     </message>
     <message>
       <source>Thanks to all the other Amarok and Clementine contributors.</source>
-      <translation>Ευχαριστούμε όλους τους άλλους συνεισφέροντες Amarok και Clementine.</translation>
+      <translation type="unfinished">Thanks to all the other Amarok and Clementine contributors.</translation>
+    </message>
+  </context>
+  <context>
+    <name>AcoustidClient</name>
+    <message>
+      <source>Missing AcoustID API key</source>
+      <translation type="unfinished">Missing AcoustID API key</translation>
+    </message>
+  </context>
+  <context>
+    <name>AcoustidSettingsPage</name>
+    <message>
+      <source>AcoustID</source>
+      <translation type="unfinished">AcoustID</translation>
+    </message>
+    <message>
+      <source>AcoustID is used to identify songs by their audio fingerprint when fetching tags.</source>
+      <translation type="unfinished">AcoustID is used to identify songs by their audio fingerprint when fetching tags.</translation>
+    </message>
+    <message>
+      <source>API Credentials</source>
+      <translation type="unfinished">API Credentials</translation>
+    </message>
+    <message>
+      <source>Use custom API Key</source>
+      <translation type="unfinished">Use custom API Key</translation>
+    </message>
+    <message>
+      <source>API key</source>
+      <translation type="unfinished">API key</translation>
     </message>
   </context>
   <context>
@@ -521,7 +551,7 @@
     </message>
     <message>
       <source>Window</source>
-      <translation type="unfinished">Window</translation>
+      <translation>Παράθυρο</translation>
     </message>
     <message>
       <source>Window text</source>
@@ -529,11 +559,11 @@
     </message>
     <message>
       <source>Base</source>
-      <translation type="unfinished">Base</translation>
+      <translation>Βασικό</translation>
     </message>
     <message>
       <source>Alternate base</source>
-      <translation type="unfinished">Alternate base</translation>
+      <translation/>
     </message>
     <message>
       <source>Tooltip base</source>
@@ -549,7 +579,7 @@
     </message>
     <message>
       <source>Text</source>
-      <translation type="unfinished">Text</translation>
+      <translation>Κείμενο</translation>
     </message>
     <message>
       <source>Button</source>
@@ -565,7 +595,7 @@
     </message>
     <message>
       <source>Select color</source>
-      <translation type="unfinished">Select color</translation>
+      <translation>Επιλέξτε χρώμα</translation>
     </message>
     <message>
       <source>Select background image</source>
@@ -573,51 +603,51 @@
     </message>
     <message>
       <source>Colors</source>
-      <translation type="unfinished">Colors</translation>
+      <translation>Χρώματα</translation>
     </message>
     <message>
       <source>&amp;Use the system default color set</source>
-      <translation type="unfinished">&amp;Use the system default color set</translation>
+      <translation>&amp;Χρησιμοποιήστε την προεπιλογή χρωμάτων του συστήματος</translation>
     </message>
     <message>
       <source>Use a custom color set</source>
-      <translation type="unfinished">Use a custom color set</translation>
+      <translation>Χρήση προσαρμοσμένου χρώματος</translation>
     </message>
     <message>
       <source>Set a custom color set suitable for a dark theme</source>
-      <translation type="unfinished">Set a custom color set suitable for a dark theme</translation>
+      <translation>Ορίστε ένα προσαρμοσμένο σύνολο χρωμάτων κατάλληλο για ένα σκούρο θέμα</translation>
     </message>
     <message>
       <source>Dark mode</source>
-      <translation type="unfinished">Dark mode</translation>
+      <translation>Dark mode</translation>
     </message>
     <message>
       <source>Reset the custom color set to the system default colors</source>
-      <translation type="unfinished">Reset the custom color set to the system default colors</translation>
+      <translation>Επαναφορά προσαρμοσμένου χρώματος στα προκαθορισμένα χρώματα του συστήματος</translation>
     </message>
     <message>
       <source>Reset to default</source>
-      <translation type="unfinished">Reset to default</translation>
+      <translation>Επαναφορά στις προεπιλογές</translation>
     </message>
     <message>
       <source>You might need to restart Strawberry for this setting to fully apply</source>
-      <translation type="unfinished">You might need to restart Strawberry for this setting to fully apply</translation>
+      <translation>Ίσως να πρέπει να επανεκκινήσετε το Srawberry για να ενεργοποιηθεί αυτή η ρύθμιση</translation>
     </message>
     <message>
       <source>You need to restart Strawberry for this setting to take affect</source>
-      <translation type="unfinished">You need to restart Strawberry for this setting to take affect</translation>
+      <translation>Θα πρέπει να επανεκκινήσετε το Srawberry για να ενεργοποιηθεί αυτή η ρύθμιση</translation>
     </message>
     <message>
       <source>System icons</source>
-      <translation type="unfinished">System icons</translation>
+      <translation>Εικονίδια συστήματος</translation>
     </message>
     <message>
       <source>Changing colors is only supported with some styles</source>
-      <translation type="unfinished">Changing colors is only supported with some styles</translation>
+      <translation>Η αλλαγή χρωμάτων υποστηρίζεται μόνο με κάποια στυλ</translation>
     </message>
     <message>
       <source>Dark colors</source>
-      <translation type="unfinished">Dark colors</translation>
+      <translation>Σκοτεινά χρώματα</translation>
     </message>
   </context>
   <context>
@@ -800,7 +830,7 @@
     </message>
     <message>
       <source>Map the volume slider to a decibel scale so that perceived loudness changes evenly. Each 1% step equals 0.5 dB, 100% is 0 dB and 0% is silence.</source>
-      <translation type="unfinished">Map the volume slider to a decibel scale so that perceived loudness changes evenly. Each 1% step equals 0.5 dB, 100% is 0 dB and 0% is silence.</translation>
+      <translation/>
     </message>
     <message>
       <source>Exponential volume scaling</source>
@@ -808,7 +838,7 @@
     </message>
     <message>
       <source>Device warm-up</source>
-      <translation type="unfinished">Device warm-up</translation>
+      <translation>Προθέρμανση συσκευής</translation>
     </message>
     <message>
       <source>Delay between opening the audio device and starting playback, to avoid the start of the track being cut off while the device (DAC) is still becoming ready.  Set to 0 to disable.</source>
@@ -1919,6 +1949,22 @@ If there are no matches then it will use the largest image in the directory.</so
       <source>Embedded album cover art (%1)</source>
       <translation>Ενσωματωμένο εξώφυλλο άλμπουμ (%1)</translation>
     </message>
+    <message>
+      <source>API Credentials</source>
+      <translation type="unfinished">API Credentials</translation>
+    </message>
+    <message>
+      <source>Use custom API credentials</source>
+      <translation type="unfinished">Use custom API credentials</translation>
+    </message>
+    <message>
+      <source>Client ID</source>
+      <translation type="unfinished">Client ID</translation>
+    </message>
+    <message>
+      <source>Client secret</source>
+      <translation type="unfinished">Client secret</translation>
+    </message>
   </context>
   <context>
     <name>CueParser</name>
@@ -2157,6 +2203,13 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Form</source>
       <translation>Φόρμα</translation>
+    </message>
+  </context>
+  <context>
+    <name>DiscogsCoverProvider</name>
+    <message>
+      <source>Missing Discogs client ID and/or client secret</source>
+      <translation type="unfinished">Missing Discogs client ID and/or client secret</translation>
     </message>
   </context>
   <context>
@@ -2847,6 +2900,13 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
   </context>
   <context>
+    <name>GeniusLyricsProvider</name>
+    <message>
+      <source>Missing Genius client ID and/or client secret</source>
+      <translation type="unfinished">Missing Genius client ID and/or client secret</translation>
+    </message>
+  </context>
+  <context>
     <name>GioLister</name>
     <message>
       <source>Mount point</source>
@@ -3136,6 +3196,10 @@ If there are no matches then it will use the largest image in the directory.</so
   <context>
     <name>LastFMScrobbler</name>
     <message>
+      <source>Missing Last.fm API key and/or API secret</source>
+      <translation type="unfinished">Missing Last.fm API key and/or API secret</translation>
+    </message>
+    <message>
       <source>%1 Scrobbler Authentication</source>
       <translation>Ταυτοποίηση %1 Scrobbler</translation>
     </message>
@@ -3169,6 +3233,13 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
   </context>
   <context>
+    <name>LastFmCoverProvider</name>
+    <message>
+      <source>Missing Last.fm API key and/or API secret</source>
+      <translation type="unfinished">Missing Last.fm API key and/or API secret</translation>
+    </message>
+  </context>
+  <context>
     <name>LastPlayedItemDelegate</name>
     <message>
       <source>Never</source>
@@ -3184,6 +3255,10 @@ If there are no matches then it will use the largest image in the directory.</so
   </context>
   <context>
     <name>ListenBrainzScrobbler</name>
+    <message>
+      <source>Missing ListenBrainz client ID and/or client secret</source>
+      <translation type="unfinished">Missing ListenBrainz client ID and/or client secret</translation>
+    </message>
     <message>
       <source>Unable to scrobble %1 - %2 because of error: %3</source>
       <translation>Αδυναμία scrobble %1 - %2 λόγω σφάλματος: %3</translation>
@@ -3265,6 +3340,22 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Authentication failed</source>
       <translation>Αποτυχία ταυτοποίησης</translation>
+    </message>
+    <message>
+      <source>API Credentials</source>
+      <translation type="unfinished">API Credentials</translation>
+    </message>
+    <message>
+      <source>Use custom API credentials</source>
+      <translation type="unfinished">Use custom API credentials</translation>
+    </message>
+    <message>
+      <source>Client ID</source>
+      <translation type="unfinished">Client ID</translation>
+    </message>
+    <message>
+      <source>Client secret</source>
+      <translation type="unfinished">Client secret</translation>
     </message>
   </context>
   <context>
@@ -3783,7 +3874,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Ctrl+Shift+H</source>
-      <translation type="unfinished">Ctrl+Shift+H</translation>
+      <translation>Ctrl+Shift+H</translation>
     </message>
     <message>
       <source>Go to last playlist tab</source>
@@ -3796,6 +3887,10 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Close current playlist tab</source>
       <translation type="unfinished">Close current playlist tab</translation>
+    </message>
+    <message>
+      <source>Ctrl+B</source>
+      <translation type="unfinished">Ctrl+B</translation>
     </message>
   </context>
   <context>
@@ -3863,6 +3958,13 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Error connecting MTP device %1: %2</source>
       <translation>Σφάλμα κατά τη σύνδεση της συσκευής MTP %1: %2</translation>
+    </message>
+  </context>
+  <context>
+    <name>MusixmatchLyricsProvider</name>
+    <message>
+      <source>Missing Musixmatch client ID and/or client secret</source>
+      <translation type="unfinished">Missing Musixmatch client ID and/or client secret</translation>
     </message>
   </context>
   <context>
@@ -4171,6 +4273,18 @@ If there are no matches then it will use the largest image in the directory.</so
   <context>
     <name>OAuthenticator</name>
     <message>
+      <source>Missing client ID</source>
+      <translation type="unfinished">Missing client ID</translation>
+    </message>
+    <message>
+      <source>Missing client secret</source>
+      <translation type="unfinished">Missing client secret</translation>
+    </message>
+    <message>
+      <source>Invalid redirect URL</source>
+      <translation type="unfinished">Invalid redirect URL</translation>
+    </message>
+    <message>
       <source>Authentication</source>
       <translation>Ταυτοποίηση</translation>
     </message>
@@ -4238,6 +4352,14 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>Ένταση %1%</translation>
     </message>
     <message>
+      <source>Muted</source>
+      <translation type="unfinished">Muted</translation>
+    </message>
+    <message>
+      <source>Unmuted</source>
+      <translation type="unfinished">Unmuted</translation>
+    </message>
+    <message>
       <source>Don&apos;t shuffle</source>
       <translation type="unfinished">Don&apos;t shuffle</translation>
     </message>
@@ -4278,8 +4400,19 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>Παύση μετά από κάθε τραγούδι</translation>
     </message>
     <message>
-      <source>Intro tracks</source>
-      <translation>Εισαγωγικά κομμάτια</translation>
+      <source>Scan tracks</source>
+      <translation type="unfinished">Scan tracks</translation>
+    </message>
+  </context>
+  <context>
+    <name>OpenTidalCoverProvider</name>
+    <message>
+      <source>Missing OpenTidal client ID and/or client secret.</source>
+      <translation type="unfinished">Missing OpenTidal client ID and/or client secret.</translation>
+    </message>
+    <message>
+      <source>Authentication failed: %1</source>
+      <translation type="unfinished">Authentication failed: %1</translation>
     </message>
   </context>
   <context>
@@ -4472,11 +4605,11 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>File %1 does not exist</source>
-      <translation type="unfinished">File %1 does not exist</translation>
+      <translation>Το αρχείο %1 δεν υπάρχει</translation>
     </message>
     <message>
       <source>Could not read file %1: %2</source>
-      <translation type="unfinished">Could not read file %1: %2</translation>
+      <translation>Αδυναμία αντιγραφής αρχείου %1 στο %2</translation>
     </message>
   </context>
   <context>
@@ -4514,7 +4647,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Title Sort</source>
-      <translation type="unfinished">Title Sort</translation>
+      <translation>Ταξινόμηση τίτλων</translation>
     </message>
     <message>
       <source>Artist</source>
@@ -4522,7 +4655,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Artist Sort</source>
-      <translation type="unfinished">Artist Sort</translation>
+      <translation>Ταξινόμηση καλλιτέχνη</translation>
     </message>
     <message>
       <source>Album</source>
@@ -4530,7 +4663,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Album Sort</source>
-      <translation type="unfinished">Album Sort</translation>
+      <translation>Ταξινόμηση άλμπουμ</translation>
     </message>
     <message>
       <source>Track</source>
@@ -4562,7 +4695,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Album Artist Sort</source>
-      <translation type="unfinished">Album Artist Sort</translation>
+      <translation>Ταξινόμηση άλμπουμ καλλιτέχνη</translation>
     </message>
     <message>
       <source>Composer</source>
@@ -4570,7 +4703,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Composer Sort</source>
-      <translation type="unfinished">Composer Sort</translation>
+      <translation>Ταξινόμηση συνθέτη</translation>
     </message>
     <message>
       <source>Performer</source>
@@ -4578,7 +4711,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Performer Sort</source>
-      <translation type="unfinished">Performer Sort</translation>
+      <translation>Ταξινόμηση εκτελεστή</translation>
     </message>
     <message>
       <source>Grouping</source>
@@ -4590,7 +4723,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Skip Count</source>
-      <translation type="unfinished">Skip Count</translation>
+      <translation>Παράλειψη καταμέτρησης</translation>
     </message>
     <message>
       <source>Last Played</source>
@@ -4642,7 +4775,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Moodbar</source>
-      <translation type="unfinished">Moodbar</translation>
+      <translation>Moodbar</translation>
     </message>
     <message>
       <source>BPM</source>
@@ -4731,6 +4864,22 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>&amp;Lock rating</source>
       <translation>&amp;Κλείδωμα βαθμολογίας</translation>
+    </message>
+    <message>
+      <source>Sor&amp;t</source>
+      <translation type="unfinished">Sor&amp;t</translation>
+    </message>
+    <message>
+      <source>&amp;Ascending</source>
+      <translation type="unfinished">&amp;Ascending</translation>
+    </message>
+    <message>
+      <source>&amp;Descending</source>
+      <translation type="unfinished">&amp;Descending</translation>
+    </message>
+    <message>
+      <source>&amp;Clear sorting</source>
+      <translation type="unfinished">&amp;Clear sorting</translation>
     </message>
     <message>
       <source>&amp;Align text</source>
@@ -4940,12 +5089,8 @@ If there are no matches then it will use the largest image in the directory.</so
       <translation>Παύση μετά από κάθε τραγούδι</translation>
     </message>
     <message>
-      <source>Intro tracks</source>
-      <translation>Εισαγωγικά κομμάτια</translation>
-    </message>
-    <message>
       <source>Don&apos;t shuffle</source>
-      <translation type="unfinished">Don&apos;t shuffle</translation>
+      <translation>Ακύρωση ανακατέματος</translation>
     </message>
     <message>
       <source>Shuffle tracks in this album</source>
@@ -4962,6 +5107,10 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Shuffle grouping</source>
       <translation>Τυχαίο ομαδοποίηση</translation>
+    </message>
+    <message>
+      <source>Scan tracks</source>
+      <translation type="unfinished">Scan tracks</translation>
     </message>
   </context>
   <context>
@@ -5012,7 +5161,7 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
       <source>Enable delete files in the right click context menu</source>
-      <translation type="unfinished">Enable delete files in the right click context menu</translation>
+      <translation>Ενεργοποίηση διαγραφής αρχείων στο μενού δεξιού κλικ</translation>
     </message>
     <message>
       <source>Automatically sort playlist when inserting songs</source>
@@ -5053,6 +5202,26 @@ If there are no matches then it will use the largest image in the directory.</so
     <message>
       <source>Write metadata when saving playlists</source>
       <translation>Εγγραφή μεταδεδομένων κατά την αποθήκευση λιστών αναπαραγωγής</translation>
+    </message>
+    <message>
+      <source>Scan mode</source>
+      <translation type="unfinished">Scan mode</translation>
+    </message>
+    <message>
+      <source>Playing time (seconds)</source>
+      <translation type="unfinished">Playing time (seconds)</translation>
+    </message>
+    <message>
+      <source>The time played before and after the position time selected in seconds (0 for playing the complete track)</source>
+      <translation type="unfinished">The time played before and after the position time selected in seconds (0 for playing the complete track)</translation>
+    </message>
+    <message>
+      <source>Interest position (percent of track length)</source>
+      <translation type="unfinished">Interest position (percent of track length)</translation>
+    </message>
+    <message>
+      <source>The position time reference selected in percent of the track length</source>
+      <translation type="unfinished">The position time reference selected in percent of the track length</translation>
     </message>
   </context>
   <context>
@@ -5618,7 +5787,7 @@ Are you sure you want to continue?</source>
     </message>
     <message>
       <source>No track ID</source>
-      <translation type="unfinished">No track ID</translation>
+      <translation>Δεν υπάρχει ID κομματιού</translation>
     </message>
   </context>
   <context>
@@ -5700,11 +5869,11 @@ Are you sure you want to continue?</source>
     </message>
     <message>
       <source>Waiting for browser authentication...</source>
-      <translation type="unfinished">Waiting for browser authentication...</translation>
+      <translation>Αναμονή για έλεγχο ταυτότητας περιηγητή...</translation>
     </message>
     <message>
       <source>OAuth redirect failed: %1</source>
-      <translation type="unfinished">OAuth redirect failed: %1</translation>
+      <translation>Η ανακατεύθυνση OAuth απέτυχε: %1</translation>
     </message>
     <message>
       <source>OAuth redirect is missing authorization code.</source>
@@ -5736,10 +5905,6 @@ Are you sure you want to continue?</source>
     <message>
       <source>Enable</source>
       <translation>Ενεργοποίηση</translation>
-    </message>
-    <message>
-      <source>Authentication</source>
-      <translation>Ταυτοποίηση</translation>
     </message>
     <message>
       <source>App ID</source>
@@ -5790,16 +5955,16 @@ Are you sure you want to continue?</source>
       <translation>Μη ολοκληρωμένη διαμόρφωση</translation>
     </message>
     <message>
-      <source>Missing app id. Please fetch credentials first.</source>
-      <translation type="unfinished">Missing app id. Please fetch credentials first.</translation>
+      <source>Missing app id. Please fetch API credentials first.</source>
+      <translation type="unfinished">Missing app id. Please fetch API credentials first.</translation>
     </message>
     <message>
-      <source>Missing app secret. Please fetch credentials first.</source>
-      <translation type="unfinished">Missing app secret. Please fetch credentials first.</translation>
+      <source>Missing app secret. Please fetch API credentials first.</source>
+      <translation type="unfinished">Missing app secret. Please fetch API credentials first.</translation>
     </message>
     <message>
-      <source>Missing private key. Please fetch credentials first.</source>
-      <translation type="unfinished">Missing private key. Please fetch credentials first.</translation>
+      <source>Missing private key. Please fetch API credentials first.</source>
+      <translation type="unfinished">Missing private key. Please fetch API credentials first.</translation>
     </message>
     <message>
       <source>Authentication failed</source>
@@ -5810,20 +5975,16 @@ Are you sure you want to continue?</source>
       <translation type="unfinished">Fetching...</translation>
     </message>
     <message>
-      <source>Credentials fetched</source>
-      <translation type="unfinished">Credentials fetched</translation>
+      <source>API credentials fetched</source>
+      <translation type="unfinished">API credentials fetched</translation>
     </message>
     <message>
-      <source>Credentials have been successfully fetched. Click Login to authenticate via your browser.</source>
-      <translation type="unfinished">Credentials have been successfully fetched. Click Login to authenticate via your browser.</translation>
+      <source>API credentials have been successfully fetched. Click Login to authenticate via your browser.</source>
+      <translation type="unfinished">API credentials have been successfully fetched. Click Login to authenticate via your browser.</translation>
     </message>
     <message>
       <source>Credential fetch failed</source>
       <translation type="unfinished">Credential fetch failed</translation>
-    </message>
-    <message>
-      <source>Fetch Credentials</source>
-      <translation type="unfinished">Fetch Credentials</translation>
     </message>
     <message>
       <source>Remove (Remastered), etc from song titles</source>
@@ -5836,6 +5997,14 @@ Are you sure you want to continue?</source>
     <message>
       <source>Automatically fetch app ID, app secret and private key from Qobuz web player</source>
       <translation type="unfinished">Automatically fetch app ID, app secret and private key from Qobuz web player</translation>
+    </message>
+    <message>
+      <source>API Credentials</source>
+      <translation type="unfinished">API Credentials</translation>
+    </message>
+    <message>
+      <source>Fetch API Credentials</source>
+      <translation type="unfinished">Fetch API Credentials</translation>
     </message>
   </context>
   <context>
@@ -5902,54 +6071,54 @@ Are you sure you want to continue?</source>
     <name>RadioBrowserSearchModel</name>
     <message>
       <source>Name</source>
-      <translation type="unfinished">Name</translation>
+      <translation>Όνομα</translation>
     </message>
     <message>
       <source>Country</source>
-      <translation type="unfinished">Country</translation>
+      <translation>Χώρα</translation>
     </message>
     <message>
       <source>Tags</source>
-      <translation type="unfinished">Tags</translation>
+      <translation>Ετικέτες</translation>
     </message>
     <message>
       <source>Codec</source>
-      <translation type="unfinished">Codec</translation>
+      <translation>Κωδικοποιητής</translation>
     </message>
   </context>
   <context>
     <name>RadioBrowserSearchView</name>
     <message>
       <source>Load more...</source>
-      <translation type="unfinished">Load more...</translation>
+      <translation>Φόρτωση περισσότερων...</translation>
     </message>
     <message>
       <source>Search for radio stations using radio-browser.info</source>
-      <translation type="unfinished">Search for radio stations using radio-browser.info</translation>
+      <translation>Αναζήτηση ραδιοφωνικών σταθμών με χρήση radio-browser.info</translation>
     </message>
     <message>
       <source>Search radio stations...</source>
-      <translation type="unfinished">Search radio stations...</translation>
+      <translation>Αναζήτηση ραδιοφωνικών σταθμών...</translation>
     </message>
     <message>
       <source>All countries</source>
-      <translation type="unfinished">All countries</translation>
+      <translation>Όλες οι χώρες</translation>
     </message>
     <message>
       <source>By votes</source>
-      <translation type="unfinished">By votes</translation>
+      <translation>Κατά ψήφους</translation>
     </message>
     <message>
       <source>By clicks</source>
-      <translation type="unfinished">By clicks</translation>
+      <translation>Κατά κλικ</translation>
     </message>
     <message>
       <source>By name</source>
-      <translation type="unfinished">By name</translation>
+      <translation>Κατά όνομα</translation>
     </message>
     <message>
       <source>By bitrate</source>
-      <translation type="unfinished">By bitrate</translation>
+      <translation>Κατά bitrate</translation>
     </message>
     <message>
       <source>Searching...</source>
@@ -6362,6 +6531,18 @@ Are you sure you want to continue?</source>
     <message>
       <source>Spotify</source>
       <translation>Spotify</translation>
+    </message>
+    <message>
+      <source>Use custom API credentials</source>
+      <translation type="unfinished">Use custom API credentials</translation>
+    </message>
+    <message>
+      <source>Client ID:</source>
+      <translation type="unfinished">Client ID:</translation>
+    </message>
+    <message>
+      <source>Client secret:</source>
+      <translation type="unfinished">Client secret:</translation>
     </message>
   </context>
   <context>
@@ -6791,6 +6972,10 @@ Are you sure you want to continue?</source>
   <context>
     <name>SpotifyService</name>
     <message>
+      <source>Missing Spotify client ID and/or client secret</source>
+      <translation type="unfinished">Missing Spotify client ID and/or client secret</translation>
+    </message>
+    <message>
       <source>Not authenticated with Spotify.</source>
       <translation>Μη πιστοποίηση με το Spotify.</translation>
     </message>
@@ -6804,10 +6989,6 @@ Are you sure you want to continue?</source>
     <message>
       <source>Enable</source>
       <translation>Ενεργοποίηση</translation>
-    </message>
-    <message>
-      <source>Basic authentication</source>
-      <translation>Βασική ταυτοποίηση</translation>
     </message>
     <message>
       <source>Authenticate</source>
@@ -6856,6 +7037,26 @@ Are you sure you want to continue?</source>
     <message>
       <source>Remove (Remastered), etc from song titles</source>
       <translation type="unfinished">Remove (Remastered), etc from song titles</translation>
+    </message>
+    <message>
+      <source>Authentication</source>
+      <translation type="unfinished">Authentication</translation>
+    </message>
+    <message>
+      <source>Use custom API credentials</source>
+      <translation type="unfinished">Use custom API credentials</translation>
+    </message>
+    <message>
+      <source>Client ID</source>
+      <translation type="unfinished">Client ID</translation>
+    </message>
+    <message>
+      <source>Client secret</source>
+      <translation type="unfinished">Client secret</translation>
+    </message>
+    <message>
+      <source>API Credentials</source>
+      <translation type="unfinished">API Credentials</translation>
     </message>
   </context>
   <context>
@@ -7291,14 +7492,6 @@ Are you sure you want to continue?</source>
       <translation>Ενεργοποίηση</translation>
     </message>
     <message>
-      <source>Tidal support is not official and requires a API token from a registered application to work. We can&apos;t help you getting these.</source>
-      <translation type="unfinished">Tidal support is not official and requires a API token from a registered application to work. We can&apos;t help you getting these.</translation>
-    </message>
-    <message>
-      <source>Authentication</source>
-      <translation>Ταυτοποίηση</translation>
-    </message>
-    <message>
       <source>Client ID</source>
       <translation>Κωδικός Πελάτη</translation>
     </message>
@@ -7370,6 +7563,14 @@ Are you sure you want to continue?</source>
       <source>Remove (Remastered), etc from song titles</source>
       <translation>Αφαίρεση (Remastered), κλπ από τίτλους τραγουδιών</translation>
     </message>
+    <message>
+      <source>Use custom client ID</source>
+      <translation type="unfinished">Use custom client ID</translation>
+    </message>
+    <message>
+      <source>API Credentials</source>
+      <translation type="unfinished">API Credentials</translation>
+    </message>
   </context>
   <context>
     <name>TidalStreamURLRequest</name>
@@ -7382,12 +7583,12 @@ Are you sure you want to continue?</source>
       <translation>Ακυρώθηκε.</translation>
     </message>
     <message>
-      <source>Received URL with %1 encrypted stream from Tidal. Strawberry does not currently support encrypted streams.</source>
-      <translation>Λήφθηκε URL με κρυπτογράφηση %1 από το Tidal. Το Strawberry δεν υποστηρίζει προς το παρόν κρυπτογραφημένες ροές.</translation>
+      <source>Received a %1 encrypted stream from Tidal, which Strawberry does not support. Whether Tidal delivers encrypted streams depends on the client ID in use. Try changing the Client ID in the Tidal settings</source>
+      <translation type="unfinished">Received a %1 encrypted stream from Tidal, which Strawberry does not support. Whether Tidal delivers encrypted streams depends on the client ID in use. Try changing the Client ID in the Tidal settings</translation>
     </message>
     <message>
-      <source>Received URL with encrypted stream from Tidal. Strawberry does not currently support encrypted streams.</source>
-      <translation>Λήφθηκε URL με κρυπτογράφηση από το Tidal. Το Strawberry δεν υποστηρίζει προς το παρόν κρυπτογραφημένες ροές.</translation>
+      <source>Received an encrypted stream from Tidal, which Strawberry does not support. Whether Tidal delivers encrypted streams depends on the client ID in use. Try changing the Client ID in the Tidal settings</source>
+      <translation type="unfinished">Received an encrypted stream from Tidal, which Strawberry does not support. Whether Tidal delivers encrypted streams depends on the client ID in use. Try changing the Client ID in the Tidal settings</translation>
     </message>
   </context>
   <context>
@@ -7434,7 +7635,7 @@ Are you sure you want to continue?</source>
     </message>
     <message>
       <source>Error</source>
-      <translation type="unfinished">Error</translation>
+      <translation>Σφάλμα</translation>
     </message>
     <message>
       <source>Original tags</source>
@@ -7454,7 +7655,7 @@ Are you sure you want to continue?</source>
     </message>
     <message>
       <source>No results</source>
-      <translation type="unfinished">No results</translation>
+      <translation>Δε βρέθηκαν αποτελέσματα</translation>
     </message>
   </context>
   <context>
@@ -7473,19 +7674,19 @@ Are you sure you want to continue?</source>
     </message>
     <message>
       <source>Normal</source>
-      <translation type="unfinished">Normal</translation>
+      <translation>Κανονικός</translation>
     </message>
     <message>
       <source>Moodbar</source>
-      <translation type="unfinished">Moodbar</translation>
+      <translation>Moodbar</translation>
     </message>
     <message>
       <source>Moodbar style</source>
-      <translation type="unfinished">Moodbar style</translation>
+      <translation>Στυλ μπάρας διάθεσης</translation>
     </message>
     <message>
       <source>Waveform</source>
-      <translation type="unfinished">Waveform</translation>
+      <translation>Κυματομορφή</translation>
     </message>
   </context>
   <context>
@@ -7564,9 +7765,9 @@ Are you sure you want to continue?</source>
     </message>
     <message numerus="yes">
       <source>%n remaining</source>
-      <translation type="unfinished">
+      <translation>
         <numerusform>%n απομένουν</numerusform>
-        <numerusform>%n remaining</numerusform>
+        <numerusform>%n απομένουν</numerusform>
       </translation>
     </message>
     <message numerus="yes">
@@ -7578,9 +7779,9 @@ Are you sure you want to continue?</source>
     </message>
     <message numerus="yes">
       <source>%n failed</source>
-      <translation type="unfinished">
+      <translation>
         <numerusform>%n απέτυχε</numerusform>
-        <numerusform>%n failed</numerusform>
+        <numerusform>%n απέτυχε</numerusform>
       </translation>
     </message>
     <message>
@@ -8011,6 +8212,13 @@ Are you sure you want to continue?</source>
     </message>
   </context>
   <context>
+    <name>VolumeSlider</name>
+    <message>
+      <source>Muted</source>
+      <translation type="unfinished">Muted</translation>
+    </message>
+  </context>
+  <context>
     <name>WaveformSettingsPage</name>
     <message>
       <source>Waveform</source>
@@ -8018,7 +8226,7 @@ Are you sure you want to continue?</source>
     </message>
     <message>
       <source>Color</source>
-      <translation type="unfinished">Color</translation>
+      <translation>Χρώμα</translation>
     </message>
     <message>
       <source>Select waveform color</source>

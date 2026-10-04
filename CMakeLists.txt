@@ -19,8 +19,7 @@ include(CheckIncludeFiles)
 include(FindPkgConfig)
 include(cmake/Version.cmake)
 include(cmake/OptionalComponent.cmake)
-include(cmake/OptionalSource.cmake)
-include(cmake/ParseArguments.cmake)
+include(cmake/ApiCredentials.cmake)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   set(LINUX ON)
@@ -167,6 +166,10 @@ find_package(Backtrace)
 if(Backtrace_FOUND)
   set(HAVE_BACKTRACE ON)
 endif()
+find_package(OpenSSL COMPONENTS Crypto CONFIG)
+if(NOT OpenSSL_FOUND)
+  find_package(OpenSSL COMPONENTS Crypto REQUIRED)
+endif()
 find_package(Boost CONFIG)
 if(NOT Boost_FOUND)
   find_package(Boost REQUIRED)
@@ -196,8 +199,10 @@ pkg_check_modules(GSTREAMER_APP REQUIRED IMPORTED_TARGET gstreamer-app-1.0)
 pkg_check_modules(GSTREAMER_TAG REQUIRED IMPORTED_TARGET gstreamer-tag-1.0)
 pkg_check_modules(GSTREAMER_PBUTILS REQUIRED IMPORTED_TARGET gstreamer-pbutils-1.0)
 pkg_check_modules(SQLITE REQUIRED IMPORTED_TARGET sqlite3>=3.9)
+pkg_check_modules(UCHARDET REQUIRED IMPORTED_TARGET uchardet)
 if(UNIX AND NOT APPLE)
   pkg_check_modules(LIBPULSE IMPORTED_TARGET libpulse)
+  pkg_check_modules(LIBSECRET IMPORTED_TARGET libsecret-1)
 endif()
 pkg_check_modules(CHROMAPRINT IMPORTED_TARGET libchromaprint>=1.4)
 pkg_check_modules(FFTW3 IMPORTED_TARGET fftw3)
@@ -325,6 +330,15 @@ if(UNIX AND NOT APPLE)
   optional_component(UDISKS2 ON "Devices: UDisks2 backend"
     DEPENDS "D-Bus support" HAVE_DBUS
   )
+  optional_component(KWALLET ON "Credentials: KWallet backend"
+    DEPENDS "D-Bus support" HAVE_DBUS
+  )
+  optional_component(GNOME_KEYRING ON "Credentials: GNOME Keyring backend"
+    DEPENDS "D-Bus support" HAVE_DBUS
+  )
+  optional_component(LIBSECRET ON "Credentials: libsecret backend"
+    DEPENDS "libsecret" LIBSECRET_FOUND
+  )
 endif()
 
 if(NOT APPLE)
@@ -359,6 +373,8 @@ optional_component(SUBSONIC ON "Streaming: Subsonic")
 optional_component(TIDAL ON "Streaming: Tidal")
 optional_component(SPOTIFY ON "Streaming: Spotify")
 optional_component(QOBUZ ON "Streaming: Qobuz")
+optional_component(PLEX ON "Streaming: Plex")
+optional_component(JELLYFIN ON "Streaming: Jellyfin")
 
 optional_component(MOODBAR ON "Moodbar")
 
@@ -502,7 +518,13 @@ set(SOURCES
   src/utilities/textencodingutils.cpp
   src/utilities/styleutils.cpp
   src/utilities/coveroptions.cpp
-  src/utilities/musixmatchprovider.cpp
+  src/utilities/useragent.cpp
+
+  src/credentialsmanager/credentialsmanager.cpp
+  src/credentialsmanager/credentialsresult.cpp
+  src/credentialsmanager/credentialsreply.cpp
+  src/credentialsmanager/credentialsblockingbackend.cpp
+  src/credentialsmanager/credentialsbackendsettings.cpp
 
   src/tagreader/tagreaderclient.cpp
   src/tagreader/tagreaderresult.cpp
@@ -564,8 +586,8 @@ set(SOURCES
 
   src/engine/enginebase.cpp
   src/engine/enginedevice.cpp
-  src/engine/devicefinders.cpp
-  src/engine/devicefinder.cpp
+  src/engine/audiodevicelisters.cpp
+  src/engine/audiodevicelister.cpp
   src/engine/gststartup.cpp
   src/engine/gstengine.cpp
   src/engine/gstenginepipeline.cpp
@@ -613,6 +635,7 @@ set(SOURCES
   src/playlist/playlistfilter.cpp
   src/playlist/playlistheader.cpp
   src/playlist/playlistitem.cpp
+  src/playlist/playlistitemsavedata.cpp
   src/playlist/songplaylistitem.cpp
   src/playlist/streamplaylistitem.cpp
   src/playlist/playlistitemmimedata.cpp
@@ -881,6 +904,11 @@ set(HEADERS
   src/core/oauthenticator.h
   src/core/appearance.h
 
+  src/credentialsmanager/credentialsmanager.h
+  src/credentialsmanager/credentialsreply.h
+  src/credentialsmanager/credentialsbackendinterface.h
+  src/credentialsmanager/credentialsblockingbackend.h
+
   src/tagreader/tagreaderclient.h
   src/tagreader/tagreaderreply.h
   src/tagreader/tagreaderreadfilereply.h
@@ -888,7 +916,7 @@ set(HEADERS
   src/tagreader/tagreaderloadcoverimagereply.h
 
   src/engine/enginebase.h
-  src/engine/devicefinders.h
+  src/engine/audiodevicelisters.h
   src/engine/gstengine.h
   src/engine/gstenginepipeline.h
 
@@ -1230,7 +1258,8 @@ set(UI
 )
 
 if(UNIX)
-  optional_source(UNIX SOURCES src/core/unixsignalwatcher.cpp HEADERS src/core/unixsignalwatcher.h)
+  list(APPEND SOURCES src/core/unixsignalwatcher.cpp)
+  list(APPEND HEADERS src/core/unixsignalwatcher.h)
 endif()
 
 if(LINUX)
@@ -1245,116 +1274,160 @@ else()
 endif()
 
 if(APPLE)
-  optional_source(APPLE
-    SOURCES
-      src/utilities/macosutils.mm
-      src/core/scoped_nsautorelease_pool.mm
-      src/core/mac_startup.mm
-      src/systemtrayicon/macsystemtrayicon.mm
-      src/osd/osdmac.mm
-      src/widgets/searchfield_mac.mm
-      src/engine/macosdevicefinder.cpp
-      src/device/macosdevicelister.mm
-    HEADERS
-      src/systemtrayicon/macsystemtrayicon.h
-      src/osd/osdmac.h
-      src/device/macosdevicelister.h
+  list(APPEND SOURCES
+    src/utilities/macosutils.mm
+    src/core/scoped_nsautorelease_pool.mm
+    src/core/mac_startup.mm
+    src/systemtrayicon/macsystemtrayicon.mm
+    src/osd/osdmac.mm
+    src/widgets/searchfield_mac.mm
+    src/engine/macosaudiodevicelister.cpp
+    src/device/macosdevicelister.mm
   )
-  optional_source(HAVE_SPARKLE SOURCES src/core/sparkleupdater.mm HEADERS src/core/sparkleupdater.h)
+  list(APPEND HEADERS
+    src/systemtrayicon/macsystemtrayicon.h
+    src/osd/osdmac.h
+    src/device/macosdevicelister.h
+  )
+  if(HAVE_SPARKLE)
+    list(APPEND SOURCES src/core/sparkleupdater.mm)
+    list(APPEND HEADERS src/core/sparkleupdater.h)
+  endif()
 else()
   list(APPEND SOURCES src/systemtrayicon/qtsystemtrayicon.cpp src/widgets/searchfield_qt.cpp src/widgets/searchfield_qt_private.cpp)
   list(APPEND HEADERS src/systemtrayicon/qtsystemtrayicon.h src/widgets/searchfield_qt_private.h)
 endif()
 
-optional_source(WIN32
-  SOURCES
+if(WIN32)
+  list(APPEND SOURCES
     src/utilities/scopedwchararray.cpp
     src/utilities/winutils.cpp
-    src/engine/directsounddevicefinder.cpp
-    src/engine/mmdevicefinder.cpp
+    src/engine/directsoundaudiodevicelister.cpp
+    src/engine/mmaudiodevicelister.cpp
+    src/engine/asioaudiodevicelister.cpp
     src/core/windows7thumbbar.cpp
-  HEADERS
+  )
+  list(APPEND HEADERS
     src/core/windows7thumbbar.h
-)
+  )
+endif()
 
-optional_source(HAVE_STREAMTAGREADER
-  SOURCES src/tagreader/streamtagreader.cpp src/tagreader/tagreaderreadstreamrequest.cpp src/tagreader/tagreaderreadstreamreply.cpp
-  HEADERS src/tagreader/tagreaderreadstreamreply.h
-)
+if(HAVE_STREAMTAGREADER)
+  list(APPEND SOURCES src/tagreader/streamtagreader.cpp src/tagreader/tagreaderreadstreamrequest.cpp src/tagreader/tagreaderreadstreamreply.cpp)
+  list(APPEND HEADERS src/tagreader/tagreaderreadstreamreply.h)
+endif()
 
-optional_source(HAVE_DISCORD_RPC
-  SOURCES src/discord/discordrpc.cpp src/discord/discordrichpresence.cpp src/discord/discordpresence.cpp
-  HEADERS src/discord/discordrpc.h src/discord/discordrichpresence.h
-)
+if(HAVE_DISCORD_RPC)
+  list(APPEND SOURCES src/discord/discordrpc.cpp src/discord/discordrichpresence.cpp src/discord/discordpresence.cpp)
+  list(APPEND HEADERS src/discord/discordrpc.h src/discord/discordrichpresence.h)
+endif()
 
 if(HAVE_GLOBALSHORTCUTS)
 
-  optional_source(HAVE_GLOBALSHORTCUTS
-    SOURCES src/globalshortcuts/globalshortcutsmanager.cpp src/globalshortcuts/globalshortcutsbackend.cpp src/globalshortcuts/globalshortcutgrabber.cpp src/settings/globalshortcutssettingspage.cpp
-    HEADERS src/globalshortcuts/globalshortcutsmanager.h src/globalshortcuts/globalshortcutsbackend.h src/globalshortcuts/globalshortcutgrabber.h src/settings/globalshortcutssettingspage.h
-    UI src/globalshortcuts/globalshortcutgrabber.ui src/settings/globalshortcutssettingspage.ui
-  )
+  list(APPEND SOURCES src/globalshortcuts/globalshortcutsmanager.cpp src/globalshortcuts/globalshortcutsbackend.cpp src/globalshortcuts/globalshortcutgrabber.cpp src/settings/globalshortcutssettingspage.cpp)
+  list(APPEND HEADERS src/globalshortcuts/globalshortcutsmanager.h src/globalshortcuts/globalshortcutsbackend.h src/globalshortcuts/globalshortcutgrabber.h src/settings/globalshortcutssettingspage.h)
+  list(APPEND UI src/globalshortcuts/globalshortcutgrabber.ui src/settings/globalshortcutssettingspage.ui)
 
   if(HAVE_KGLOBALACCEL_GLOBALSHORTCUTS)
-    optional_source(HAVE_KGLOBALACCEL_GLOBALSHORTCUTS
-      SOURCES src/globalshortcuts/globalshortcutsbackend-kglobalaccel.cpp
-      HEADERS src/globalshortcuts/globalshortcutsbackend-kglobalaccel.h
-    )
+    list(APPEND SOURCES src/globalshortcuts/globalshortcutsbackend-kglobalaccel.cpp)
+    list(APPEND HEADERS src/globalshortcuts/globalshortcutsbackend-kglobalaccel.h)
     qt_add_dbus_interface(SOURCES src/globalshortcuts/org.kde.KGlobalAccel.xml kglobalaccel)
     qt_add_dbus_interface(SOURCES src/globalshortcuts/org.kde.KGlobalAccel.Component.xml kglobalaccelcomponent)
   endif()
 
-  optional_source(HAVE_X11_GLOBALSHORTCUTS
-    SOURCES src/globalshortcuts/globalshortcutsbackend-x11.cpp src/globalshortcuts/globalshortcut.cpp src/globalshortcuts/globalshortcut-x11.cpp
-    HEADERS src/globalshortcuts/globalshortcutsbackend-x11.h src/globalshortcuts/globalshortcut.h
-  )
+  if(HAVE_X11_GLOBALSHORTCUTS)
+    list(APPEND SOURCES src/globalshortcuts/globalshortcutsbackend-x11.cpp src/globalshortcuts/globalshortcut.cpp src/globalshortcuts/globalshortcut-x11.cpp)
+    list(APPEND HEADERS src/globalshortcuts/globalshortcutsbackend-x11.h src/globalshortcuts/globalshortcut.h)
+  endif()
 
-  optional_source(APPLE
-    SOURCES src/globalshortcuts/globalshortcutsbackend-macos.mm src/globalshortcuts/globalshortcutgrabber.mm
-    HEADERS src/globalshortcuts/globalshortcutsbackend-macos.h src/globalshortcuts/globalshortcutgrabber.h
-  )
+  if(APPLE)
+    list(APPEND SOURCES src/globalshortcuts/globalshortcutsbackend-macos.mm src/globalshortcuts/globalshortcutgrabber.mm)
+    list(APPEND HEADERS src/globalshortcuts/globalshortcutsbackend-macos.h src/globalshortcuts/globalshortcutgrabber.h)
+  endif()
 
-  optional_source(WIN32
-    SOURCES src/globalshortcuts/globalshortcutsbackend-win.cpp src/globalshortcuts/globalshortcut.cpp src/globalshortcuts/globalshortcut-win.cpp
-    HEADERS src/globalshortcuts/globalshortcutsbackend-win.h src/globalshortcuts/globalshortcut.h
-  )
+  if(WIN32)
+    list(APPEND SOURCES src/globalshortcuts/globalshortcutsbackend-win.cpp src/globalshortcuts/globalshortcut.cpp src/globalshortcuts/globalshortcut-win.cpp)
+    list(APPEND HEADERS src/globalshortcuts/globalshortcutsbackend-win.h src/globalshortcuts/globalshortcut.h)
+  endif()
 
 endif()
 
-optional_source(HAVE_ALSA SOURCES src/engine/alsadevicefinder.cpp src/engine/alsapcmdevicefinder.cpp)
-optional_source(HAVE_PULSE SOURCES src/engine/pulsedevicefinder.cpp)
-optional_source(MSVC SOURCES src/engine/uwpdevicefinder.cpp src/engine/asiodevicefinder.cpp)
-optional_source(MSVC SOURCES src/core/winsystemmediatransportcontrols.cpp HEADERS src/core/winsystemmediatransportcontrols.h)
-optional_source(HAVE_CHROMAPRINT SOURCES src/engine/chromaprinter.cpp)
+if(HAVE_DBUS)
+  list(APPEND SOURCES src/credentialsmanager/credentialsdbusutils.cpp)
+endif()
+if(HAVE_KWALLET)
+  list(APPEND SOURCES src/credentialsmanager/credentialsbackendkwallet.cpp)
+  list(APPEND HEADERS src/credentialsmanager/credentialsbackendkwallet.h)
+endif()
+if(HAVE_GNOME_KEYRING)
+  list(APPEND SOURCES src/credentialsmanager/credentialsbackendgnomekeyring.cpp src/credentialsmanager/secretservicepromptwaiter.cpp src/credentialsmanager/secretservicesecret.cpp)
+  list(APPEND HEADERS src/credentialsmanager/credentialsbackendgnomekeyring.h src/credentialsmanager/secretservicepromptwaiter.h)
+endif()
+if(HAVE_LIBSECRET)
+  list(APPEND SOURCES src/credentialsmanager/credentialsbackendlibsecret.cpp)
+  list(APPEND HEADERS src/credentialsmanager/credentialsbackendlibsecret.h)
+endif()
+if(WIN32)
+  list(APPEND SOURCES src/credentialsmanager/credentialsbackendwincred.cpp)
+endif()
+if(APPLE)
+  list(APPEND SOURCES src/credentialsmanager/credentialsbackendkeychain.cpp)
+endif()
 
-optional_source(HAVE_TAGFETCHER
-  SOURCES
+if(HAVE_ALSA)
+  list(APPEND SOURCES src/engine/alsaaudiodevicelister.cpp src/engine/alsapcmaudiodevicelister.cpp)
+endif()
+if(HAVE_PULSE)
+  list(APPEND SOURCES src/engine/pulseaudiodevicelister.cpp)
+endif()
+if(MSVC)
+  list(APPEND SOURCES src/engine/uwpaudiodevicelister.cpp)
+  list(APPEND SOURCES src/core/winsystemmediatransportcontrols.cpp)
+  list(APPEND HEADERS src/core/winsystemmediatransportcontrols.h)
+endif()
+if(HAVE_CHROMAPRINT)
+  list(APPEND SOURCES src/engine/chromaprinter.cpp)
+endif()
+
+if(HAVE_TAGFETCHER)
+  list(APPEND SOURCES
     src/tagfetcher/acoustidclient.cpp
     src/tagfetcher/musicbrainzclient.cpp
     src/tagfetcher/tagfetcher.cpp
-  HEADERS
+    src/settings/acoustidsettingspage.cpp
+  )
+  list(APPEND HEADERS
     src/tagfetcher/acoustidclient.h
     src/tagfetcher/musicbrainzclient.h
     src/tagfetcher/tagfetcher.h
-)
+    src/settings/acoustidsettingspage.h
+  )
+  list(APPEND UI
+    src/settings/acoustidsettingspage.ui
+  )
+endif()
 
-optional_source(HAVE_EBUR128 SOURCES src/engine/ebur128analysis.cpp)
+if(HAVE_EBUR128)
+  list(APPEND SOURCES src/engine/ebur128analysis.cpp)
+endif()
 
 if(HAVE_DBUS)
-  optional_source(HAVE_DBUS SOURCES src/osd/osddbus.cpp HEADERS src/osd/osddbus.h)
+  list(APPEND SOURCES src/osd/osddbus.cpp)
+  list(APPEND HEADERS src/osd/osddbus.h)
   qt_add_dbus_interface(SOURCES src/osd/org.freedesktop.Notifications.xml notification)
 endif()
 
 if(HAVE_MPRIS2)
-  optional_source(HAVE_MPRIS2 SOURCES src/mpris2/mpris2.cpp HEADERS src/mpris2/mpris2.h)
-  qt_add_dbus_adaptor(SOURCES src/mpris2/org.mpris.MediaPlayer2.xml src/mpris2/mpris2.h mpris::Mpris2 mpris2_root Mpris2Root)
-  qt_add_dbus_adaptor(SOURCES src/mpris2/org.mpris.MediaPlayer2.Player.xml src/mpris2/mpris2.h mpris::Mpris2 mpris2_player Mpris2Player)
-  qt_add_dbus_adaptor(SOURCES src/mpris2/org.mpris.MediaPlayer2.TrackList.xml src/mpris2/mpris2.h mpris::Mpris2 mpris2_tracklist Mpris2TrackList)
-  qt_add_dbus_adaptor(SOURCES src/mpris2/org.mpris.MediaPlayer2.Playlists.xml src/mpris2/mpris2.h mpris::Mpris2 mpris2_playlists Mpris2Playlists)
+  list(APPEND SOURCES src/mpris2/mpris2.cpp)
+  list(APPEND HEADERS src/mpris2/mpris2.h)
+  qt_add_dbus_adaptor(SOURCES src/mpris2/org.mpris.MediaPlayer2.xml src/mpris2/mpris2.h Mpris2 mpris2_root Mpris2Root)
+  qt_add_dbus_adaptor(SOURCES src/mpris2/org.mpris.MediaPlayer2.Player.xml src/mpris2/mpris2.h Mpris2 mpris2_player Mpris2Player)
+  qt_add_dbus_adaptor(SOURCES src/mpris2/org.mpris.MediaPlayer2.TrackList.xml src/mpris2/mpris2.h Mpris2 mpris2_tracklist Mpris2TrackList)
+  qt_add_dbus_adaptor(SOURCES src/mpris2/org.mpris.MediaPlayer2.Playlists.xml src/mpris2/mpris2.h Mpris2 mpris2_playlists Mpris2Playlists)
 endif()
 
-optional_source(HAVE_WAVEFORM
-  SOURCES
+if(HAVE_WAVEFORM)
+  list(APPEND SOURCES
     src/waveform/waveformbuilder.cpp
     src/waveform/waveformpipeline.cpp
     src/waveform/waveformloader.cpp
@@ -1362,18 +1435,21 @@ optional_source(HAVE_WAVEFORM
     src/waveform/waveformrenderer.cpp
     src/waveform/waveformproxystyle.cpp
     src/settings/waveformsettingspage.cpp
-  HEADERS
+  )
+  list(APPEND HEADERS
     src/waveform/waveformpipeline.h
     src/waveform/waveformloader.h
     src/waveform/waveformcontroller.h
     src/waveform/waveformproxystyle.h
     src/settings/waveformsettingspage.h
-  UI
+  )
+  list(APPEND UI
     src/settings/waveformsettingspage.ui
-)
+  )
+endif()
 
-optional_source(HAVE_MOODBAR
-  SOURCES
+if(HAVE_MOODBAR)
+  list(APPEND SOURCES
     src/moodbar/moodbarbuilder.cpp
     src/moodbar/moodbarcontroller.cpp
     src/moodbar/moodbaritemdelegate.cpp
@@ -1382,23 +1458,32 @@ optional_source(HAVE_MOODBAR
     src/moodbar/moodbarproxystyle.cpp
     src/moodbar/moodbarrenderer.cpp
     src/settings/moodbarsettingspage.cpp
-  HEADERS
+  )
+  list(APPEND HEADERS
     src/moodbar/moodbarcontroller.h
     src/moodbar/moodbaritemdelegate.h
     src/moodbar/moodbarloader.h
     src/moodbar/moodbarpipeline.h
     src/moodbar/moodbarproxystyle.h
     src/settings/moodbarsettingspage.h
-  UI
+  )
+  list(APPEND UI
     src/settings/moodbarsettingspage.ui
-)
+  )
+endif()
 
-optional_source(HAVE_GSTFASTSPECTRUM SOURCES src/engine/gstfastspectrumplugin.cpp src/engine/gstfastspectrum.cpp)
+if(HAVE_GSTFASTSPECTRUM)
+  list(APPEND SOURCES src/engine/gstfastspectrumplugin.cpp src/engine/gstfastspectrum.cpp)
+endif()
 
-optional_source(HAVE_GIO SOURCES src/device/giolister.cpp HEADERS src/device/giolister.h)
+if(HAVE_GIO)
+  list(APPEND SOURCES src/device/giolister.cpp)
+  list(APPEND HEADERS src/device/giolister.h)
+endif()
 
 if(HAVE_UDISKS2)
-  optional_source(HAVE_UDISKS2 SOURCES src/device/udisks2lister.cpp HEADERS src/device/udisks2lister.h)
+  list(APPEND SOURCES src/device/udisks2lister.cpp)
+  list(APPEND HEADERS src/device/udisks2lister.h)
   set_source_files_properties(src/device/org.freedesktop.DBus.ObjectManager.xml PROPERTIES NO_NAMESPACE objectmanager INCLUDE includes/dbus_metatypes.h)
   set_source_files_properties(src/device/org.freedesktop.UDisks2.Filesystem.xml PROPERTIES NO_NAMESPACE udisks2filesystem INCLUDE includes/dbus_metatypes.h)
   set_source_files_properties(src/device/org.freedesktop.UDisks2.Block.xml PROPERTIES NO_NAMESPACE udisks2block INCLUDE includes/dbus_metatypes.h)
@@ -1411,39 +1496,45 @@ if(HAVE_UDISKS2)
   qt_add_dbus_interface(SOURCES src/device/org.freedesktop.UDisks2.Job.xml udisks2job)
 endif()
 
-optional_source(HAVE_MTP
-  SOURCES
+if(HAVE_MTP)
+  list(APPEND SOURCES
     src/device/mtpconnection.cpp
     src/device/mtpdevice.cpp
     src/device/mtploader.cpp
-  HEADERS
+  )
+  list(APPEND HEADERS
     src/device/mtpconnection.h
     src/device/mtpdevice.h
     src/device/mtploader.h
-)
+  )
+endif()
 
-optional_source(HAVE_AUDIOCD
-  SOURCES
+if(HAVE_AUDIOCD)
+  list(APPEND SOURCES
     src/device/cddadevice.cpp
     src/device/cddalister.cpp
     src/device/cddasongloader.cpp
-  HEADERS
+  )
+  list(APPEND HEADERS
     src/device/cddadevice.h
     src/device/cddalister.h
     src/device/cddasongloader.h
-)
+  )
+endif()
 
-optional_source(HAVE_GPOD
-  SOURCES
+if(HAVE_GPOD)
+  list(APPEND SOURCES
     src/device/gpoddevice.cpp
     src/device/gpodloader.cpp
-  HEADERS
+  )
+  list(APPEND HEADERS
     src/device/gpoddevice.h
     src/device/gpodloader.h
-)
+  )
+endif()
 
-optional_source(HAVE_SUBSONIC
-  SOURCES
+if(HAVE_SUBSONIC)
+  list(APPEND SOURCES
     src/subsonic/subsonicservice.cpp
     src/subsonic/subsonicurlhandler.cpp
     src/subsonic/subsonicbaserequest.cpp
@@ -1451,7 +1542,8 @@ optional_source(HAVE_SUBSONIC
     src/subsonic/subsonicscrobblerequest.cpp
     src/settings/subsonicsettingspage.cpp
     src/scrobbler/subsonicscrobbler.cpp
-  HEADERS
+  )
+  list(APPEND HEADERS
     src/subsonic/subsonicservice.h
     src/subsonic/subsonicurlhandler.h
     src/subsonic/subsonicbaserequest.h
@@ -1459,12 +1551,40 @@ optional_source(HAVE_SUBSONIC
     src/subsonic/subsonicscrobblerequest.h
     src/settings/subsonicsettingspage.h
     src/scrobbler/subsonicscrobbler.h
-  UI
+  )
+  list(APPEND UI
     src/settings/subsonicsettingspage.ui
-)
+  )
+endif()
 
-optional_source(HAVE_TIDAL
-  SOURCES
+if(HAVE_JELLYFIN)
+  list(APPEND SOURCES
+    src/jellyfin/jellyfinservice.cpp
+    src/jellyfin/jellyfinbaserequest.cpp
+    src/jellyfin/jellyfinrequest.cpp
+    src/jellyfin/jellyfinscrobblerequest.cpp
+    src/jellyfin/jellyfinfavoriterequest.cpp
+    src/jellyfin/jellyfinurlhandler.cpp
+    src/settings/jellyfinsettingspage.cpp
+    src/scrobbler/jellyfinscrobbler.cpp
+  )
+  list(APPEND HEADERS
+    src/jellyfin/jellyfinservice.h
+    src/jellyfin/jellyfinbaserequest.h
+    src/jellyfin/jellyfinrequest.h
+    src/jellyfin/jellyfinscrobblerequest.h
+    src/jellyfin/jellyfinfavoriterequest.h
+    src/jellyfin/jellyfinurlhandler.h
+    src/settings/jellyfinsettingspage.h
+    src/scrobbler/jellyfinscrobbler.h
+  )
+  list(APPEND UI
+    src/settings/jellyfinsettingspage.ui
+  )
+endif()
+
+if(HAVE_TIDAL)
+  list(APPEND SOURCES
     src/tidal/tidalservice.cpp
     src/tidal/tidalurlhandler.cpp
     src/tidal/tidalbaserequest.cpp
@@ -1473,7 +1593,8 @@ optional_source(HAVE_TIDAL
     src/tidal/tidalfavoriterequest.cpp
     src/settings/tidalsettingspage.cpp
     src/covermanager/tidalcoverprovider.cpp
-  HEADERS
+  )
+  list(APPEND HEADERS
     src/tidal/tidalservice.h
     src/tidal/tidalurlhandler.h
     src/tidal/tidalbaserequest.h
@@ -1482,12 +1603,14 @@ optional_source(HAVE_TIDAL
     src/tidal/tidalfavoriterequest.h
     src/settings/tidalsettingspage.h
     src/covermanager/tidalcoverprovider.h
-  UI
+  )
+  list(APPEND UI
     src/settings/tidalsettingspage.ui
-)
+  )
+endif()
 
-optional_source(HAVE_SPOTIFY
-  SOURCES
+if(HAVE_SPOTIFY)
+  list(APPEND SOURCES
     src/spotify/spotifyservice.cpp
     src/spotify/spotifybaserequest.cpp
     src/spotify/spotifyrequest.cpp
@@ -1495,7 +1618,8 @@ optional_source(HAVE_SPOTIFY
     src/spotify/spotifymetadatarequest.cpp
     src/settings/spotifysettingspage.cpp
     src/covermanager/spotifycoverprovider.cpp
-  HEADERS
+  )
+  list(APPEND HEADERS
     src/spotify/spotifyservice.h
     src/spotify/spotifybaserequest.h
     src/spotify/spotifyrequest.h
@@ -1503,12 +1627,14 @@ optional_source(HAVE_SPOTIFY
     src/spotify/spotifymetadatarequest.h
     src/settings/spotifysettingspage.h
     src/covermanager/spotifycoverprovider.h
-  UI
+  )
+  list(APPEND UI
     src/settings/spotifysettingspage.ui
-)
+  )
+endif()
 
-optional_source(HAVE_QOBUZ
-  SOURCES
+if(HAVE_QOBUZ)
+  list(APPEND SOURCES
     src/qobuz/qobuzservice.cpp
     src/qobuz/qobuzurlhandler.cpp
     src/qobuz/qobuzbaserequest.cpp
@@ -1516,10 +1642,11 @@ optional_source(HAVE_QOBUZ
     src/qobuz/qobuzstreamurlrequest.cpp
     src/qobuz/qobuzfavoriterequest.cpp
     src/qobuz/qobuzmetadatarequest.cpp
-    src/qobuz/qobuzcredentialfetcher.cpp
+    src/qobuz/qobuzapicredentialfetcher.cpp
     src/settings/qobuzsettingspage.cpp
     src/covermanager/qobuzcoverprovider.cpp
-  HEADERS
+  )
+  list(APPEND HEADERS
     src/qobuz/qobuzservice.h
     src/qobuz/qobuzurlhandler.h
     src/qobuz/qobuzbaserequest.h
@@ -1527,12 +1654,34 @@ optional_source(HAVE_QOBUZ
     src/qobuz/qobuzstreamurlrequest.h
     src/qobuz/qobuzfavoriterequest.h
     src/qobuz/qobuzmetadatarequest.h
-    src/qobuz/qobuzcredentialfetcher.h
+    src/qobuz/qobuzapicredentialfetcher.h
     src/settings/qobuzsettingspage.h
     src/covermanager/qobuzcoverprovider.h
-  UI
+  )
+  list(APPEND UI
     src/settings/qobuzsettingspage.ui
-)
+  )
+endif()
+
+if(HAVE_PLEX)
+  list(APPEND SOURCES
+    src/plex/plexservice.cpp
+    src/plex/plexurlhandler.cpp
+    src/plex/plexbaserequest.cpp
+    src/plex/plexrequest.cpp
+    src/settings/plexsettingspage.cpp
+  )
+  list(APPEND HEADERS
+    src/plex/plexservice.h
+    src/plex/plexurlhandler.h
+    src/plex/plexbaserequest.h
+    src/plex/plexrequest.h
+    src/settings/plexsettingspage.h
+  )
+  list(APPEND UI
+    src/settings/plexsettingspage.ui
+  )
+endif()
 
 qt_wrap_cpp(SOURCES ${HEADERS})
 qt_wrap_ui(SOURCES ${UI})
@@ -1581,6 +1730,7 @@ endif()
 target_link_libraries(strawberry_lib PUBLIC
   ${CMAKE_THREAD_LIBS_INIT}
   $<$<BOOL:${HAVE_BACKTRACE}>:${Backtrace_LIBRARIES}>
+  OpenSSL::Crypto
   PkgConfig::GLIB
   PkgConfig::GOBJECT
   PkgConfig::SQLITE
@@ -1601,9 +1751,11 @@ target_link_libraries(strawberry_lib PUBLIC
   $<$<BOOL:${HAVE_QPA_QPLATFORMNATIVEINTERFACE}>:Qt${QT_VERSION_MAJOR}::GuiPrivate>
   ICU::uc
   ICU::i18n
+  PkgConfig::UCHARDET
   $<$<BOOL:${HAVE_STREAMTAGREADER}>:PkgConfig::LIBSPARSEHASH>
   $<$<BOOL:${HAVE_ALSA}>:ALSA::ALSA>
   $<$<BOOL:${HAVE_PULSE}>:PkgConfig::LIBPULSE>
+  $<$<BOOL:${HAVE_LIBSECRET}>:PkgConfig::LIBSECRET>
   $<$<BOOL:${HAVE_CHROMAPRINT}>:PkgConfig::CHROMAPRINT>
   $<$<BOOL:${HAVE_GSTFASTSPECTRUM}>:PkgConfig::FFTW3>
   $<$<BOOL:${HAVE_EBUR128}>:PkgConfig::LIBEBUR128>
@@ -1614,7 +1766,7 @@ target_link_libraries(strawberry_lib PUBLIC
   $<$<BOOL:${HAVE_MTP}>:PkgConfig::LIBMTP>
   $<$<BOOL:${HAVE_GPOD}>:PkgConfig::LIBGPOD PkgConfig::GDK_PIXBUF>
   $<$<BOOL:${HAVE_QTSPARKLE}>:qtsparkle-qt${QT_VERSION_MAJOR}::qtsparkle>
-  $<$<BOOL:${WIN32}>:dsound dwmapi ${GETOPT_LIBRARIES}>
+  $<$<BOOL:${WIN32}>:dsound dwmapi advapi32 ${GETOPT_LIBRARIES}>
   $<$<BOOL:${MSVC}>:WindowsApp>
   KDAB::kdsingleapplication
 )
@@ -1628,6 +1780,7 @@ if(APPLE)
     "-framework DiskArbitration"
     "-framework IOKit"
     "-framework ScriptingBridge"
+    "-framework Security"
     "-framework UserNotifications"
   )
   if(HAVE_SPARKLE)

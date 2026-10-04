@@ -13,7 +13,7 @@
     </message>
 </context>
 <context>
-    <name>About</name>
+    <name>AboutDialog</name>
     <message>
         <source>About</source>
         <translation type="unfinished"></translation>
@@ -72,6 +72,36 @@
     </message>
     <message>
         <source>Thanks to all the other Amarok and Clementine contributors.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>AcoustidClient</name>
+    <message>
+        <source>Missing AcoustID API key</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>AcoustidSettingsPage</name>
+    <message>
+        <source>AcoustID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>AcoustID is used to identify songs by their audio fingerprint when fetching tags.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>API Credentials</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use custom API Key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>API key</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1918,6 +1948,22 @@ If there are no matches then it will use the largest image in the directory.</so
         <source>Embedded album cover art (%1)</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>API Credentials</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use custom API credentials</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Client ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Client secret</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CueParser</name>
@@ -2155,6 +2201,13 @@ If there are no matches then it will use the largest image in the directory.</so
     <name>DeviceViewContainer</name>
     <message>
         <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DiscogsCoverProvider</name>
+    <message>
+        <source>Missing Discogs client ID and/or client secret</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2846,6 +2899,13 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
 </context>
 <context>
+    <name>GeniusLyricsProvider</name>
+    <message>
+        <source>Missing Genius client ID and/or client secret</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>GioLister</name>
     <message>
         <source>Mount point</source>
@@ -3133,7 +3193,271 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
 </context>
 <context>
+    <name>GstEnginePipeline</name>
+    <message>
+        <source>The track is not available from Spotify. This happens for every track when the GStreamer Spotify plugin is older than version %1, or when the account doesn&apos;t have Spotify Premium. Some tracks are also not available in every country.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>JellyfinFavoriteRequest</name>
+    <message>
+        <source>Changing Jellyfin favorites failed: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>JellyfinRequest</name>
+    <message>
+        <source>Invalid query type.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Searching for %1...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Retrieving favorite artists...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Retrieving favorite albums...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Retrieving favorite songs...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Received an empty reply for offset %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not authorized, logging in again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not authorized with Jellyfin, try again later.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Retrieving album covers for %n album(s)...</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Catalog may be incomplete: stopped receiving results before the end of the list was reached.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No match.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>JellyfinScrobbleRequest</name>
+    <message numerus="yes">
+        <source>Could not log in again, dropped %n playback report(s): %1</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>JellyfinScrobbler</name>
+    <message>
+        <source>Scrobbler %1 error: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>JellyfinService</name>
+    <message>
+        <source>The Jellyfin server or username changed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The Jellyfin server URL or username is missing.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Jellyfin is disabled.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not authenticated with Jellyfin.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Changing Jellyfin favorites failed: not authorized.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Changing Jellyfin favorites failed: not authenticated with Jellyfin.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Logging in failed, not trying again automatically yet.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No stored Jellyfin password to log in with.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The server redirected to another server %1, which is not followed, since the credentials would be sent to it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No stored credentials to log in with.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not authorized with Jellyfin.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Missing Json response.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Response is missing AccessToken or User.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Response contains an empty AccessToken or User Id.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Missing server url, username or password.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The Jellyfin settings changed while logging in.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not authenticated with Jellyfin, logging in failed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>JellyfinSettingsPage</name>
+    <message>
+        <source>Jellyfin</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Authentication</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Username</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Preferences</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use HTTP/2 when possible</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Verify server certificate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download album covers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server-side scrobbling</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to save password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to save the Jellyfin password: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unencrypted connection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The server URL uses HTTP, so the username, password and access token are sent unencrypted and can be read by others on the network. Use HTTPS if the server supports it.
+
+Do you want to continue?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Configuration incorrect</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server URL is invalid, Jellyfin was not enabled.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Configuration incomplete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Missing server url, username or password.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server URL is invalid.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Test successful!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Test failed!</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>JellyfinUrlHandler</name>
+    <message>
+        <source>Not authenticated with Jellyfin.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid Jellyfin URL.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>LastFMScrobbler</name>
+    <message>
+        <source>Missing Last.fm API key and/or API secret</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>%1 Scrobbler Authentication</source>
         <translation type="unfinished"></translation>
@@ -3168,6 +3492,13 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
 </context>
 <context>
+    <name>LastFmCoverProvider</name>
+    <message>
+        <source>Missing Last.fm API key and/or API secret</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>LastPlayedItemDelegate</name>
     <message>
         <source>Never</source>
@@ -3183,6 +3514,10 @@ If there are no matches then it will use the largest image in the directory.</so
 </context>
 <context>
     <name>ListenBrainzScrobbler</name>
+    <message>
+        <source>Missing ListenBrainz client ID and/or client secret</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>Unable to scrobble %1 - %2 because of error: %3</source>
         <translation type="unfinished"></translation>
@@ -3263,6 +3598,22 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
         <source>Authentication failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>API Credentials</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use custom API credentials</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Client ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Client secret</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3597,6 +3948,14 @@ If there are no matches then it will use the largest image in the directory.</so
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Plex</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Jellyfin</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Show all songs</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3796,6 +4155,10 @@ If there are no matches then it will use the largest image in the directory.</so
         <source>Close current playlist tab</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Ctrl+B</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MessageDialog</name>
@@ -3861,6 +4224,13 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
         <source>Error connecting MTP device %1: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>MusixmatchLyricsProvider</name>
+    <message>
+        <source>Missing Musixmatch client ID and/or client secret</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4166,9 +4536,25 @@ If there are no matches then it will use the largest image in the directory.</so
         <source>Song title</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Show a notification when the title of a radio stream changes</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>OAuthenticator</name>
+    <message>
+        <source>Missing client ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Missing client secret</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid redirect URL</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>Authentication</source>
         <translation type="unfinished"></translation>
@@ -4237,6 +4623,14 @@ If there are no matches then it will use the largest image in the directory.</so
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Muted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unmuted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Don&apos;t shuffle</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4277,7 +4671,18 @@ If there are no matches then it will use the largest image in the directory.</so
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Intro tracks</source>
+        <source>Scan tracks</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>OpenTidalCoverProvider</name>
+    <message>
+        <source>Missing OpenTidal client ID and/or client secret.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Authentication failed: %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4730,6 +5135,22 @@ If there are no matches then it will use the largest image in the directory.</so
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Sor&amp;t</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Ascending</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Descending</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Clear sorting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>&amp;Align text</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4937,10 +5358,6 @@ If there are no matches then it will use the largest image in the directory.</so
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Intro tracks</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Don&apos;t shuffle</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4958,6 +5375,10 @@ If there are no matches then it will use the largest image in the directory.</so
     </message>
     <message>
         <source>Shuffle grouping</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Scan tracks</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5051,6 +5472,26 @@ If there are no matches then it will use the largest image in the directory.</so
         <source>Write metadata when saving playlists</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Scan mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Playing time (seconds)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The time played before and after the position time selected in seconds (0 for playing the complete track)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Interest position (percent of track length)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The position time reference selected in percent of the track length</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>PlaylistTabBar</name>
@@ -5116,6 +5557,126 @@ Are you sure you want to continue?</source>
     </message>
     <message>
         <source>kbps</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PlexRequest</name>
+    <message>
+        <source>Retrieving library sections...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No music libraries found on the Plex server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Retrieving songs...</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PlexService</name>
+    <message>
+        <source>Server URL is invalid.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not authenticated with Plex.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PlexSettingsPage</name>
+    <message>
+        <source>Plex</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Authentication</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Click Log in to open the Plex website in your browser and authorize Strawberry.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Log in with Plex</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Refresh servers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Preferences</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Verify server certificate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download album covers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete songs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Authentication failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not authenticated</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Log in with Plex first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Configuration incorrect</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server URL is invalid.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Test successful!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Test failed!</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PlexUrlHandler</name>
+    <message>
+        <source>Plex server URL is invalid.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not authenticated with Plex.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5734,10 +6295,6 @@ Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Authentication</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>App ID</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5786,15 +6343,15 @@ Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Missing app id. Please fetch credentials first.</source>
+        <source>Missing app id. Please fetch API credentials first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Missing app secret. Please fetch credentials first.</source>
+        <source>Missing app secret. Please fetch API credentials first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Missing private key. Please fetch credentials first.</source>
+        <source>Missing private key. Please fetch API credentials first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5806,19 +6363,15 @@ Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Credentials fetched</source>
+        <source>API credentials fetched</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Credentials have been successfully fetched. Click Login to authenticate via your browser.</source>
+        <source>API credentials have been successfully fetched. Click Login to authenticate via your browser.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Credential fetch failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Fetch Credentials</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5831,6 +6384,22 @@ Are you sure you want to continue?</source>
     </message>
     <message>
         <source>Automatically fetch app ID, app secret and private key from Qobuz web player</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>API Credentials</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fetch API Credentials</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show audio quality in album names in search results</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show edition (e.g. Remastered, Deluxe) in album names in search results</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -6359,6 +6928,30 @@ Are you sure you want to continue?</source>
         <source>Spotify</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Use custom API credentials</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Client ID:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Client secret:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Plex</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Jellyfin</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Radio Browser</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsDialog</name>
@@ -6787,6 +7380,10 @@ Are you sure you want to continue?</source>
 <context>
     <name>SpotifyService</name>
     <message>
+        <source>Missing Spotify client ID and/or client secret</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Not authenticated with Spotify.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6799,10 +7396,6 @@ Are you sure you want to continue?</source>
     </message>
     <message>
         <source>Enable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Basic authentication</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6846,11 +7439,47 @@ Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Wiki</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The installed GStreamer Spotify plugin version %1 is too old, playing songs from Spotify fails with &quot;track is not available&quot;. Version %2 or newer is required.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>See %1 for instructions on how to install the plugin.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Authentication failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Remove (Remastered), etc from song titles</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Authentication</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use custom API credentials</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Client ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Client secret</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>API Credentials</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Bitrate</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -7125,6 +7754,14 @@ Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Failed to save password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to save the Subsonic password: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Configuration incomplete</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7287,14 +7924,6 @@ Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Tidal support is not official and requires a API token from a registered application to work. We can&apos;t help you getting these.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Authentication</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Client ID</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7366,6 +7995,18 @@ Are you sure you want to continue?</source>
         <source>Remove (Remastered), etc from song titles</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Use custom client ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>API Credentials</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show audio quality in album names in search results</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>TidalStreamURLRequest</name>
@@ -7378,11 +8019,11 @@ Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Received URL with %1 encrypted stream from Tidal. Strawberry does not currently support encrypted streams.</source>
+        <source>Received a %1 encrypted stream from Tidal, which Strawberry does not support. Whether Tidal delivers encrypted streams depends on the client ID in use. Try changing the Client ID in the Tidal settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Received URL with encrypted stream from Tidal. Strawberry does not currently support encrypted streams.</source>
+        <source>Received an encrypted stream from Tidal, which Strawberry does not support. Whether Tidal delivers encrypted streams depends on the client ID in use. Try changing the Client ID in the Tidal settings</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -8003,6 +8644,13 @@ Are you sure you want to continue?</source>
     </message>
     <message>
         <source>Password</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>VolumeSlider</name>
+    <message>
+        <source>Muted</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

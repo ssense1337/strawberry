@@ -72,6 +72,9 @@
 #include "contextsettingspage.h"
 #include "notificationssettingspage.h"
 #include "globalshortcutssettingspage.h"
+#ifdef HAVE_TAGFETCHER
+#  include "acoustidsettingspage.h"
+#endif
 #ifdef HAVE_MOODBAR
 #  include "moodbarsettingspage.h"
 #endif
@@ -94,6 +97,14 @@
 #  include "qobuz/qobuzservice.h"
 #  include "qobuzsettingspage.h"
 #endif
+#ifdef HAVE_PLEX
+#  include "plex/plexservice.h"
+#  include "plexsettingspage.h"
+#endif
+#ifdef HAVE_JELLYFIN
+#  include "jellyfin/jellyfinservice.h"
+#  include "jellyfinsettingspage.h"
+#endif
 
 #include "radiosettingspage.h"
 
@@ -107,7 +118,7 @@ constexpr char kGeometry[] = "geometry";
 }
 
 SettingsDialog::SettingsDialog(const SharedPtr<Player> player,
-                               const SharedPtr<DeviceFinders> device_finders,
+                               const SharedPtr<AudioDeviceListers> audio_device_listers,
                                const SharedPtr<CollectionLibrary> collection,
                                const SharedPtr<CoverProviders> cover_providers,
                                const SharedPtr<LyricsProviders> lyrics_providers,
@@ -131,11 +142,14 @@ SettingsDialog::SettingsDialog(const SharedPtr<Player> player,
   QTreeWidgetItem *general = AddCategory(tr("General"));
   AddPage(Page::Behaviour, new BehaviourSettingsPage(this, this), general);
   AddPage(Page::Collection, new CollectionSettingsPage(this, collection, collection->backend(), collection->model(), collection->model()->directory_model(), this), general);
-  AddPage(Page::Backend, new BackendSettingsPage(this, player, device_finders, this), general);
+  AddPage(Page::Backend, new BackendSettingsPage(this, player, audio_device_listers, this), general);
   AddPage(Page::Playlist, new PlaylistSettingsPage(this, this), general);
   AddPage(Page::Scrobbler, new ScrobblerSettingsPage(this, scrobbler, this), general);
   AddPage(Page::Covers, new CoversSettingsPage(this, cover_providers, this), general);
   AddPage(Page::Lyrics, new LyricsSettingsPage(this, lyrics_providers, this), general);
+#ifdef HAVE_TAGFETCHER
+  AddPage(Page::Acoustid, new AcoustidSettingsPage(this, this), general);
+#endif
   AddPage(Page::Transcoding, new TranscoderSettingsPage(this, this), general);
   AddPage(Page::Proxy, new NetworkProxySettingsPage(this, this), general);
 
@@ -169,6 +183,12 @@ SettingsDialog::SettingsDialog(const SharedPtr<Player> player,
 #endif
 #ifdef HAVE_QOBUZ
   AddPage(Page::Qobuz, new QobuzSettingsPage(this, streaming_services->Service<QobuzService>(), this), streaming);
+#endif
+#ifdef HAVE_PLEX
+  AddPage(Page::Plex, new PlexSettingsPage(this, streaming_services->Service<PlexService>(), this), streaming);
+#endif
+#ifdef HAVE_JELLYFIN
+  AddPage(Page::Jellyfin, new JellyfinSettingsPage(this, streaming_services->Service<JellyfinService>(), this), streaming);
 #endif
 
   AddPage(Page::Radio, new RadioSettingsPage(this, this), streaming);

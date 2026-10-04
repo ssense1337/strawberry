@@ -97,12 +97,14 @@ To build Strawberry from source, you’ll need:
 - [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/) or [pkgconf](https://github.com/pkgconf/pkgconf)
 - [Boost](https://www.boost.org/)
 - [GLib](https://developer.gnome.org/glib/)
+- [OpenSSL](https://www.openssl.org/)
 - [Qt 6.4 or higher](https://www.qt.io/) (Core, Concurrent, Gui, Widgets, Network, SQL, D-Bus)
 - [SQLite 3.9 or higher](https://www.sqlite.org)
 - [ALSA (Linux only)](https://www.alsa-project.org/)
 - [GStreamer](https://gstreamer.freedesktop.org/)
 - [TagLib 1.12 or higher](https://www.taglib.org/)
 - [ICU](https://unicode-org.github.io/icu/)
+- [uchardet](https://www.freedesktop.org/wiki/Software/uchardet/)
 - [KDSingleApplication 1.1.0 or higher](https://github.com/KDAB/KDSingleApplication)
 
 **Dependencies for optional features:**
@@ -113,6 +115,7 @@ To build Strawberry from source, you’ll need:
 - MTP devices: [libmtp](http://libmtp.sourceforge.net/)
 - iPod Classic: [libgpod](http://www.gtkpod.org/libgpod/)
 - EBU R128 normalization: [libebur128](https://github.com/jiixyj/libebur128)
+- Secure password storage using libsecret on Linux/BSD: [libsecret](https://gnome.pages.gitlab.gnome.org/libsecret/)
 
 Also install GStreamer plugins **base**, **good**, and optionally **bad**, **ugly** and **libav** for full codec support.
 
@@ -131,7 +134,7 @@ Also install GStreamer plugins **base**, **good**, and optionally **bad**, **ugl
     cmake --build build --parallel $(nproc)
     sudo cmake --install build
 
-For building on Windows with Visual Studio 2022, see: :point_right: https://github.com/strawberrymusicplayer/strawberry-msvc-build-tools
+For building on Windows with Visual Studio 2022/2026, see: :point_right: https://github.com/strawberrymusicplayer/strawberry-msvc-build-tools
 
 ---
 

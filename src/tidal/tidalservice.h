@@ -1,6 +1,6 @@
 /*
  * Strawberry Music Player
- * Copyright 2018-2025, Jonas Kvinge <jonas@jkvinge.net>
+ * Copyright 2018-2026, Jonas Kvinge <jonas@jkvinge.net>
  *
  * Strawberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,6 +72,9 @@ class TidalService : public StreamingService {
   static const char kApiUrl[];
   static const char kResourcesUrl[];
 
+  static bool HasCompiledCredentials();
+  static QString CompiledClientId();
+
   void Exit() override;
   void ReloadSettings() override;
 
@@ -90,6 +93,7 @@ class TidalService : public StreamingService {
   TidalSettings::StreamUrlMethod stream_url_method() const { return stream_url_method_; }
   bool album_explicit() const { return album_explicit_; }
   bool remove_remastered() const { return remove_remastered_; }
+  bool show_search_album_quality() const override { return show_search_album_quality_; }
 
   bool authenticated() const override;
   QByteArray authorization_header() const;
@@ -122,7 +126,7 @@ class TidalService : public StreamingService {
 
  private Q_SLOTS:
   void ExitReceived();
-  void OAuthFinished(const bool success, const QString &error);
+  void OAuthFinished(const bool success, const QString &error, const bool invalid_grant = false);
   void StartSearch();
   void ArtistsResultsReceived(const int id, const SongMap &songs, const QString &error);
   void AlbumsResultsReceived(const int id, const SongMap &songs, const QString &error);
@@ -173,6 +177,7 @@ class TidalService : public StreamingService {
   TidalSettings::StreamUrlMethod stream_url_method_;
   bool album_explicit_;
   bool remove_remastered_;
+  bool show_search_album_quality_;
 
   int pending_search_id_;
   int next_pending_search_id_;

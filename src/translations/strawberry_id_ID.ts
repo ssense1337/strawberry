@@ -13,14 +13,14 @@
     </message>
   </context>
   <context>
-    <name>About</name>
+    <name>AboutDialog</name>
     <message>
       <source>About</source>
       <translation type="unfinished">About</translation>
     </message>
     <message>
       <source>About Strawberry</source>
-      <translation>Tentang Strawberry</translation>
+      <translation type="unfinished">About Strawberry</translation>
     </message>
     <message>
       <source>Version %1</source>
@@ -73,6 +73,36 @@
     <message>
       <source>Thanks to all the other Amarok and Clementine contributors.</source>
       <translation type="unfinished">Thanks to all the other Amarok and Clementine contributors.</translation>
+    </message>
+  </context>
+  <context>
+    <name>AcoustidClient</name>
+    <message>
+      <source>Missing AcoustID API key</source>
+      <translation type="unfinished">Missing AcoustID API key</translation>
+    </message>
+  </context>
+  <context>
+    <name>AcoustidSettingsPage</name>
+    <message>
+      <source>AcoustID</source>
+      <translation type="unfinished">AcoustID</translation>
+    </message>
+    <message>
+      <source>AcoustID is used to identify songs by their audio fingerprint when fetching tags.</source>
+      <translation type="unfinished">AcoustID is used to identify songs by their audio fingerprint when fetching tags.</translation>
+    </message>
+    <message>
+      <source>API Credentials</source>
+      <translation type="unfinished">API Credentials</translation>
+    </message>
+    <message>
+      <source>Use custom API Key</source>
+      <translation type="unfinished">Use custom API Key</translation>
+    </message>
+    <message>
+      <source>API key</source>
+      <translation type="unfinished">API key</translation>
     </message>
   </context>
   <context>
@@ -1919,6 +1949,22 @@ Jika tidak ada yang cocok maka akan menggunakan gambar terbesar dalam direktori.
       <source>Embedded album cover art (%1)</source>
       <translation type="unfinished">Embedded album cover art (%1)</translation>
     </message>
+    <message>
+      <source>API Credentials</source>
+      <translation type="unfinished">API Credentials</translation>
+    </message>
+    <message>
+      <source>Use custom API credentials</source>
+      <translation type="unfinished">Use custom API credentials</translation>
+    </message>
+    <message>
+      <source>Client ID</source>
+      <translation type="unfinished">Client ID</translation>
+    </message>
+    <message>
+      <source>Client secret</source>
+      <translation type="unfinished">Client secret</translation>
+    </message>
   </context>
   <context>
     <name>CueParser</name>
@@ -2157,6 +2203,13 @@ Jika tidak ada yang cocok maka akan menggunakan gambar terbesar dalam direktori.
     <message>
       <source>Form</source>
       <translation type="unfinished">Form</translation>
+    </message>
+  </context>
+  <context>
+    <name>DiscogsCoverProvider</name>
+    <message>
+      <source>Missing Discogs client ID and/or client secret</source>
+      <translation type="unfinished">Missing Discogs client ID and/or client secret</translation>
     </message>
   </context>
   <context>
@@ -2847,6 +2900,13 @@ Jika tidak ada yang cocok maka akan menggunakan gambar terbesar dalam direktori.
     </message>
   </context>
   <context>
+    <name>GeniusLyricsProvider</name>
+    <message>
+      <source>Missing Genius client ID and/or client secret</source>
+      <translation type="unfinished">Missing Genius client ID and/or client secret</translation>
+    </message>
+  </context>
+  <context>
     <name>GioLister</name>
     <message>
       <source>Mount point</source>
@@ -3136,6 +3196,10 @@ Jika tidak ada yang cocok maka akan menggunakan gambar terbesar dalam direktori.
   <context>
     <name>LastFMScrobbler</name>
     <message>
+      <source>Missing Last.fm API key and/or API secret</source>
+      <translation type="unfinished">Missing Last.fm API key and/or API secret</translation>
+    </message>
+    <message>
       <source>%1 Scrobbler Authentication</source>
       <translation type="unfinished">%1 Scrobbler Authentication</translation>
     </message>
@@ -3169,6 +3233,13 @@ Jika tidak ada yang cocok maka akan menggunakan gambar terbesar dalam direktori.
     </message>
   </context>
   <context>
+    <name>LastFmCoverProvider</name>
+    <message>
+      <source>Missing Last.fm API key and/or API secret</source>
+      <translation type="unfinished">Missing Last.fm API key and/or API secret</translation>
+    </message>
+  </context>
+  <context>
     <name>LastPlayedItemDelegate</name>
     <message>
       <source>Never</source>
@@ -3184,6 +3255,10 @@ Jika tidak ada yang cocok maka akan menggunakan gambar terbesar dalam direktori.
   </context>
   <context>
     <name>ListenBrainzScrobbler</name>
+    <message>
+      <source>Missing ListenBrainz client ID and/or client secret</source>
+      <translation type="unfinished">Missing ListenBrainz client ID and/or client secret</translation>
+    </message>
     <message>
       <source>Unable to scrobble %1 - %2 because of error: %3</source>
       <translation type="unfinished">Unable to scrobble %1 - %2 because of error: %3</translation>
@@ -3265,6 +3340,22 @@ Jika tidak ada yang cocok maka akan menggunakan gambar terbesar dalam direktori.
     <message>
       <source>Authentication failed</source>
       <translation>Otentikasi gagal</translation>
+    </message>
+    <message>
+      <source>API Credentials</source>
+      <translation type="unfinished">API Credentials</translation>
+    </message>
+    <message>
+      <source>Use custom API credentials</source>
+      <translation type="unfinished">Use custom API credentials</translation>
+    </message>
+    <message>
+      <source>Client ID</source>
+      <translation type="unfinished">Client ID</translation>
+    </message>
+    <message>
+      <source>Client secret</source>
+      <translation type="unfinished">Client secret</translation>
     </message>
   </context>
   <context>
@@ -3797,6 +3888,10 @@ Jika tidak ada yang cocok maka akan menggunakan gambar terbesar dalam direktori.
       <source>Close current playlist tab</source>
       <translation type="unfinished">Close current playlist tab</translation>
     </message>
+    <message>
+      <source>Ctrl+B</source>
+      <translation type="unfinished">Ctrl+B</translation>
+    </message>
   </context>
   <context>
     <name>MessageDialog</name>
@@ -3863,6 +3958,13 @@ Jika tidak ada yang cocok maka akan menggunakan gambar terbesar dalam direktori.
     <message>
       <source>Error connecting MTP device %1: %2</source>
       <translation type="unfinished">Error connecting MTP device %1: %2</translation>
+    </message>
+  </context>
+  <context>
+    <name>MusixmatchLyricsProvider</name>
+    <message>
+      <source>Missing Musixmatch client ID and/or client secret</source>
+      <translation type="unfinished">Missing Musixmatch client ID and/or client secret</translation>
     </message>
   </context>
   <context>
@@ -4171,6 +4273,18 @@ Jika tidak ada yang cocok maka akan menggunakan gambar terbesar dalam direktori.
   <context>
     <name>OAuthenticator</name>
     <message>
+      <source>Missing client ID</source>
+      <translation type="unfinished">Missing client ID</translation>
+    </message>
+    <message>
+      <source>Missing client secret</source>
+      <translation type="unfinished">Missing client secret</translation>
+    </message>
+    <message>
+      <source>Invalid redirect URL</source>
+      <translation type="unfinished">Invalid redirect URL</translation>
+    </message>
+    <message>
       <source>Authentication</source>
       <translation type="unfinished">Authentication</translation>
     </message>
@@ -4238,6 +4352,14 @@ Jika tidak ada yang cocok maka akan menggunakan gambar terbesar dalam direktori.
       <translation type="unfinished">Volume %1%</translation>
     </message>
     <message>
+      <source>Muted</source>
+      <translation type="unfinished">Muted</translation>
+    </message>
+    <message>
+      <source>Unmuted</source>
+      <translation type="unfinished">Unmuted</translation>
+    </message>
+    <message>
       <source>Don&apos;t shuffle</source>
       <translation>Jangan karau</translation>
     </message>
@@ -4278,8 +4400,19 @@ Jika tidak ada yang cocok maka akan menggunakan gambar terbesar dalam direktori.
       <translation>Berhenti setelah setiap trek</translation>
     </message>
     <message>
-      <source>Intro tracks</source>
-      <translation>Trek intro</translation>
+      <source>Scan tracks</source>
+      <translation type="unfinished">Scan tracks</translation>
+    </message>
+  </context>
+  <context>
+    <name>OpenTidalCoverProvider</name>
+    <message>
+      <source>Missing OpenTidal client ID and/or client secret.</source>
+      <translation type="unfinished">Missing OpenTidal client ID and/or client secret.</translation>
+    </message>
+    <message>
+      <source>Authentication failed: %1</source>
+      <translation type="unfinished">Authentication failed: %1</translation>
     </message>
   </context>
   <context>
@@ -4733,6 +4866,22 @@ Jika tidak ada yang cocok maka akan menggunakan gambar terbesar dalam direktori.
       <translation type="unfinished">&amp;Lock rating</translation>
     </message>
     <message>
+      <source>Sor&amp;t</source>
+      <translation type="unfinished">Sor&amp;t</translation>
+    </message>
+    <message>
+      <source>&amp;Ascending</source>
+      <translation type="unfinished">&amp;Ascending</translation>
+    </message>
+    <message>
+      <source>&amp;Descending</source>
+      <translation type="unfinished">&amp;Descending</translation>
+    </message>
+    <message>
+      <source>&amp;Clear sorting</source>
+      <translation type="unfinished">&amp;Clear sorting</translation>
+    </message>
+    <message>
       <source>&amp;Align text</source>
       <translation>Sej&amp;ajarkan teks</translation>
     </message>
@@ -4939,10 +5088,6 @@ Jika tidak ada yang cocok maka akan menggunakan gambar terbesar dalam direktori.
       <translation>Berhenti setelah masing-masing trek</translation>
     </message>
     <message>
-      <source>Intro tracks</source>
-      <translation>Trek intro</translation>
-    </message>
-    <message>
       <source>Don&apos;t shuffle</source>
       <translation>Jangan karau</translation>
     </message>
@@ -4961,6 +5106,10 @@ Jika tidak ada yang cocok maka akan menggunakan gambar terbesar dalam direktori.
     <message>
       <source>Shuffle grouping</source>
       <translation>Karau grouping</translation>
+    </message>
+    <message>
+      <source>Scan tracks</source>
+      <translation type="unfinished">Scan tracks</translation>
     </message>
   </context>
   <context>
@@ -5052,6 +5201,26 @@ Jika tidak ada yang cocok maka akan menggunakan gambar terbesar dalam direktori.
     <message>
       <source>Write metadata when saving playlists</source>
       <translation>Tulis metadata saat menyimpan daftar putar</translation>
+    </message>
+    <message>
+      <source>Scan mode</source>
+      <translation type="unfinished">Scan mode</translation>
+    </message>
+    <message>
+      <source>Playing time (seconds)</source>
+      <translation type="unfinished">Playing time (seconds)</translation>
+    </message>
+    <message>
+      <source>The time played before and after the position time selected in seconds (0 for playing the complete track)</source>
+      <translation type="unfinished">The time played before and after the position time selected in seconds (0 for playing the complete track)</translation>
+    </message>
+    <message>
+      <source>Interest position (percent of track length)</source>
+      <translation type="unfinished">Interest position (percent of track length)</translation>
+    </message>
+    <message>
+      <source>The position time reference selected in percent of the track length</source>
+      <translation type="unfinished">The position time reference selected in percent of the track length</translation>
     </message>
   </context>
   <context>
@@ -5734,10 +5903,6 @@ Apakah Anda yakin ingin melanjutkan?</translation>
       <translation>Fungsikan</translation>
     </message>
     <message>
-      <source>Authentication</source>
-      <translation>Otentikasi</translation>
-    </message>
-    <message>
       <source>App ID</source>
       <translation type="unfinished">App ID</translation>
     </message>
@@ -5786,16 +5951,16 @@ Apakah Anda yakin ingin melanjutkan?</translation>
       <translation>Konfigurasi tidak lengkap</translation>
     </message>
     <message>
-      <source>Missing app id. Please fetch credentials first.</source>
-      <translation type="unfinished">Missing app id. Please fetch credentials first.</translation>
+      <source>Missing app id. Please fetch API credentials first.</source>
+      <translation type="unfinished">Missing app id. Please fetch API credentials first.</translation>
     </message>
     <message>
-      <source>Missing app secret. Please fetch credentials first.</source>
-      <translation type="unfinished">Missing app secret. Please fetch credentials first.</translation>
+      <source>Missing app secret. Please fetch API credentials first.</source>
+      <translation type="unfinished">Missing app secret. Please fetch API credentials first.</translation>
     </message>
     <message>
-      <source>Missing private key. Please fetch credentials first.</source>
-      <translation type="unfinished">Missing private key. Please fetch credentials first.</translation>
+      <source>Missing private key. Please fetch API credentials first.</source>
+      <translation type="unfinished">Missing private key. Please fetch API credentials first.</translation>
     </message>
     <message>
       <source>Authentication failed</source>
@@ -5806,20 +5971,16 @@ Apakah Anda yakin ingin melanjutkan?</translation>
       <translation type="unfinished">Fetching...</translation>
     </message>
     <message>
-      <source>Credentials fetched</source>
-      <translation type="unfinished">Credentials fetched</translation>
+      <source>API credentials fetched</source>
+      <translation type="unfinished">API credentials fetched</translation>
     </message>
     <message>
-      <source>Credentials have been successfully fetched. Click Login to authenticate via your browser.</source>
-      <translation type="unfinished">Credentials have been successfully fetched. Click Login to authenticate via your browser.</translation>
+      <source>API credentials have been successfully fetched. Click Login to authenticate via your browser.</source>
+      <translation type="unfinished">API credentials have been successfully fetched. Click Login to authenticate via your browser.</translation>
     </message>
     <message>
       <source>Credential fetch failed</source>
       <translation type="unfinished">Credential fetch failed</translation>
-    </message>
-    <message>
-      <source>Fetch Credentials</source>
-      <translation type="unfinished">Fetch Credentials</translation>
     </message>
     <message>
       <source>Remove (Remastered), etc from song titles</source>
@@ -5832,6 +5993,14 @@ Apakah Anda yakin ingin melanjutkan?</translation>
     <message>
       <source>Automatically fetch app ID, app secret and private key from Qobuz web player</source>
       <translation type="unfinished">Automatically fetch app ID, app secret and private key from Qobuz web player</translation>
+    </message>
+    <message>
+      <source>API Credentials</source>
+      <translation type="unfinished">API Credentials</translation>
+    </message>
+    <message>
+      <source>Fetch API Credentials</source>
+      <translation type="unfinished">Fetch API Credentials</translation>
     </message>
   </context>
   <context>
@@ -6358,6 +6527,18 @@ Apakah Anda yakin ingin melanjutkan?</translation>
       <source>Spotify</source>
       <translation type="unfinished">Spotify</translation>
     </message>
+    <message>
+      <source>Use custom API credentials</source>
+      <translation type="unfinished">Use custom API credentials</translation>
+    </message>
+    <message>
+      <source>Client ID:</source>
+      <translation type="unfinished">Client ID:</translation>
+    </message>
+    <message>
+      <source>Client secret:</source>
+      <translation type="unfinished">Client secret:</translation>
+    </message>
   </context>
   <context>
     <name>SettingsDialog</name>
@@ -6786,6 +6967,10 @@ Apakah Anda yakin ingin melanjutkan?</translation>
   <context>
     <name>SpotifyService</name>
     <message>
+      <source>Missing Spotify client ID and/or client secret</source>
+      <translation type="unfinished">Missing Spotify client ID and/or client secret</translation>
+    </message>
+    <message>
       <source>Not authenticated with Spotify.</source>
       <translation type="unfinished">Not authenticated with Spotify.</translation>
     </message>
@@ -6799,10 +6984,6 @@ Apakah Anda yakin ingin melanjutkan?</translation>
     <message>
       <source>Enable</source>
       <translation>Fungsikan</translation>
-    </message>
-    <message>
-      <source>Basic authentication</source>
-      <translation type="unfinished">Basic authentication</translation>
     </message>
     <message>
       <source>Authenticate</source>
@@ -6851,6 +7032,26 @@ Apakah Anda yakin ingin melanjutkan?</translation>
     <message>
       <source>Remove (Remastered), etc from song titles</source>
       <translation type="unfinished">Remove (Remastered), etc from song titles</translation>
+    </message>
+    <message>
+      <source>Authentication</source>
+      <translation type="unfinished">Authentication</translation>
+    </message>
+    <message>
+      <source>Use custom API credentials</source>
+      <translation type="unfinished">Use custom API credentials</translation>
+    </message>
+    <message>
+      <source>Client ID</source>
+      <translation type="unfinished">Client ID</translation>
+    </message>
+    <message>
+      <source>Client secret</source>
+      <translation type="unfinished">Client secret</translation>
+    </message>
+    <message>
+      <source>API Credentials</source>
+      <translation type="unfinished">API Credentials</translation>
     </message>
   </context>
   <context>
@@ -7286,14 +7487,6 @@ Apakah Anda yakin ingin melanjutkan?</translation>
       <translation>Fungsikan</translation>
     </message>
     <message>
-      <source>Tidal support is not official and requires a API token from a registered application to work. We can&apos;t help you getting these.</source>
-      <translation type="unfinished">Tidal support is not official and requires a API token from a registered application to work. We can&apos;t help you getting these.</translation>
-    </message>
-    <message>
-      <source>Authentication</source>
-      <translation>Otentikasi</translation>
-    </message>
-    <message>
       <source>Client ID</source>
       <translation type="unfinished">Client ID</translation>
     </message>
@@ -7365,6 +7558,14 @@ Apakah Anda yakin ingin melanjutkan?</translation>
       <source>Remove (Remastered), etc from song titles</source>
       <translation type="unfinished">Remove (Remastered), etc from song titles</translation>
     </message>
+    <message>
+      <source>Use custom client ID</source>
+      <translation type="unfinished">Use custom client ID</translation>
+    </message>
+    <message>
+      <source>API Credentials</source>
+      <translation type="unfinished">API Credentials</translation>
+    </message>
   </context>
   <context>
     <name>TidalStreamURLRequest</name>
@@ -7377,12 +7578,12 @@ Apakah Anda yakin ingin melanjutkan?</translation>
       <translation>Dibatalkan.</translation>
     </message>
     <message>
-      <source>Received URL with %1 encrypted stream from Tidal. Strawberry does not currently support encrypted streams.</source>
-      <translation type="unfinished">Received URL with %1 encrypted stream from Tidal. Strawberry does not currently support encrypted streams.</translation>
+      <source>Received a %1 encrypted stream from Tidal, which Strawberry does not support. Whether Tidal delivers encrypted streams depends on the client ID in use. Try changing the Client ID in the Tidal settings</source>
+      <translation type="unfinished">Received a %1 encrypted stream from Tidal, which Strawberry does not support. Whether Tidal delivers encrypted streams depends on the client ID in use. Try changing the Client ID in the Tidal settings</translation>
     </message>
     <message>
-      <source>Received URL with encrypted stream from Tidal. Strawberry does not currently support encrypted streams.</source>
-      <translation type="unfinished">Received URL with encrypted stream from Tidal. Strawberry does not currently support encrypted streams.</translation>
+      <source>Received an encrypted stream from Tidal, which Strawberry does not support. Whether Tidal delivers encrypted streams depends on the client ID in use. Try changing the Client ID in the Tidal settings</source>
+      <translation type="unfinished">Received an encrypted stream from Tidal, which Strawberry does not support. Whether Tidal delivers encrypted streams depends on the client ID in use. Try changing the Client ID in the Tidal settings</translation>
     </message>
   </context>
   <context>
@@ -8000,6 +8201,13 @@ Apakah Anda yakin ingin melanjutkan?</translation>
     <message>
       <source>Password</source>
       <translation>Sandi</translation>
+    </message>
+  </context>
+  <context>
+    <name>VolumeSlider</name>
+    <message>
+      <source>Muted</source>
+      <translation type="unfinished">Muted</translation>
     </message>
   </context>
   <context>
